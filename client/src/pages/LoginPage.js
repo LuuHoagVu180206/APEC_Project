@@ -1,0 +1,67 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+const LoginPage = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      // Gọi API sang Backend
+      const res = await axios.post('http://localhost:5000/api/auth/login', {
+        username,
+        password
+      });
+
+      // Nếu thành công:
+      alert('Đăng nhập thành công!');
+      
+      // Lưu thông tin user vào bộ nhớ trình duyệt để dùng sau này
+      localStorage.setItem('user', JSON.stringify(res.data));
+      
+      // Chuyển hướng sang trang Game
+      navigate('/game');
+      
+    } catch (err) {
+      console.error(err);
+      alert('Sai tài khoản hoặc mật khẩu!');
+    }
+  };
+
+  return (
+    <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f2f5' }}>
+      <form onSubmit={handleLogin} style={{ padding: '30px', background: 'white', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Đăng Nhập Game</h2>
+        
+        <div style={{ marginBottom: '15px' }}>
+          <input 
+            type="text" 
+            placeholder="Tên đăng nhập (vd: admin)" 
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+          />
+        </div>
+        
+        <div style={{ marginBottom: '20px' }}>
+          <input 
+            type="password" 
+            placeholder="Mật khẩu (vd: 123)" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ width: '100%', padding: '10px' }}
+          />
+        </div>
+
+        <button type="submit" style={{ width: '100%', padding: '10px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
+          Vào Chơi Ngay
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default LoginPage;
