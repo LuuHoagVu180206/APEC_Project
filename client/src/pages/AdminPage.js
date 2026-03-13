@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const AdminPage = () => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
-  
+
   // State cho form thêm câu hỏi mới
   const [formData, setFormData] = useState({
     questionText: '',
@@ -17,6 +17,9 @@ const AdminPage = () => {
     difficulty: 'easy'
   });
 
+  const [currentVersion, setCurrentVersion] = useState("v1.0");
+  const [newVersion, setNewVersion] = useState("");
+  
   // 1. Kiểm tra quyền Admin (đơn giản) và tải câu hỏi
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -27,12 +30,22 @@ const AdminPage = () => {
       return;
     }
     fetchQuestions();
+    fetchVersion();
   }, [navigate]);
 
   const fetchQuestions = async () => {
     const res = await axios.get('http://localhost:5000/api/questions');
     setQuestions(res.data);
   };
+
+  const fetchVersion = async () => {
+    try {
+        const res = await axios.get('http://localhost:5000/api/settings/version');
+        setCurrentVersion(res.data.version);
+    } catch (err) {
+        console.error(err);
+    }
+};
 
   // 2. Xử lý khi nhập liệu vào Form
   const handleChange = (e) => {
@@ -63,6 +76,19 @@ const AdminPage = () => {
       alert("Lỗi thêm câu hỏi");
     }
   };
+  const handleUpdateVersion = async () => {
+    if (!newVersion) return alert("Vui lòng nhập tên phiên bản!");
+    try {
+        await axios.post('http://localhost:5000/api/settings/version', {
+            version: newVersion
+        });
+        alert(`Đã chuyển game sang phiên bản: ${newVersion}`);
+        setCurrentVersion(newVersion);
+        setNewVersion("");
+      } catch (err) {
+        alert("Lỗi cập nhật version");
+      }
+  };
 
   // Hàm phụ trợ: Lấy text của đáp án đúng dựa vào lựa chọn A/B/C/D
   const getCorrectText = (key) => {
@@ -89,6 +115,23 @@ const AdminPage = () => {
       <button onClick={() => navigate('/game')} style={{ marginBottom: '20px' }}>⬅ Quay lại Game</button>
       
       <h1 style={{ textAlign: 'center' }}>⚙️ Quản Lý Ngân Hàng Câu Hỏi</h1>
+      
+      {/* --- KHUNG QUẢN LÝ VERSION (MỚI) --- */} 
+       <div style={{ background: '#e3f2fd', padding: '15px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #90caf9' }}>
+           <h3>🚀 Phiên bản Game hiện tại: <span style={{ color: 'red' }}>{currentVersion}</span></h3>
+           <div style={{ display: 'flex', gap: '10px' }}>
+               <input 
+                 placeholder="Nhập tên folder mới (vd: v1.1)" 
+                 value={newVersion}
+                 onChange={(e) => setNewVersion(e.target.value)}
+                 style={{ padding: '8px', flex: 1 }}
+               />
+               <button onClick={handleUpdateVersion} style={{ background: '#007bff', color: 'white', border: 'none', padding: '8px 15px', cursor: 'pointer' }}>
+                   Cập nhật ngay
+               </button>
+           </div>
+           <small>Lưu ý: Đảm bảo bạn đã tạo folder `public/game/{newVersion}` trước nhé.</small>
+       </div>
 
       {/* FORM THÊM CÂU HỎI */}
       <div style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
@@ -143,7 +186,10 @@ const AdminPage = () => {
         </div>
       ))}
     </div>
+    
   );
 };
 
 export default AdminPage;
+
+

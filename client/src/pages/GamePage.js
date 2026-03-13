@@ -7,6 +7,7 @@ const GamePage = () => {
   const iframeRef = useRef(null);
   const [user, setUser] = useState(null);
   const [questions, setQuestions] = useState([]);
+  const [gameVersion, setGameVersion] = useState(null);
 
   // 1. Kiểm tra đăng nhập & Lấy câu hỏi từ Server
   useEffect(() => {
@@ -27,9 +28,23 @@ const GamePage = () => {
         console.error("Lỗi lấy câu hỏi:", err);
       }
     };
+
+    const fetchGameConfig = async () => {
+        try {
+            const res = await axios.get('http://localhost:5000/api/settings/version');
+            setGameVersion(res.data.version); // Lưu version vào state
+            console.log("Đang chạy game phiên bản:", res.data.version);
+        } catch (err) {
+            console.error("Lỗi lấy version, dùng mặc định v1.0");
+            setGameVersion("v1.0");
+        }
+    };
+
     fetchQuestions();
+    fetchGameConfig();
   }, [navigate]);
 
+  
   // 2. Lắng nghe tin nhắn từ Game (Godot)
   useEffect(() => {
     const handleGameMessage = async (event) => {
@@ -90,6 +105,7 @@ const GamePage = () => {
   }, [questions]); // Cập nhật listener khi có questions mới
 
   if (!user) return <div>Đang tải...</div>;
+  if (!user || !gameVersion) return <div>Đang tải Game...</div>;
 
   return (
     <div style={{ textAlign: 'center', padding: '20px', fontFamily: 'Arial' }}>
@@ -102,8 +118,7 @@ const GamePage = () => {
       <div style={{ width: '1000px', height: '600px', margin: '0 auto', border: '5px solid #2c3e50', borderRadius: '10px', overflow: 'hidden' }}>
         <iframe 
           ref={iframeRef}
-          // NHỚ: Sửa lại đường dẫn này cho đúng folder thật của bạn (v1 hay v1.0)
-          src="/game/v1.0/index.html" 
+          src={`/game/${gameVersion}/index.html`}
           width="100%" 
           height="100%" 
           title="EduGame"
@@ -140,7 +155,7 @@ const GamePage = () => {
             style={{ 
                 marginRight: '10px',
                 padding: '10px 20px', 
-                backgroundColor: '#3498db', // Màu xanh dương
+                backgroundColor: '#3498db',
                 color: 'white', 
                 border: 'none', 
                 borderRadius: '5px', 
