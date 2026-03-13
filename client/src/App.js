@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import GamePage from './pages/GamePage';
 import AdminPage from './pages/AdminPage';
 import LeaderboardPage from './pages/LeaderboardPage'; // <--- Import
+import RegisterPage from './pages/RegisterPage';
 
 // ... trong thẻ <Routes>
 function App() {
@@ -11,9 +12,10 @@ function App() {
     <Router>
       <Routes>
         {/* Đường dẫn mặc định (/) sẽ vào trang Login */}
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<LoginPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
-
+        <Route path="/register" element={<RegisterPage />} /> 
         {/* Đường dẫn /game sẽ vào trang Game */}
         <Route path="/game" element={<GamePage />} />
         <Route path="/admin" element={<AdminPage />} />

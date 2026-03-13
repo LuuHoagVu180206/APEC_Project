@@ -69,21 +69,26 @@ const GamePage = () => {
         const score = data.score;
         console.log(`🏆 Nhận được điểm số: ${score}`);
         
+        const user = JSON.parse(localStorage.getItem("user"));
+        
         try {
-          const storedUser = JSON.parse(localStorage.getItem('user'));
-          
           // 1. Gọi API lưu vào Database (Backend)
           const res = await axios.post('http://localhost:5000/api/auth/score', {
-            username: storedUser.username,
+            username: user.username,
             score: score
-          });
+          },
+          {
+              // QUAN TRỌNG: Gửi kèm vé ở đây
+              headers: { token: user.accessToken } 
+          }
+        );
           
           // 2. CẬP NHẬT GIAO DIỆN NGAY LẬP TỨC (Frontend)
           // Lấy điểm cao nhất mới từ phản hồi của Server
           const newHighScore = res.data.newHighScore; 
           
           // Cập nhật lại biến user trong React để màn hình nhảy số
-          const updatedUser = { ...storedUser, highScore: newHighScore };
+          const updatedUser = { ...user, highScore: newHighScore };
           setUser(updatedUser);
           
           // Lưu lại vào bộ nhớ trình duyệt để F5 không bị mất
@@ -127,7 +132,7 @@ const GamePage = () => {
       </div>
 
       <div style={{ marginTop: '20px' }}>
-        {user.username === 'admin' && (
+        {user.role === 'admin' && (
         <button 
             onClick={() => navigate('/admin')}
             style={{ 
