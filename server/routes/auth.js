@@ -3,6 +3,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs'); // Thư viện mã hóa
 const jwt = require('jsonwebtoken');
 const { verifyToken } = require('../verifyToken');
+const QuestionSet = require('../models/QuestionSet');
 
 // ĐĂNG KÝ
 router.post('/register', async (req, res) => {
@@ -23,6 +24,18 @@ router.post('/register', async (req, res) => {
         });
 
         const user = await newUser.save();
+        
+        const defaultSet = new QuestionSet({
+            title: "Túi đồ Tân Thủ (Cơ bản)",
+            createdBy: user._id, // Lấy ID của cái user vừa tạo ở ngay dòng trên
+            isPublic: false,
+            questions: [
+                { questionText: "Chào mừng bạn đến với EduGame! 1 + 1 bằng mấy?", options: ["1", "2", "3", "4"], correctAnswer: "2" },
+                { questionText: "Game này được tạo ra bằng công cụ (Engine) nào?", options: ["Unity", "Unreal", "Godot", "Cocos"], correctAnswer: "Godot" }
+            ]
+        });
+        await defaultSet.save(); // Lưu bộ câu hỏi vào DB
+
         res.status(200).json(user);
     } catch (err) {
         res.status(500).json(err);

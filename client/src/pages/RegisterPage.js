@@ -7,6 +7,7 @@ const RegisterPage = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false); // Mặc định là tắt (ẩn pass)
     
     const navigate = useNavigate();
 
@@ -79,26 +80,62 @@ const RegisterPage = () => {
                     />
                 </div>
                 
-                <div style={{ marginBottom: '15px' }}>
-                    <label>Mật khẩu</label>
+                <div style={{ position: 'relative', marginBottom: '15px' }}>
                     <input 
-                        type="password" 
-                        required 
-                        value={password}
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="Mật khẩu" 
+                        value={password} 
                         onChange={(e) => setPassword(e.target.value)}
-                        style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }}
+                        required
+                        style={{ padding: '10px', width: '100%', boxSizing: 'border-box', paddingRight: '40px' }} // Chừa chỗ cho con mắt
                     />
+                    
+                    {/* Nút bấm Ẩn/Hiện */}
+                    <button 
+                        type="button" 
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ 
+                            position: 'absolute', 
+                            right: '10px', 
+                            top: '50%', 
+                            transform: 'translateY(-50%)', 
+                            border: 'none', 
+                            background: 'transparent', 
+                            cursor: 'pointer',
+                            fontSize: '16px'
+                        }}
+                    >
+                        {showPassword ? "🙈" : "👁️"}
+                    </button>
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                    <label>Nhập lại mật khẩu</label>
+                <div style={{ position: 'relative', marginBottom: '15px' }}>
                     <input 
-                        type="password" 
-                        required 
-                        value={confirmPassword}
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="Nhập lại mật khẩu" 
+                        value={confirmPassword} 
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }}
+                        required
+                        style={{ padding: '10px', width: '100%', boxSizing: 'border-box', paddingRight: '40px' }} // Chừa chỗ cho con mắt
                     />
+                    
+                    {/* Nút bấm Ẩn/Hiện */}
+                    <button 
+                        type="button" 
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ 
+                            position: 'absolute', 
+                            right: '10px', 
+                            top: '50%', 
+                            transform: 'translateY(-50%)', 
+                            border: 'none', 
+                            background: 'transparent', 
+                            cursor: 'pointer',
+                            fontSize: '16px'
+                        }}
+                    >
+                        {showPassword ? "🙈" : "👁️"}
+                    </button>
                 </div>
                 
                 <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>

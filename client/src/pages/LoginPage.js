@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // Mặc định là tắt (ẩn pass)
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -37,23 +38,48 @@ const LoginPage = () => {
         
         <div style={{ marginBottom: '15px' }}>
           <input 
-            type="text" 
-            placeholder="Tên đăng nhập" 
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-          />
+                    type="text" 
+                    placeholder="Tên đăng nhập" 
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    style={{ 
+                        padding: '10px', 
+                        width: '100%', 
+                        boxSizing: 'border-box', 
+                        marginBottom: '15px' 
+                    }} 
+                />
         </div>
         
-        <div style={{ marginBottom: '20px' }}>
-          <input 
-            type="password" 
-            placeholder="Mật khẩu" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: '100%', padding: '10px' }}
-          />
-        </div>
+        <div style={{ position: 'relative', marginBottom: '15px' }}>
+                    <input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="Mật khẩu" 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        style={{ padding: '10px', width: '100%', boxSizing: 'border-box', paddingRight: '40px' }} // Chừa chỗ cho con mắt
+                    />
+                    
+                    {/* Nút bấm Ẩn/Hiện */}
+                    <button 
+                        type="button" 
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ 
+                            position: 'absolute', 
+                            right: '10px', 
+                            top: '50%', 
+                            transform: 'translateY(-50%)', 
+                            border: 'none', 
+                            background: 'transparent', 
+                            cursor: 'pointer',
+                            fontSize: '16px'
+                        }}
+                    >
+                        {showPassword ? "🙈" : "👁️"}
+                    </button>
+                </div>
 
         <button type="submit" style={{ width: '100%', padding: '10px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
           Vào Chơi Ngay

@@ -1,195 +1,217 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const AdminPage = () => {
-  const navigate = useNavigate();
-  const [questions, setQuestions] = useState([]);
+    const navigate = useNavigate();
+    const [user, setUser] = useState(null);
 
-  // State cho form thêm câu hỏi mới
-  const [formData, setFormData] = useState({
-    questionText: '',
-    optionA: '',
-    optionB: '',
-    optionC: '',
-    optionD: '',
-    correctAnswer: 'A', // Mặc định đáp án đúng là A
-    difficulty: 'easy'
-  });
+    // ==========================================
+    // STATE CHO PHẦN 1: CẬP NHẬT PHIÊN BẢN GAME
+    // ==========================================
+    const [gameVersion, setGameVersion] = useState("");
+    const [versionMessage, setVersionMessage] = useState("");
 
-  const [currentVersion, setCurrentVersion] = useState("v1.0");
-  const [newVersion, setNewVersion] = useState("");
-  
-  // 1. Kiểm tra quyền Admin (đơn giản) và tải câu hỏi
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    // Nếu không phải admin thì đá về trang chủ (bảo mật cơ bản)
-    if (!user || user.username !== 'admin') {
-      alert("Bạn không có quyền truy cập trang này!");
-      navigate('/');
-      return;
-    }
-    fetchQuestions();
-    fetchVersion();
-  }, [navigate]);
+    // ==========================================
+    // STATE CHO PHẦN 2: BỘ CÂU HỎI
+    // ==========================================
+    const [mySets, setMySets] = useState([]); // Danh sách các bộ đã tạo
+    const [title, setTitle] = useState("");   // Tên bộ mới đang tạo
+    const [isPublic, setIsPublic] = useState(false); // 👉 THÊM DÒNG NÀY: Khởi tạo công tắc Public
+    // Khởi tạo form với 1 câu hỏi trống mặc định
+    const [questions, setQuestions] = useState([
+        { questionText: "", options: ["", "", "", ""], correctAnswer: "" }
+    ]);
 
-  const fetchQuestions = async () => {
-    const res = await axios.get('http://localhost:5000/api/questions');
-    setQuestions(res.data);
-  };
+    // ------------------------------------------
+    // KIỂM TRA QUYỀN VÀ TẢI DỮ LIỆU BAN ĐẦU
+    // ------------------------------------------
+    useEffect(() => {
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (!storedUser || storedUser.role !== 'admin') {
+            alert("Bạn không có quyền truy cập trang này!");
+            navigate('/');
+            return;
+        }
+        setUser(storedUser);
+        fetchMySets(storedUser.accessToken);
+    }, [navigate]);
 
-  const fetchVersion = async () => {
-    try {
-        const res = await axios.get('http://localhost:5000/api/settings/version');
-        setCurrentVersion(res.data.version);
-    } catch (err) {
-        console.error(err);
-    }
-};
+    // Hàm lấy danh sách bộ câu hỏi từ Server
+    const fetchMySets = async (token) => {
+        try {
+            const res = await axios.get('http://localhost:5000/api/questionset/my-sets', {
+                headers: { token: token }
+            });
+            setMySets(res.data);
+        } catch (err) {
+            console.error("Lỗi lấy danh sách bộ câu hỏi:", err);
+        }
+    };
 
-  // 2. Xử lý khi nhập liệu vào Form
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    // ------------------------------------------
+    // CÁC HÀM XỬ LÝ CHO PHẦN GAME VERSION
+    // ------------------------------------------
+    const handleUpdateVersion = async () => {
+        try {
+            await axios.post('http://localhost:5000/api/settings/version', { version: gameVersion });
+            setVersionMessage(`✅ Cập nhật thành công! Game sẽ chạy bản: ${gameVersion}`);
+        } catch (err) {
+            setVersionMessage("❌ Lỗi khi cập nhật phiên bản.");
+        }
+    };
 
-  // 3. Gửi câu hỏi mới lên Server
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      // Chuẩn bị dữ liệu đúng cấu trúc Database
-      const newQuestion = {
-        questionText: formData.questionText,
-        options: [formData.optionA, formData.optionB, formData.optionC, formData.optionD],
-        // Lưu ý: Logic này giả định đáp án đúng là nội dung text. 
-        // Nếu game bạn so sánh A,B,C,D thì sửa lại logic ở đây nhé.
-        correctAnswer: getCorrectText(formData.correctAnswer), 
-        difficulty: formData.difficulty
-      };
+    // ------------------------------------------
+    // CÁC HÀM XỬ LÝ CHO PHẦN TẠO BỘ CÂU HỎI
+    // ------------------------------------------
+    // 1. Hàm sửa nội dung của 1 câu hỏi trong form
+    const handleQuestionChange = (index, field, value, optIndex = null) => {
+        const updatedQuestions = [...questions];
+        if (field === 'options') {
+            updatedQuestions[index].options[optIndex] = value;
+        } else {
+            updatedQuestions[index][field] = value;
+        }
+        setQuestions(updatedQuestions);
+    };
 
-      await axios.post('http://localhost:5000/api/questions', newQuestion);
-      alert("Thêm câu hỏi thành công!");
-      fetchQuestions(); // Tải lại danh sách
-      
-      // Reset form
-      setFormData({...formData, questionText: '', optionA: '', optionB: '', optionC: '', optionD: ''});
-    } catch (err) {
-      alert("Lỗi thêm câu hỏi");
-    }
-  };
-  const handleUpdateVersion = async () => {
-    if (!newVersion) return alert("Vui lòng nhập tên phiên bản!");
-    try {
-        await axios.post('http://localhost:5000/api/settings/version', {
-            version: newVersion
-        });
-        alert(`Đã chuyển game sang phiên bản: ${newVersion}`);
-        setCurrentVersion(newVersion);
-        setNewVersion("");
-      } catch (err) {
-        alert("Lỗi cập nhật version");
-      }
-  };
+    // 2. Hàm thêm 1 khung câu hỏi trống mới
+    const handleAddMoreQuestion = () => {
+        setQuestions([...questions, { questionText: "", options: ["", "", "", ""], correctAnswer: "" }]);
+    };
 
-  // Hàm phụ trợ: Lấy text của đáp án đúng dựa vào lựa chọn A/B/C/D
-  const getCorrectText = (key) => {
-    if (key === 'A') return formData.optionA;
-    if (key === 'B') return formData.optionB;
-    if (key === 'C') return formData.optionC;
-    return formData.optionD;
-  };
-
-  // 4. Xóa câu hỏi
-  const handleDelete = async (id) => {
-    if (window.confirm("Bạn chắc chắn muốn xóa câu hỏi này?")) {
-      try {
-        await axios.delete(`http://localhost:5000/api/questions/${id}`);
-        fetchQuestions();
-      } catch (err) {
-        alert("Lỗi khi xóa");
-      }
-    }
-  };
-
-  return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <button onClick={() => navigate('/game')} style={{ marginBottom: '20px' }}>⬅ Quay lại Game</button>
-      
-      <h1 style={{ textAlign: 'center' }}>⚙️ Quản Lý Ngân Hàng Câu Hỏi</h1>
-      
-      {/* --- KHUNG QUẢN LÝ VERSION (MỚI) --- */} 
-       <div style={{ background: '#e3f2fd', padding: '15px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #90caf9' }}>
-           <h3>🚀 Phiên bản Game hiện tại: <span style={{ color: 'red' }}>{currentVersion}</span></h3>
-           <div style={{ display: 'flex', gap: '10px' }}>
-               <input 
-                 placeholder="Nhập tên folder mới (vd: v1.1)" 
-                 value={newVersion}
-                 onChange={(e) => setNewVersion(e.target.value)}
-                 style={{ padding: '8px', flex: 1 }}
-               />
-               <button onClick={handleUpdateVersion} style={{ background: '#007bff', color: 'white', border: 'none', padding: '8px 15px', cursor: 'pointer' }}>
-                   Cập nhật ngay
-               </button>
-           </div>
-           <small>Lưu ý: Đảm bảo bạn đã tạo folder `public/game/{newVersion}` trước nhé.</small>
-       </div>
-
-      {/* FORM THÊM CÂU HỎI */}
-      <div style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
-        <h3>Thêm câu hỏi mới</h3>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <input required name="questionText" placeholder="Nội dung câu hỏi..." value={formData.questionText} onChange={handleChange} style={{ padding: '8px' }} />
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <input required name="optionA" placeholder="Đáp án A" value={formData.optionA} onChange={handleChange} style={{ padding: '8px' }} />
-            <input required name="optionB" placeholder="Đáp án B" value={formData.optionB} onChange={handleChange} style={{ padding: '8px' }} />
-            <input required name="optionC" placeholder="Đáp án C" value={formData.optionC} onChange={handleChange} style={{ padding: '8px' }} />
-            <input required name="optionD" placeholder="Đáp án D" value={formData.optionD} onChange={handleChange} style={{ padding: '8px' }} />
-          </div>
-
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-            <label>
-              Đáp án đúng: 
-              <select name="correctAnswer" value={formData.correctAnswer} onChange={handleChange} style={{ marginLeft: '10px', padding: '5px' }}>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-              </select>
-            </label>
+    // 3. Hàm gửi dữ liệu lên Server để lưu
+    const handleCreateSet = async (e) => {
+        e.preventDefault();
+        try {
+            const newSet = { title, isPublic, questions };
+            await axios.post('http://localhost:5000/api/questionset', newSet, {
+                headers: { token: user.accessToken }
+            });
+            alert("✅ Đã tạo bộ câu hỏi thành công!");
             
-            <label>
-              Độ khó: 
-              <select name="difficulty" value={formData.difficulty} onChange={handleChange} style={{ marginLeft: '10px', padding: '5px' }}>
-                <option value="easy">Dễ</option>
-                <option value="medium">Trung bình</option>
-                <option value="hard">Khó</option>
-              </select>
-            </label>
-          </div>
+            // Xóa form và tải lại danh sách
+            setTitle("");
+            setQuestions([{ questionText: "", options: ["", "", "", ""], correctAnswer: "" }]);
+            fetchMySets(user.accessToken);
+            
+        } catch (err) {
+            console.error(err);
+            alert("❌ Lỗi khi tạo bộ câu hỏi!");
+        }
+    };
 
-          <button type="submit" style={{ padding: '10px', background: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}>Lưu Câu Hỏi</button>
-        </form>
-      </div>
+    // ------------------------------------------
+    // GIAO DIỆN (UI)
+    // ------------------------------------------
+    if (!user) return null;
 
-      {/* DANH SÁCH CÂU HỎI */}
-      <h3>Danh sách hiện có ({questions.length})</h3>
-      {questions.map((q, index) => (
-        <div key={q._id} style={{ border: '1px solid #ddd', padding: '15px', marginBottom: '10px', borderRadius: '5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <strong>Câu {index + 1}: {q.questionText}</strong>
-            <div style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
-              • Đúng: {q.correctAnswer} <br/>
-              • Các lựa chọn: {q.options.join(' | ')}
+    return (
+        <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto', fontFamily: 'Arial' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2>⚙️ BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN</h2>
+                <button onClick={() => navigate('/')} style={{ padding: '10px', cursor: 'pointer' }}>⬅️ Quay lại Game</button>
             </div>
-          </div>
-          <button onClick={() => handleDelete(q._id)} style={{ background: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer' }}>Xóa</button>
+
+            {/* KHU VỰC 1: CẬP NHẬT PHIÊN BẢN GAME */}
+            <div style={{ backgroundColor: '#e3f2fd', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
+                <h3>🚀 Cập nhật phiên bản Game</h3>
+                <input 
+                    type="text" 
+                    placeholder="Nhập tên thư mục (VD: v2.0)" 
+                    value={gameVersion} 
+                    onChange={(e) => setGameVersion(e.target.value)}
+                    style={{ padding: '8px', width: '250px', marginRight: '10px' }}
+                />
+                <button onClick={handleUpdateVersion} style={{ padding: '8px 15px', cursor: 'pointer' }}>Cập nhật</button>
+                {versionMessage && <p style={{ color: 'green', fontWeight: 'bold' }}>{versionMessage}</p>}
+            </div>
+
+            {/* KHU VỰC 2: TẠO BỘ CÂU HỎI MỚI */}
+            <div style={{ backgroundColor: '#fff3cd', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
+                <h3>📝 Tạo Bộ Câu Hỏi Mới</h3>
+                <form onSubmit={handleCreateSet}>
+                    <input 
+                        type="text" 
+                        required
+                        placeholder="Tên bộ câu hỏi (VD: Đề Toán Học Kỳ 1)" 
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        style={{ padding: '10px', width: '100%', marginBottom: '20px', fontWeight: 'bold', fontSize: '16px', boxSizing: 'border-box' }}
+                    />
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                        <label style={{ cursor: 'pointer', fontWeight: 'bold', color: '#d35400' }}>
+                            <input 
+                                type="checkbox" 
+                                checked={isPublic} 
+                                onChange={(e) => setIsPublic(e.target.checked)} 
+                                style={{ marginRight: '8px', transform: 'scale(1.2)' }}
+                            />
+                            🌍 Chia sẻ công khai (Mọi người đều có thể copy bộ đề này)
+                        </label>
+                    </div>
+                    {/* Lặp qua danh sách câu hỏi đang tạo */}
+                    {questions.map((q, qIndex) => (
+                        <div key={qIndex} style={{ backgroundColor: 'white', padding: '15px', borderRadius: '5px', marginBottom: '15px', border: '1px solid #ccc' }}>
+                            <h4>Câu hỏi {qIndex + 1}</h4>
+                            <input 
+                                type="text" required placeholder="Nội dung câu hỏi..." 
+                                value={q.questionText}
+                                onChange={(e) => handleQuestionChange(qIndex, 'questionText', e.target.value)}
+                                style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
+                            />
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                                {[0, 1, 2, 3].map(optIndex => (
+                                    <input 
+                                        key={optIndex} type="text" required placeholder={`Đáp án ${optIndex + 1}`}
+                                        value={q.options[optIndex]}
+                                        onChange={(e) => handleQuestionChange(qIndex, 'options', e.target.value, optIndex)}
+                                        style={{ padding: '8px' }}
+                                    />
+                                ))}
+                            </div>
+
+                            <input 
+                                type="text" required placeholder="Copy đáp án đúng dán vào đây" 
+                                value={q.correctAnswer}
+                                onChange={(e) => handleQuestionChange(qIndex, 'correctAnswer', e.target.value)}
+                                style={{ width: '100%', padding: '8px', border: '2px solid #28a745', boxSizing: 'border-box' }}
+                            />
+                        </div>
+                    ))}
+
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button type="button" onClick={handleAddMoreQuestion} style={{ padding: '10px', flex: 1, backgroundColor: '#17a2b8', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                            ➕ Thêm câu hỏi
+                        </button>
+                        <button type="submit" style={{ padding: '10px', flex: 1, backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+                            💾 Lưu Bộ Câu Hỏi
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {/* KHU VỰC 3: XEM LẠI CÁC BỘ ĐÃ TẠO */}
+            <div style={{ backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '8px' }}>
+                <h3>📚 Kho Câu Hỏi Của Bạn</h3>
+                {mySets.length === 0 ? (
+                    <p>Bạn chưa tạo bộ câu hỏi nào.</p>
+                ) : (
+                    <ul>
+                        {mySets.map(set => (
+                            <li key={set._id} style={{ marginBottom: '10px', padding: '10px', backgroundColor: 'white', border: '1px solid #ccc', borderRadius: '4px' }}>
+                                <strong>{set.title}</strong> - (Gồm {set.questions.length} câu hỏi) 
+                                <span style={{ color: 'gray', fontSize: '12px', marginLeft: '10px' }}>
+                                    (Tạo lúc: {new Date(set.createdAt).toLocaleDateString()})
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
         </div>
-      ))}
-    </div>
-    
-  );
+    );
 };
 
 export default AdminPage;
-
-

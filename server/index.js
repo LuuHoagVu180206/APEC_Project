@@ -15,10 +15,12 @@ app.use(express.json()); // Cho phép Server đọc dữ liệu JSON gửi lên
 const authRoute = require('./routes/auth');
 const questionRoute = require('./routes/questions');
 const settingsRoute = require('./routes/settings');
+const questionSetRoute = require('./routes/questionSet');
 
 app.use('/api/auth', authRoute);
 app.use('/api/questions', questionRoute);
 app.use('/api/settings', settingsRoute);
+app.use('/api/questionset', questionSetRoute);
 
 // 4. Kết nối Database MongoDB
 mongoose.connect(process.env.MONGO_URI)

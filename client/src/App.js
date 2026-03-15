@@ -5,6 +5,7 @@ import GamePage from './pages/GamePage';
 import AdminPage from './pages/AdminPage';
 import LeaderboardPage from './pages/LeaderboardPage'; // <--- Import
 import RegisterPage from './pages/RegisterPage';
+import LibraryPage from './pages/LibraryPage'; // BẮT BUỘC PHẢI CÓ DÒNG NÀY
 
 // ... trong thẻ <Routes>
 function App() {
@@ -19,6 +20,7 @@ function App() {
         {/* Đường dẫn /game sẽ vào trang Game */}
         <Route path="/game" element={<GamePage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/library" element={<LibraryPage />} />
       </Routes>
     </Router>
   );
