@@ -4,18 +4,14 @@ const Question = require('../models/Question');
 // LẤY CÂU HỎI (Có chức năng lọc)
 router.get('/', async (req, res) => {
     try {
-        // 1. Xem người dùng có gửi yêu cầu lọc độ khó không?
-        // Ví dụ: GET /api/questions?level=hard
-        const level = req.query.level; 
 
-        let query = {}; // Mặc định là lấy hết
+        const level = req.query.level; 
+        let query = {}; 
         
-        // Nếu có yêu cầu 'level', ta thêm điều kiện lọc
         if (level) {
             query = { difficulty: level };
         }
 
-        // 2. Tìm trong Database với điều kiện lọc
         const questions = await Question.find(query);
         
         res.status(200).json(questions);
