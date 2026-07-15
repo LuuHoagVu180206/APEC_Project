@@ -68,3 +68,75 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+
+======================================================
+🚀 HƯỚNG DẪN CÀI ĐẶT VÀ CHẠY DỰ ÁN GAME PLATFORM 🚀
+======================================================
+
+Dự án này sử dụng MERN Stack (MongoDB, Express, React, Node.js).
+Vui lòng làm theo từng bước dưới đây để chạy dự án trên máy tính mới.
+
+--- CÁC PHẦN MỀM CẦN CÓ (YÊU CẦU BẮT BUỘC) ---
+1. Node.js (Khuyên dùng bản v18.x LTS để đảm bảo tính ổn định).
+2. MongoDB Compass (Hoặc có tài khoản MongoDB Atlas online).
+3. Git (Để tải code về).
+
+======================================================
+
+BƯỚC 1: TẢI CODE VÀ MỞ DỰ ÁN
+1. Clone dự án từ GitHub về máy (hoặc giải nén file ZIP).
+2. Mở thư mục gốc của dự án bằng phần mềm VS Code.
+
+------------------------------------------------------
+
+BƯỚC 2: CÀI ĐẶT & CHẠY BACKEND (SERVER)
+1. Mở Terminal trong VS Code (Ctrl + `).
+2. Di chuyển vào thư mục server:
+   > cd server
+
+3. Cài đặt các thư viện cần thiết:
+   > npm install
+
+4. TẠO FILE BIẾN MÔI TRƯỜNG (RẤT QUAN TRỌNG):
+   - Trong thư mục "server", tạo một file mới tên CHÍNH XÁC là: .env
+   - Copy 3 dòng dưới đây dán vào file .env và lưu lại:
+     PORT=5000
+     MONGO_URI=mongodb://localhost:27017/edugame
+     JWT_SECRET=chuoi_ky_tu_bi_mat_bat_ky_cua_ban
+
+5. Chạy Server (Dùng 1 trong 2 lệnh gốc sau):
+   - Chạy bình thường: 
+     > node index.js
+   - Hoặc chạy chế độ Dev (Tự khởi động lại khi sửa code): 
+     > npx nodemon index.js
+   
+   (Nếu thấy dòng chữ "✅ Đã kết nối MongoDB!" là thành công).
+
+------------------------------------------------------
+
+BƯỚC 3: CÀI ĐẶT & CHẠY FRONTEND (CLIENT)
+1. Mở thêm một Terminal thứ 2 trong VS Code (Giữ nguyên Terminal của Server cho nó chạy).
+2. Di chuyển vào thư mục client:
+   > cd client
+
+3. Cài đặt các thư viện cho React (Dùng thêm đuôi legacy để tránh lỗi phiên bản cũ):
+   > npm install --legacy-peer-deps
+
+4. Chạy giao diện Web:
+   > npm start
+   (Trình duyệt sẽ tự động mở trang web tại địa chỉ http://localhost:3000)
+
+------------------------------------------------------
+
+BƯỚC 4: TẠO TÀI KHOẢN ADMIN ĐẦU TIÊN (Dành cho máy mới tinh)
+Vì máy mới chưa có dữ liệu trong Database, bạn cần tạo quyền Admin bằng tay lần đầu:
+1. Mở trang web, vào mục Đăng ký và tạo một tài khoản (VD: admin123).
+2. Mở phần mềm MongoDB Compass, kết nối vào "mongodb://localhost:27017".
+3. Tìm database "edugame", mở bảng "users".
+4. Tìm tài khoản bạn vừa tạo, sửa dòng role: "user" thành role: "admin".
+5. Bấm UPDATE để lưu lại. Lần sau đăng nhập lại, bạn đã có full quyền Admin!
+
+======================================================
+Chúc bạn cài đặt thành công! 🎉

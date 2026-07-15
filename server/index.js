@@ -13,12 +13,19 @@ app.use(express.json());
 
 const authRoute = require('./routes/auth');
 const questionRoute = require('./routes/questions');
+const settingsRoute = require('./routes/settings');
 
 app.use('/api/auth', authRoute);
 app.use('/api/questions', questionRoute);
+app.use('/api/settings', settingsRoute);
 
+// 4. Kết nối Database MongoDB
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('✅ Đã kết nối MongoDB thành công!'))
+    .then(() => {
+        console.log('✅ Đã kết nối MongoDB thành công!');
+        console.log("🏠 Địa chỉ máy chủ DB:", mongoose.connection.host);
+        console.log("📂 Tên Database đang dùng:", mongoose.connection.name);
+    })
     .catch((err) => console.error('❌ Lỗi kết nối MongoDB:', err));
 
 

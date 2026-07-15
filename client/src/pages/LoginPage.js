@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -15,7 +15,6 @@ const LoginPage = () => {
         username,
         password
       });
-
       // Nếu thành công:
       alert('Đăng nhập thành công!');
       
@@ -39,7 +38,7 @@ const LoginPage = () => {
         <div style={{ marginBottom: '15px' }}>
           <input 
             type="text" 
-            placeholder="Tên đăng nhập (vd: admin)" 
+            placeholder="Tên đăng nhập" 
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
@@ -49,7 +48,7 @@ const LoginPage = () => {
         <div style={{ marginBottom: '20px' }}>
           <input 
             type="password" 
-            placeholder="Mật khẩu (vd: 123)" 
+            placeholder="Mật khẩu" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={{ width: '100%', padding: '10px' }}
@@ -59,6 +58,10 @@ const LoginPage = () => {
         <button type="submit" style={{ width: '100%', padding: '10px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
           Vào Chơi Ngay
         </button>
+        
+        <p style={{ textAlign: 'center', marginTop: '15px', fontSize: '14px' }}>
+            Chưa có tài khoản? <Link to="/register" style={{ color: '#007bff', textDecoration: 'none' }}>Đăng ký ngay</Link>
+        </p>
       </form>
     </div>
   );
