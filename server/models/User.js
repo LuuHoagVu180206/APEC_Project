@@ -11,7 +11,14 @@ const UserSchema = new mongoose.Schema({
             score: Number,
             playedAt: { type: Date, default: Date.now }
         }
-    ]
+    ],
+    savedQuestions: {
+    type: [String], 
+    default: []
+  },
+  savedSets: {
+    type: [String], 
+    default: []}
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);

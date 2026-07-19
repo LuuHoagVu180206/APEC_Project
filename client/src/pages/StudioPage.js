@@ -14,7 +14,7 @@ const StudioPage = () => {
     questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy',
     setId: ''
   });
-
+  
   // ==========================================
   // 2. STATE MỚI CHO "BỘ CÂU HỎI"
   // ==========================================
@@ -23,6 +23,8 @@ const StudioPage = () => {
     title: '', description: '', isPublic: false
   });
 
+  const [savedSetsData, setSavedSetsData] = useState([]);
+
   useEffect(() => {
     if (!currentUser) {
         alert("Vui lòng đăng nhập để vào Góc Sáng Tạo!");
@@ -30,7 +32,8 @@ const StudioPage = () => {
         return;
     }
     fetchQuestions();
-    fetchMySets(); // Gọi thêm hàm lấy danh sách Bộ câu hỏi
+    fetchMySets();
+    fetchSavedSets();
   }, [navigate]);
 
   // ==========================================
@@ -55,7 +58,24 @@ const StudioPage = () => {
     } catch (err) { console.error(err); }
   };
 
-  // --- TẠO MỚI ---
+
+  const fetchSavedSets = async () => {
+    try {
+      // 1. Kéo toàn bộ thư viện về
+      const res = await axios.get('http://localhost:5000/api/sets/library');
+      
+      // 2. Lấy túi đồ mới nhất của user từ localStorage
+      const latestUser = JSON.parse(localStorage.getItem('user'));
+      
+      // 3. Lọc ra những bộ có ID nằm trong túi đồ
+      const mySaved = res.data.filter(set => latestUser?.savedSets?.includes(set._id));
+      setSavedSetsData(mySaved);
+    } catch (err) { 
+      console.error("Lỗi tải bộ đã lưu:", err); 
+    }
+  };
+
+
   const handleCreateSet = async (e) => {
     e.preventDefault();
     try {
@@ -154,9 +174,26 @@ const StudioPage = () => {
   };
 
 
-  // ==========================================
-  // 4. GIAO DIỆN
-  // ==========================================
+  const handleRemoveSavedSet = async (setId) => {
+    try {
+      // Gọi lại API toggle bọc thép mà chúng ta vừa làm
+      await axios.put('http://localhost:5000/api/users/toggle-save-set', { setId }, {
+          headers: { token: currentUser.accessToken }
+      });
+      
+      // Cập nhật túi đồ trong localStorage
+      let latestUser = JSON.parse(localStorage.getItem('user'));
+      latestUser.savedSets = latestUser.savedSets.filter(id => id !== setId);
+      localStorage.setItem('user', JSON.stringify(latestUser));
+      
+      // Đá bộ câu hỏi đó ra khỏi màn hình ngay lập tức
+      setSavedSetsData(prev => prev.filter(set => set._id !== setId));
+    } catch (err) {
+      alert("Lỗi khi bỏ lưu bộ câu hỏi!");
+    }
+  };
+
+
   return (
     <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto', fontFamily: 'Arial' }}>
       <button onClick={() => navigate('/game')} style={{ marginBottom: '20px', padding: '8px 15px', cursor: 'pointer' }}>⬅ Quay lại Game</button>
@@ -276,6 +313,30 @@ const StudioPage = () => {
                     </div>
                 ))}
             </div>
+            
+            <h3 style={{ marginTop: '30px', color: '#e67e22' }}>Bộ câu hỏi đã lưu ({savedSetsData.length})</h3>
+            {savedSetsData.length === 0 ? (
+                <p style={{ fontSize: '14px', color: '#7f8c8d' }}>Bạn chưa lưu bộ câu hỏi nào từ thư viện.</p>
+            ) : (
+                savedSetsData.map((set) => (
+                    <div key={set._id} style={{ background: '#fef9e7', border: '1px dashed #f39c12', padding: '15px', marginBottom: '10px', borderRadius: '5px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                                <strong style={{ color: '#d35400' }}>🔖 {set.title}</strong>
+                                <p style={{ fontSize: '12px', color: '#7f8c8d', margin: '5px 0' }}>
+                                    Tác giả: {set.owner?.username || "Ẩn danh"}
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => handleRemoveSavedSet(set._id)} 
+                                style={{ background: 'white', color: '#e74c3c', border: '1px solid #e74c3c', padding: '4px 8px', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
+                            >
+                                ✖ Bỏ lưu
+                            </button>
+                        </div>
+                    </div>
+                ))
+            )}
         </div>
     </div>
     )

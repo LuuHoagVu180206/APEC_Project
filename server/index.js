@@ -15,12 +15,14 @@ const authRoute = require('./routes/auth');
 const questionRoute = require('./routes/questions');
 const settingsRoute = require('./routes/settings');
 const scoreRoute = require('./routes/scores');
+const userRoute = require('./routes/users');
 
 app.use('/api/sets', setRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/questions', questionRoute);
 app.use('/api/settings', settingsRoute);
 app.use('/api/scores', scoreRoute);
+app.use('/api/users', userRoute);
 
 // 4. Kết nối Database MongoDB
 mongoose.connect(process.env.MONGO_URI)

@@ -8,7 +8,7 @@ const LibraryPage = () => {
 
   const [questionSets, setQuestionSets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [savedSets, setSavedSets] = useState(currentUser?.savedSets || []);
   useEffect(() => {
     fetchLibrary();
   }, []);
@@ -45,6 +45,40 @@ const LibraryPage = () => {
     } catch (err) {
       console.error(err);
       alert("Lỗi khi tương tác!");
+    }
+  };
+
+
+  const handleToggleLikeSet = async (setId) => {
+    if (!currentUser) {
+      alert("Vui lòng đăng nhập để lưu bộ câu hỏi vào tủ đồ cá nhân!");
+      return;
+    }
+    try {
+      const res = await axios.put('http://localhost:5000/api/users/toggle-save-set', {
+          setId: setId
+      }, {
+          headers: { token: currentUser.accessToken }
+      });
+      
+      // 1. Cập nhật State để UI đổi màu nút ngay lập tức
+      let newSavedSets = [...savedSets];
+      if (res.data.isSaved) {
+          newSavedSets.push(setId); // Thêm ID vào danh sách
+      } else {
+          newSavedSets = newSavedSets.filter(id => id !== setId); // Xóa ID khỏi danh sách
+      }
+      setSavedSets(newSavedSets);
+
+      // 2. Cập nhật ngầm vào localStorage để lần sau F5 vẫn giữ nguyên trạng thái
+      const updatedUser = { ...currentUser, savedSets: newSavedSets };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+    } catch (err) {
+        const errorMsg = err.response?.data?.message || err.response?.data || err.message;
+      
+        alert("🛑 Không thể lưu: " + (typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg));
+        console.error("Chi tiết lỗi:", err.response || err);
     }
   };
 
@@ -137,6 +171,24 @@ const LibraryPage = () => {
                 >
                   ❤️ {qSet.likesCount} Thích
                 </button>
+                
+                {/* --- NÚT LƯU BỘ CÂU HỎI (Mới thêm) --- */}
+                <button 
+                  onClick={() => handleToggleLikeSet(qSet._id)} 
+                  style={{ 
+                    // Nút sẽ tự động đổi màu Xanh nếu ID của bộ này nằm trong danh sách savedSets
+                    background: savedSets.includes(qSet._id) ? '#3498db' : 'none', 
+                    border: '1px solid #3498db', 
+                    color: savedSets.includes(qSet._id) ? 'white' : '#3498db', 
+                    padding: '6px 15px', 
+                    borderRadius: '20px', 
+                    cursor: 'pointer', 
+                    fontWeight: 'bold' 
+                  }}
+                >
+                  {savedSets.includes(qSet._id) ? '🏷️ Đã lưu' : '🔖 Lưu bộ'}
+                </button>
+                {/* ------------------------------------- */}
                 
                 <span style={{ color: '#ccc' }}>|</span>
 
