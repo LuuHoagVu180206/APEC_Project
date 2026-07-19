@@ -21,6 +21,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/questions', questionRoute);
 app.use('/api/settings', settingsRoute);
 app.use('/api/scores', scoreRoute);
+
 // 4. Kết nối Database MongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {

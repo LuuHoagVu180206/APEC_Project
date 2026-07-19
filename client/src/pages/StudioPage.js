@@ -74,41 +74,47 @@ const StudioPage = () => {
   const handleCreateQuestion = async (e) => {
     e.preventDefault();
     try {
-      const getCorrectText = (key) => {
-        if (key === 'A') return formData.optionA;
-        if (key === 'B') return formData.optionB;
-        if (key === 'C') return formData.optionC;
-        return formData.optionD;
-      };
+        const getCorrectText = (key) => {
+            if (key === 'A') return formData.optionA;
+            if (key === 'B') return formData.optionB;
+            if (key === 'C') return formData.optionC;
+            return formData.optionD;
+        };
 
-      const newQuestion = {
-        questionText: formData.questionText,
-        options: [formData.optionA, formData.optionB, formData.optionC, formData.optionD],
-        correctAnswer: getCorrectText(formData.correctAnswer), 
-        difficulty: formData.difficulty
-      };
+        const newQuestion = {
+            questionText: formData.questionText,
+            options: [formData.optionA, formData.optionB, formData.optionC, formData.optionD],
+            correctAnswer: getCorrectText(formData.correctAnswer), 
+            difficulty: formData.difficulty,
+            owner: currentUser._id
+        };
 
-      const res = await axios.post('http://localhost:5000/api/questions', newQuestion, {
-          headers: { token: currentUser.accessToken }
-      });
+        const res = await axios.post('http://localhost:5000/api/questions', newQuestion, {
+            headers: { token: currentUser.accessToken }
+        });
       
       // 2. NẾU USER CÓ CHỌN BỘ CÂU HỎI -> Gọi API nhét nó vào bộ
-      if (formData.setId !== '') {
+        if (formData.setId && formData.setId !== '') {
           await axios.put(`http://localhost:5000/api/sets/${formData.setId}/add-question`, {
-              questionId: res.data._id // ID của câu hỏi vừa tạo xong
+              questionId: res.data._id 
           }, {
               headers: { token: currentUser.accessToken }
           });
-      }
+        }
       
-      alert("Đã lưu câu hỏi thành công!");
-      fetchQuestions(); // Tải lại danh sách câu hỏi
+        alert("Đã lưu câu hỏi thành công!");
+        fetchQuestions(); // Tải lại danh sách câu hỏi
       
       // Reset form sạch sẽ (nhớ giữ lại hoặc reset luôn setId)
-      setFormData({ questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', setId: '' });
+        setFormData({ questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', setId: '' });
     } catch (err) {
-      alert("Lỗi thêm câu hỏi!");
-      console.error(err);
+        const errorMsg = err.response?.data?.message || err.response?.data || err.message;
+      
+      // Hiển thị lỗi ra màn hình
+        alert("🛑 Server từ chối với lý do: " + (typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg));
+      
+      // In chi tiết ra F12 để kiểm tra sâu hơn
+      console.error("Chi tiết lỗi:", err.response || err);
     }
   };
 

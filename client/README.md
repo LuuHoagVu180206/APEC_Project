@@ -80,52 +80,21 @@ Vui lòng làm theo từng bước dưới đây để chạy dự án trên má
 
 --- CÁC PHẦN MỀM CẦN CÓ (YÊU CẦU BẮT BUỘC) ---
 1. Node.js (Khuyên dùng bản v18.x LTS để đảm bảo tính ổn định).
-2. MongoDB Compass (Hoặc có tài khoản MongoDB Atlas online).
-3. Git (Để tải code về).
-
+2. MongoDB Compass.
+3. Git.
+ LƯU Ý: nếu clone mới, hãy dùng lệnh npm install để cài các dependencies của web.
 ======================================================
 
 BƯỚC 1: TẢI CODE VÀ MỞ DỰ ÁN
-1. Clone dự án từ GitHub về máy (hoặc giải nén file ZIP).
+1. Clone dự án từ GitHub về máy.
 2. Mở thư mục gốc của dự án bằng phần mềm VS Code.
 
 ------------------------------------------------------
 
-BƯỚC 2: CÀI ĐẶT & CHẠY BACKEND (SERVER)
+BƯỚC 2: CÀI ĐẶT & CHẠY CẢ SERVER
 1. Mở Terminal trong VS Code (Ctrl + `).
-2. Di chuyển vào thư mục server:
-   > cd server
-
-3. Cài đặt các thư viện cần thiết:
-   > npm install
-
-4. TẠO FILE BIẾN MÔI TRƯỜNG (RẤT QUAN TRỌNG):
-   - Trong thư mục "server", tạo một file mới tên CHÍNH XÁC là: .env
-   - Copy 3 dòng dưới đây dán vào file .env và lưu lại:
-     PORT=5000
-     MONGO_URI=mongodb://localhost:27017/edugame
-     JWT_SECRET=chuoi_ky_tu_bi_mat_bat_ky_cua_ban
-
-5. Chạy Server (Dùng 1 trong 2 lệnh gốc sau):
-   - Chạy bình thường: 
-     > node index.js
-   - Hoặc chạy chế độ Dev (Tự khởi động lại khi sửa code): 
-     > npx nodemon index.js
-   
+2. Di chuyển vào thư mục server và chạy lệnh npm run dev
    (Nếu thấy dòng chữ "✅ Đã kết nối MongoDB!" là thành công).
-
-------------------------------------------------------
-
-BƯỚC 3: CÀI ĐẶT & CHẠY FRONTEND (CLIENT)
-1. Mở thêm một Terminal thứ 2 trong VS Code (Giữ nguyên Terminal của Server cho nó chạy).
-2. Di chuyển vào thư mục client:
-   > cd client
-
-3. Cài đặt các thư viện cho React (Dùng thêm đuôi legacy để tránh lỗi phiên bản cũ):
-   > npm install --legacy-peer-deps
-
-4. Chạy giao diện Web:
-   > npm start
    (Trình duyệt sẽ tự động mở trang web tại địa chỉ http://localhost:3000)
 
 ------------------------------------------------------
@@ -136,7 +105,6 @@ Vì máy mới chưa có dữ liệu trong Database, bạn cần tạo quyền A
 2. Mở phần mềm MongoDB Compass, kết nối vào "mongodb://localhost:27017".
 3. Tìm database "edugame", mở bảng "users".
 4. Tìm tài khoản bạn vừa tạo, sửa dòng role: "user" thành role: "admin".
-5. Bấm UPDATE để lưu lại. Lần sau đăng nhập lại, bạn đã có full quyền Admin!
+5. Bấm UPDATE để lưu lại.
 
 ======================================================
-Chúc bạn cài đặt thành công! 🎉
