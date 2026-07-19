@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Question = require('../models/Question');
+const { verifyToken } = require('../verifyToken');
 
 // LẤY CÂU HỎI (Có chức năng lọc)
 router.get('/', async (req, res) => {
