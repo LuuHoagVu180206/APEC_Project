@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-  const AdminPage = () => {
+const AdminPage = () => {
     const navigate = useNavigate();
     const currentUser = JSON.parse(localStorage.getItem('user'));
 
@@ -27,6 +27,16 @@ import { useNavigate } from 'react-router-dom';
       fetchAllQuestions();
       fetchVersion();
     }, [navigate]);
+
+  
+  const fetchAllQuestions = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/questions');
+      setAllQuestions(res.data);
+    } catch (err) {
+      console.error("Lỗi lấy danh sách câu hỏi:", err);
+    }
+  };
 
 
     const fetchVersion = async () => {

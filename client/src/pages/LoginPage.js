@@ -62,7 +62,15 @@ const LoginPage = () => {
             placeholder="Tên đăng nhập" 
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+            style={{
+              width: '100%', 
+              padding: '10px', 
+              marginBottom: '10px',
+              borderRadius: '5px', 
+              border: '1px solid #ccc',
+              boxSizing: 'border-box',
+              fontSize: '16px' 
+            }}
           />
         </div>
         
@@ -72,20 +80,48 @@ const LoginPage = () => {
             placeholder="Mật khẩu" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={{ width: '100%', padding: '10px' }}
+            style={{ 
+              width: '100%', 
+              padding: '10px', 
+              marginBottom: '10px',
+              borderRadius: '5px', 
+              border: '1px solid #ccc',
+              boxSizing: 'border-box',
+              fontSize: '16px' 
+            }}
           />
         </div>
 
-        <button type="submit" style={{ width: '100%', padding: '10px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
+        <button type="submit" style={{ 
+          width: '100%',
+          padding: '10px',
+          background: '#007bff',
+          color: 'white',
+          borderRadius: '5px', 
+          border: '1px solid #ccc',
+          boxSizing: 'border-box',
+          fontSize: '16px',
+          cursor: 'pointer',
+          marginBottom: '15px' }}
+        >
           Vào Chơi Ngay
         </button>
 
-        
+
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
           <button 
             type="button" 
             onClick={handleGuestLogin} // Gắn hàm vừa tạo vào đây
-            style={{ padding: '10px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+            style={{ 
+              padding: '10px', 
+              background: '#6c757d', 
+              color: 'white', 
+              borderRadius: '5px', 
+              border: '1px solid #ccc',
+              boxSizing: 'border-box',
+              fontSize: '16px',
+              cursor: 'pointer' 
+            }}
           >
             🎮 Chơi ngay (Khách)
           </button>
@@ -93,7 +129,16 @@ const LoginPage = () => {
           <button 
             type="button"
             onClick={() => navigate('/library')} 
-            style={{ padding: '10px', background: '#17a2b8', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+            style={{ 
+              padding: '10px', 
+              background: '#17a2b8', 
+              borderRadius: '5px', 
+              border: '1px solid #ccc',
+              boxSizing: 'border-box',
+              fontSize: '16px', 
+              cursor: 'pointer', 
+              color: 'white'
+            }}
           >
             📚 Khám phá Thư viện
           </button>
