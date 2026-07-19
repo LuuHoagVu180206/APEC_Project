@@ -132,9 +132,9 @@ const GamePage = () => {
       </div>
 
       <div style={{ marginTop: '20px' }}>
-        {user.role === 'admin' && (
+        {user && (user.role === 'user' || user.role === 'admin') && (
         <button 
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/studio')}
             style={{ 
             marginRight: '10px',
             padding: '10px 20px', 
@@ -145,17 +145,43 @@ const GamePage = () => {
             cursor: 'pointer' 
             }}
         >
-            ⚙️ Quản Lý Câu Hỏi
+            ⚙️ Quản lý câu hỏi
+        </button>
+
+        )}
+        {user.role === 'admin' && (
+        <button 
+            onClick={() => navigate('/admin')}
+            style={{ 
+                marginRight: '10px',
+                padding: '10px 20px', 
+                backgroundColor: '#f39c12', // Màu cam cảnh báo
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '5px', 
+                cursor: 'pointer' 
+            }}
+        >
+            ⚙️ Quản trị hệ thống
         </button>
         )}
 
         <button 
-          onClick={() => { localStorage.removeItem('user'); navigate('/'); }}
-          style={{ padding: '10px 20px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+            onClick={() => navigate('/library')}
+            style={{ 
+                marginRight: '10px',
+                padding: '10px 20px', 
+                backgroundColor: '#9b59b6', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '5px', 
+                cursor: 'pointer' 
+            }}
         >
-          Đăng Xuất
+            📚 Thư viện câu hỏi
         </button>
-        <button 
+
+        <button
             onClick={() => navigate('/leaderboard')}
             style={{ 
                 marginRight: '10px',
@@ -167,7 +193,14 @@ const GamePage = () => {
                 cursor: 'pointer' 
             }}
             >
-            🏆 Xem Xếp Hạng
+            🏆 Xem xếp hạng
+        </button>
+
+        <button 
+          onClick={() => { localStorage.removeItem('user'); navigate('/'); }}
+          style={{ padding: '10px 20px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+        >
+          Đăng Xuất
         </button>
       </div>
     </div>

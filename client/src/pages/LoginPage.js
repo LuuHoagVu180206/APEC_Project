@@ -30,6 +30,27 @@ const LoginPage = () => {
     }
   };
 
+
+  const handleGuestLogin = () => {
+    // 1. Tạo một con số ngẫu nhiên để phân biệt các khách với nhau
+    const randomNum = Math.floor(Math.random() * 10000);
+    
+    // 2. Đóng gói một "Tài khoản ảo" với role là 'guest'
+    const guestData = {
+      _id: `guest_${randomNum}`,
+      username: `Guest_${randomNum}`,
+      role: 'guest',
+      accessToken: null // Guest không có token của Backend
+    };
+
+    // 3. Lưu vào localStorage giống hệt như một User thật
+    localStorage.setItem('user', JSON.stringify(guestData));
+    
+    // 4. Mở cổng cho vào Game
+    navigate('/game');
+  };
+
+
   return (
     <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f2f5' }}>
       <form onSubmit={handleLogin} style={{ padding: '30px', background: 'white', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
@@ -58,7 +79,27 @@ const LoginPage = () => {
         <button type="submit" style={{ width: '100%', padding: '10px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
           Vào Chơi Ngay
         </button>
+
         
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+          <button 
+            type="button" 
+            onClick={handleGuestLogin} // Gắn hàm vừa tạo vào đây
+            style={{ padding: '10px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+          >
+            🎮 Chơi ngay (Khách)
+          </button>
+          
+          <button 
+            type="button"
+            onClick={() => navigate('/library')} 
+            style={{ padding: '10px', background: '#17a2b8', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+          >
+            📚 Khám phá Thư viện
+          </button>
+        </div>
+
+
         <p style={{ textAlign: 'center', marginTop: '15px', fontSize: '14px' }}>
             Chưa có tài khoản? <Link to="/register" style={{ color: '#007bff', textDecoration: 'none' }}>Đăng ký ngay</Link>
         </p>

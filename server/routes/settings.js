@@ -4,10 +4,9 @@ const GameSetting = require('../models/GameSetting');
 // 1. LẤY VERSION HIỆN TẠI
 router.get('/version', async (req, res) => {
     try {
-        // Tìm bản ghi cấu hình
+
         let setting = await GameSetting.findOne({ settingId: "current_version" });
         
-        // Nếu database mới tinh chưa có, trả về mặc định v1.0
         if (!setting) {
             return res.status(200).json({ version: "v1.0" });
         }

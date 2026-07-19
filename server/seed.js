@@ -27,8 +27,9 @@ const sampleQuestions = [
 
 // Dữ liệu mẫu: Người dùng admin
 const sampleUser = {
-    username: "admin",
-    password: "123", // Mật khẩu đơn giản để test
+    username: "admin123",
+    password: "123456", // Mật khẩu đơn giản để test
+    role: "admin",
     highScore: 100
 };
 
