@@ -6,19 +6,12 @@ const UserSchema = new mongoose.Schema({
     password: { type: String, required: true },
     highScore: { type: Number, default: 0 },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
-    playHistory: [
-        {
-            score: Number,
-            playedAt: { type: Date, default: Date.now }
-        }
-    ],
-    savedQuestions: {
-    type: [String], 
-    default: []
-  },
-  savedSets: {
-    type: [String], 
-    default: []}
+    playHistory: [{ score: Number, playedAt: { type: Date, default: Date.now } }],
+    savedQuestions: { type: [String], default: []},
+    savedSets: { type: [String], default: []},
+    fullName: { type: String, default: "" },
+    email: { type: String, default: "" },
+    bio: { type: String, default: "" }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);

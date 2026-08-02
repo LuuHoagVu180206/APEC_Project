@@ -39,4 +39,29 @@ router.put('/toggle-save-set', verifyToken, async (req, res) => {
     }
 });
 
+router.put('/update-profile', verifyToken, async (req, res) => {
+    try {
+        // Dùng $set để chỉ cập nhật đúng những trường được gửi lên, không đụng tới password hay role
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user.id,
+            {
+                $set: {
+                    fullName: req.body.fullName,
+                    email: req.body.email,
+                    bio: req.body.bio
+                }
+            },
+            { new: true } // Trả về thông tin user mới nhất sau khi update thành công
+        );
+
+        // Tách password ra khỏi dữ liệu trước khi gửi về Frontend để bảo mật
+        const { password, ...others } = updatedUser._doc;
+        
+        res.status(200).json(others);
+    } catch (err) {
+        console.error("LỖI CẬP NHẬT PROFILE:", err);
+        res.status(500).json("Lỗi server khi cập nhật thông tin!");
+    }
+});
+
 module.exports = router;

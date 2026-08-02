@@ -23,7 +23,7 @@ const GamePage = () => {
       try {
         const res = await axios.get('http://localhost:5000/api/questions');
         setQuestions(res.data);
-        console.log("✅ Đã tải xong câu hỏi từ Database:", res.data);
+        console.log("Đã tải xong câu hỏi từ Database:", res.data);
       } catch (err) {
         console.error("Lỗi lấy câu hỏi:", err);
       }
@@ -53,14 +53,14 @@ const GamePage = () => {
 
       // TRƯỜNG HỢP A: Game đòi câu hỏi
       if (data.type === 'REQUEST_QUESTIONS') {
-        console.log("📩 Game đang xin câu hỏi...");
+        console.log("Game đang lấy câu hỏi...");
         if (iframeRef.current) {
           // Gửi câu hỏi vào trong Iframe
           iframeRef.current.contentWindow.postMessage({
             type: 'LOAD_QUESTIONS',
             data: questions
           }, '*');
-          console.log("📤 Đã gửi câu hỏi vào Game!");
+          console.log("Đã gửi câu hỏi vào Game!");
         }
       }
 
@@ -145,7 +145,7 @@ const GamePage = () => {
             cursor: 'pointer' 
             }}
         >
-            ⚙️ Quản lý câu hỏi
+            Quản lý câu hỏi
         </button>
 
         )}
@@ -193,7 +193,22 @@ const GamePage = () => {
                 cursor: 'pointer' 
             }}
             >
-            🏆 Xem xếp hạng
+            Xem xếp hạng
+        </button>
+
+        <button 
+              onClick={() => navigate('/profile')}
+              style={{ 
+                  marginRight: '10px',
+                padding: '10px 20px', 
+                backgroundColor: '#3498db',
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '5px', 
+                cursor: 'pointer' 
+                }}
+            >
+            Trang cá nhân
         </button>
 
         <button 

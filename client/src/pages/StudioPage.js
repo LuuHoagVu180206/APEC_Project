@@ -193,13 +193,31 @@ const StudioPage = () => {
     }
   };
 
+  const handleExport = async (setId, type) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/sets/${setId}/export?type=${type}`, {
+          responseType: 'blob' 
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const extension = type === 'excel' ? 'xlsx' : 'pdf';
+      link.setAttribute('download', `Bo_Cau_Hoi_${setId}.${extension}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove(); 
+    } catch (err) {
+      alert("Lỗi xuất file!");
+    }
+  };
+
 
   return (
     <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto', fontFamily: 'Arial' }}>
       <button onClick={() => navigate('/game')} style={{ marginBottom: '20px', padding: '8px 15px', cursor: 'pointer' }}>⬅ Quay lại Game</button>
       <h1 style={{ textAlign: 'center', color: '#2ecc71' }}>Bộ quản lý câu hỏi của {currentUser?.username}</h1>
       
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
         
         {/* ================= KHU VỰC 1: BỘ CÂU HỎI ================= */}
             <div>
@@ -233,17 +251,55 @@ const StudioPage = () => {
             </div>
             <h3>Bộ câu hỏi của bạn ({mySets.length})</h3>
             {mySets.map((set) => (
-                <div key={set._id} style={{ background: '#fff', border: '1px solid #ddd', padding: '15px', marginBottom: '10px', borderRadius: '5px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                            <strong>{set.title}</strong>
-                            <p style={{ fontSize: '12px', color: '#7f8c8d', margin: '5px 0' }}>{set.isPublic ? ' Công khai' : '🔒 Riêng tư'}</p>
-                        </div>
-                        <button onClick={() => handleDeleteSet(set._id)} style={{ background: '#e74c3c', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '3px', cursor: 'pointer' }}>Xóa</button>
+        <div key={set._id} style={{ background: 'white', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+            
+            {/* Khung cha: Đẩy 2 cụm ra 2 đầu */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                
+                {/* CỤM BÊN TRÁI: Tiêu đề & Trạng thái */}
+                <div>
+                    <h3 style={{ margin: 0, color: '#2c3e50' }}>{set.title}</h3>
+                    <div style={{ fontSize: '13px', color: '#7f8c8d', marginTop: '5px' }}>
+                        {set.isPublic ? "🌐 Công khai" : "🔒 Riêng tư"}
                     </div>
                 </div>
-            ))}
+
+                {/* CỤM BÊN PHẢI: Gói tất cả các nút vào đây và dùng 'gap' để kéo chúng lại gần nhau */}
+                <div style={{ display: 'flex', gap: '8px' }}> 
+                    
+                    <button 
+                        onClick={() => navigate(`/set/${set._id}`)}
+                        style={{ background: '#3498db', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                        Xem bộ
+                    </button>
+                    
+                    <button 
+                        onClick={() => handleExport(set._id, 'excel')}
+                        style={{ background: '#27ae60', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                        Excel
+                    </button>
+                    
+                    <button 
+                        onClick={() => handleExport(set._id, 'pdf')}
+                        style={{ background: '#c0392b', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                        PDF
+                    </button>
+
+                    <button 
+                        onClick={() => handleDeleteSet(set._id)}
+                        style={{ background: '#e74c3c', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                        Xóa
+                    </button>
+
+                </div>
+                
+            </div>
         </div>
+            ))}
 
         {/* ================= KHU VỰC 2: CÂU HỎI LẺ ================= */}
         <div>
@@ -338,7 +394,9 @@ const StudioPage = () => {
                 ))
             )}
         </div>
+      </div>
     </div>
-    )
+    );
 };
+
 export default StudioPage;

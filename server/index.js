@@ -1,8 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const http = require('http'); 
+const { Server } = require('socket.io');
 require('dotenv').config();
-
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -37,6 +38,68 @@ app.get('/', (req, res) => {
     res.send('Server EduGame đang chạy ngon lành!');
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
+const server = http.createServer(app);
+
+// 3. KHỞI TẠO SOCKET.IO GẮN VÀO SERVER HTTP
+const io = new Server(server, {
+    cors: {
+        origin: "*", // Cho phép Godot hoặc bất kỳ Client nào kết nối
+        methods: ["GET", "POST"]
+    }
+});
+
+// QUAN TRỌNG: Bắt buộc phải có dòng này để lưu trữ phòng
+const lobbies = {}; 
+
+// BẮT BUỘC PHẢI CÓ KHỐI NÀY ĐỂ LẮNG NGHE KẾT NỐI
+io.on('connection', (socket) => {
+    console.log(`🟢 Một thiết bị vừa kết nối: ${socket.id}`);
+
+    // 1. Khi có người vào phòng
+    socket.on('join_lobby', (data) => {
+        const pin = data.pin;
+        if (lobbies[pin]) {
+            socket.join(pin);
+            lobbies[pin].players.push({ id: socket.id, name: data.playerName });
+            
+            socket.emit('join_success', "OK");
+            io.to(pin).emit('players_update', lobbies[pin].players); 
+        } else {
+            socket.emit('error', "Phòng không tồn tại!"); 
+        }
+    });
+
+    // 2. Khi Host bấm nút "Bắt đầu Game"
+    socket.on('start_game', (pin) => {
+        io.to(pin).emit('game_started', "GO!");
+    });
+
+    // 3. Khi Host muốn Dừng game sớm
+    socket.on('request_end_game', (pin) => {
+        io.to(pin).emit('end_game_requested', "Host đã dừng game!");
+    });
+
+    // 4. Khi Game chạy hết câu hỏi
+    socket.on('trigger_end_game', (pin) => {
+        io.to(pin).emit('game_ended', "Hết giờ!");
+    });
+
+    // 5. Khi Host bấm thoát, giải tán phòng chờ
+    socket.on('destroy_room', (pin) => {
+        io.to(pin).emit('room_destroyed', "Phòng đã giải tán");
+        
+        io.in(pin).socketsLeave(pin);
+        
+        delete lobbies[pin];
+    });
+
+    // Bắt sự kiện người dùng ngắt kết nối
+    socket.on('disconnect', () => {
+        console.log(`🔴 Mất kết nối: ${socket.id}`);
+    });
+});
+
+// QUAN TRỌNG: Đổi app.listen thành server.listen
+server.listen(PORT, () => {
+    console.log(`🚀 Server & Socket.io đang chạy tại http://localhost:${PORT}`);
 });

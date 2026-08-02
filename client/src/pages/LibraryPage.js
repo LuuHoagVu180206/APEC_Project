@@ -99,10 +99,29 @@ const LibraryPage = () => {
   // 5. THAO TÁC: XUẤT FILE (Tính năng chờ)
   const handleExport = async (setId, type) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/sets/${setId}/export?type=${type}`);
-      alert(res.data.message);
+      // 1. Gửi request báo cho axios biết mình chuẩn bị nhận File (blob)
+      const res = await axios.get(`http://localhost:5000/api/sets/${setId}/export?type=${type}`, {
+          responseType: 'blob' 
+      });
+
+      // 2. Tạo một đường link ảo trong bộ nhớ của trình duyệt
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // 3. Cấu hình đuôi file tự động dựa vào type người dùng chọn (.xlsx hoặc .pdf)
+      const extension = type === 'excel' ? 'xlsx' : 'pdf';
+      const fileName = `Bo_Cau_Hoi_${setId}.${extension}`;
+      link.setAttribute('download', fileName);
+      
+      // 4. Kích hoạt tải
+      document.body.appendChild(link);
+      link.click();
+      link.remove(); 
+      
     } catch (err) {
       console.error("Lỗi xuất file:", err);
+      alert("Lỗi khi tải file! Vui lòng thử lại.");
     }
   };
 

@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const QuestionSet = require('../models/QuestionSet');
+const Question = require('../models/Question');
 const User = require('../models/User');
+const excelJS = require('exceljs');
 const { verifyToken } = require('../verifyToken');
 
 // 1. TẠO BỘ CÂU HỎI MỚI (Chỉ User mới được tạo)
@@ -85,11 +87,118 @@ router.put('/:id/like', verifyToken, async (req, res) => {
 
 // 6. XUẤT FILE (Tính năng chờ - Trả về mốc thông báo)
 router.get('/:id/export', async (req, res) => {
-    const fileType = req.query.type; // Nhận 'excel', 'pdf', hoặc 'csv'
-    // Ở đây sau này ta sẽ dùng các thư viện như exceljs, pdfkit để tạo file
-    res.status(200).json({ 
-        message: `Hệ thống đã nhận lệnh xuất file ${fileType}. Tính năng này đang được phát triển!` 
-    });
+    try {
+        const type = req.query.type; // Nhận 'excel' hoặc 'pdf' từ URL
+        
+        // 1. Tìm bộ câu hỏi trong DB
+        const set = await QuestionSet.findById(req.params.id);
+        if (!set) return res.status(404).json("Không tìm thấy bộ câu hỏi!");
+
+        // 2. Lấy danh sách toàn bộ câu hỏi nằm trong bộ này
+        // (Giả sử trong schema Set của bạn có lưu mảng questions chứa các ID câu hỏi)
+        const questions = await Question.find({ _id: { $in: set.questions } });
+
+        // ================= XỬ LÝ XUẤT EXCEL =================
+        if (type === 'excel') {
+            const workbook = new excelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Danh sách câu hỏi');
+
+            // Tạo hàng tiêu đề (Header)
+            worksheet.columns = [
+                { header: 'STT', key: 'stt', width: 5 },
+                { header: 'Câu hỏi', key: 'questionText', width: 40 },
+                { header: 'Đáp án A', key: 'A', width: 20 },
+                { header: 'Đáp án B', key: 'B', width: 20 },
+                { header: 'Đáp án C', key: 'C', width: 20 },
+                { header: 'Đáp án D', key: 'D', width: 20 },
+                { header: 'Đáp án đúng', key: 'correct', width: 15 },
+                { header: 'Độ khó', key: 'difficulty', width: 10 }
+            ];
+
+            // Đổ dữ liệu vòng lặp vào Excel
+            questions.forEach((q, index) => {
+                worksheet.addRow({
+                    stt: index + 1,
+                    questionText: q.questionText,
+                    A: q.options[0],
+                    B: q.options[1],
+                    C: q.options[2],
+                    D: q.options[3],
+                    correct: q.correctAnswer,
+                    difficulty: q.difficulty
+                });
+            });
+
+            // Định dạng màu sắc cho hàng tiêu đề đẹp mắt (Tùy chọn)
+            worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2980B9' } };
+
+            // Gắn Header báo cho trình duyệt biết đây là một file tải về (Attachment)
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename=Bo_Cau_Hoi.xlsx`);
+
+            // Đóng gói và gửi thẳng về Frontend
+            return workbook.xlsx.write(res).then(() => {
+                res.status(200).end();
+            });
+        }
+        
+        // (Phần PDF chúng ta sẽ ráp sau khi Excel chạy thành công)
+        if (type === 'pdf') {
+            const PDFDocument = require('pdfkit');
+            const fs = require('fs');
+            
+            // Khởi tạo trang PDF
+            const doc = new PDFDocument({ margin: 50 });
+
+            // Báo cho trình duyệt biết đây là file PDF
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename=Bo_Cau_Hoi_${set.title}.pdf`);
+
+            // Truyền dữ liệu thẳng về Client
+            doc.pipe(res);
+
+            // Gắn Font tiếng Việt (Đường dẫn trỏ đến file .ttf bạn đã chuẩn bị ở Bước 2)
+            // Nếu báo lỗi không tìm thấy font, hãy kiểm tra lại đường dẫn file này nhé!
+            doc.font('./fonts/Lora-VariableFont_wght.ttf'); 
+
+            // ================= BẮT ĐẦU VẼ PDF =================
+            // Tiêu đề
+            doc.fontSize(20).text(`BỘ CÂU HỎI: ${set.title}`, { align: 'center' });
+            doc.moveDown(0.5);
+            doc.fontSize(12).text(`Mô tả: ${set.description || 'Không có'}`, { align: 'center', color: 'grey' });
+            doc.moveDown(2);
+
+            // Đổi lại màu đen cho nội dung chính
+            doc.fillColor('black');
+
+            // In từng câu hỏi
+            questions.forEach((q, index) => {
+                doc.fontSize(14).text(`Câu ${index + 1}: ${q.questionText}`);
+                doc.fontSize(12).moveDown(0.5);
+                
+                doc.text(`A. ${q.options[0]}`);
+                doc.text(`B. ${q.options[1]}`);
+                doc.text(`C. ${q.options[2]}`);
+                doc.text(`D. ${q.options[3]}`);
+                
+                doc.moveDown(0.5);
+                doc.text(`=> Đáp án đúng: ${q.correctAnswer}  |  Độ khó: ${q.difficulty === 'easy' ? 'Dễ' : q.difficulty === 'medium' ? 'Trung bình' : 'Khó'}`);
+                
+                // Vẽ một đường kẻ ngang ngăn cách giữa các câu
+                doc.moveDown(1);
+                doc.lineWidth(0.5).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+                doc.moveDown(1);
+            });
+
+            // Kết thúc và đóng gói file
+            doc.end();
+            return;
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json("Lỗi server khi xuất file");
+    }
 });
 
 router.put('/:setId/add-question', verifyToken, async (req, res) => {
@@ -110,6 +219,23 @@ router.put('/:setId/add-question', verifyToken, async (req, res) => {
             res.status(400).json("Câu hỏi đã nằm sẵn trong bộ này rồi!");
         }
     } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+// API: XEM CHI TIẾT 1 BỘ CÂU HỎI KÈM DANH SÁCH CÂU HỎI
+router.get('/:id', async (req, res) => {
+    try {
+        const set = await QuestionSet.findById(req.params.id);
+        if (!set) return res.status(404).json("Không tìm thấy bộ câu hỏi!");
+
+        // Tìm tất cả các câu hỏi có ID nằm trong mảng questions của bộ này
+        const questions = await Question.find({ _id: { $in: set.questions } });
+        
+        // Trả về cả vỏ (set) và ruột (questions)
+        res.status(200).json({ set, questions });
+    } catch (err) {
+        console.error("LỖI TẢI CHI TIẾT BỘ:", err);
         res.status(500).json(err);
     }
 });

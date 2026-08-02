@@ -7,6 +7,8 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import RegisterPage from './pages/RegisterPage';
 import StudioPage from './pages/StudioPage';
 import LibraryPage from './pages/LibraryPage';
+import QuestionSetPage from './pages/QuestionSetPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/studio" element={<StudioPage />} />
         <Route path="/library" element={<LibraryPage />} />
+        <Route path="/set/:id" element={<QuestionSetPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </Router>
   );
