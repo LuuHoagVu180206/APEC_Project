@@ -43,19 +43,18 @@ const server = http.createServer(app);
 // 3. KHỞI TẠO SOCKET.IO GẮN VÀO SERVER HTTP
 const io = new Server(server, {
     cors: {
-        origin: "*", // Cho phép Godot hoặc bất kỳ Client nào kết nối
+        origin: "*", 
         methods: ["GET", "POST"]
     }
 });
 
-// QUAN TRỌNG: Bắt buộc phải có dòng này để lưu trữ phòng
+
 const lobbies = {}; 
 
-// BẮT BUỘC PHẢI CÓ KHỐI NÀY ĐỂ LẮNG NGHE KẾT NỐI
 io.on('connection', (socket) => {
     console.log(`🟢 Một thiết bị vừa kết nối: ${socket.id}`);
 
-    // 1. Khi có người vào phòng
+
     socket.on('join_lobby', (data) => {
         const pin = data.pin;
         if (lobbies[pin]) {
@@ -69,22 +68,21 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 2. Khi Host bấm nút "Bắt đầu Game"
     socket.on('start_game', (pin) => {
         io.to(pin).emit('game_started', "GO!");
     });
 
-    // 3. Khi Host muốn Dừng game sớm
+  
     socket.on('request_end_game', (pin) => {
         io.to(pin).emit('end_game_requested', "Host đã dừng game!");
     });
 
-    // 4. Khi Game chạy hết câu hỏi
+
     socket.on('trigger_end_game', (pin) => {
         io.to(pin).emit('game_ended', "Hết giờ!");
     });
 
-    // 5. Khi Host bấm thoát, giải tán phòng chờ
+
     socket.on('destroy_room', (pin) => {
         io.to(pin).emit('room_destroyed', "Phòng đã giải tán");
         
@@ -93,13 +91,12 @@ io.on('connection', (socket) => {
         delete lobbies[pin];
     });
 
-    // Bắt sự kiện người dùng ngắt kết nối
     socket.on('disconnect', () => {
         console.log(`🔴 Mất kết nối: ${socket.id}`);
     });
 });
 
-// QUAN TRỌNG: Đổi app.listen thành server.listen
+
 server.listen(PORT, () => {
     console.log(`🚀 Server & Socket.io đang chạy tại http://localhost:${PORT}`);
 });
