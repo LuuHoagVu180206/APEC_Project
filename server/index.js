@@ -79,12 +79,43 @@ io.on('connection', (socket) => {
         const pin = data.pin;
         if (lobbies[pin]) {
             socket.join(pin);
-            lobbies[pin].players.push({ id: socket.id, name: data.playerName });
+            lobbies[pin].players.push({ 
+                socketId: socket.id,
+                playerId: data.playerId,
+                name: data.playerName,
+                score: 0 
+            });
             
             socket.emit('join_success', "OK");
             io.to(pin).emit('players_update', lobbies[pin].players); 
         } else {
             socket.emit('error', "Phòng không tồn tại!"); 
+        }
+    });
+
+
+    socket.on('reconnect_lobby', (data) => {
+        const { pin, playerId } = data;
+        
+        if (lobbies[pin]) {
+            // Tìm xem ông này có nằm trong danh sách đang chơi dở không
+            const player = lobbies[pin].players.find(p => p.playerId === playerId);
+            
+            if (player) {
+                // Cập nhật lại đường ống mới cho ông ấy
+                player.socketId = socket.id;
+                socket.join(pin);
+                
+                // THẦN CHÚ LẤY LẠI PROGRESS:
+                // Bắn lại toàn bộ trạng thái hiện tại của game (đang câu mấy, điểm bao nhiêu)
+                socket.emit('restore_progress', {
+                    gameState: lobbies[pin].gameState,
+                    currentQuestionIndex: lobbies[pin].currentQuestionIndex,
+                    yourScore: player.score,
+                    // ... các dữ liệu khác
+                });
+                console.log(`🔌 Người chơi ${player.name} vừa F5 và kết nối lại thành công!`);
+            }
         }
     });
 
@@ -99,7 +130,7 @@ io.on('connection', (socket) => {
 
         if (lobbies[pin]) {
             // 1. Tìm người chơi vừa gửi điểm trong danh sách của phòng
-            const playerIndex = lobbies[pin].players.findIndex(p => p.id === socket.id);
+            const playerIndex = lobbies[pin].players.findIndex(p => p.socketId === socket.id);
             
             if (playerIndex !== -1) {
                 // 2. Cộng điểm cho người đó (nếu chưa có điểm thì khởi tạo là 0)
