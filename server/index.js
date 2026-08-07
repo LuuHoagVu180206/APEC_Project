@@ -94,6 +94,34 @@ io.on('connection', (socket) => {
     });
 
 
+    socket.on('submit_score', (data) => {
+        const { pin, addedScore } = data; // Godot gửi lên mã PIN và số điểm vừa ghi được
+
+        if (lobbies[pin]) {
+            // 1. Tìm người chơi vừa gửi điểm trong danh sách của phòng
+            const playerIndex = lobbies[pin].players.findIndex(p => p.id === socket.id);
+            
+            if (playerIndex !== -1) {
+                // 2. Cộng điểm cho người đó (nếu chưa có điểm thì khởi tạo là 0)
+                if (!lobbies[pin].players[playerIndex].score) {
+                    lobbies[pin].players[playerIndex].score = 0;
+                }
+                lobbies[pin].players[playerIndex].score += addedScore;
+
+                // 3. Sắp xếp lại danh sách người chơi theo thứ tự điểm từ Cao xuống Thấp
+                const sortedLeaderboard = [...lobbies[pin].players].sort((a, b) => {
+                    const scoreA = a.score || 0;
+                    const scoreB = b.score || 0;
+                    return scoreB - scoreA;
+                });
+
+                // 4. Bắn mảng dữ liệu đã sắp xếp này xuống TẤT CẢ mọi người (Đặc biệt là Host đang xem)
+                io.to(pin).emit('live_leaderboard_update', sortedLeaderboard);
+            }
+        }
+    });
+
+
     socket.on('request_end_game', (pin) => {
         io.to(pin).emit('end_game_requested', "Host đã dừng game!");
     });
