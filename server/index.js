@@ -55,6 +55,26 @@ io.on('connection', (socket) => {
     console.log(`🟢 Một thiết bị vừa kết nối: ${socket.id}`);
 
 
+    socket.on('create_lobby', () => {
+        let pin = Math.floor(100000 + Math.random() * 900000).toString();
+
+        while (lobbies[pin]) {
+            pin = Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        lobbies[pin] = { 
+            hostId: socket.id, 
+            players: [],
+            gameState: 'WAITING' 
+        };
+
+        socket.join(pin);
+        console.log(`👑 Host [${socket.id}] vừa tạo phòng. Mã PIN: ${pin}`);
+
+        socket.emit('lobby_created', { pin: pin });
+    });
+
+
     socket.on('join_lobby', (data) => {
         const pin = data.pin;
         if (lobbies[pin]) {
@@ -68,11 +88,12 @@ io.on('connection', (socket) => {
         }
     });
 
+
     socket.on('start_game', (pin) => {
         io.to(pin).emit('game_started', "GO!");
     });
 
-  
+
     socket.on('request_end_game', (pin) => {
         io.to(pin).emit('end_game_requested', "Host đã dừng game!");
     });
@@ -84,8 +105,7 @@ io.on('connection', (socket) => {
 
 
     socket.on('destroy_room', (pin) => {
-        io.to(pin).emit('room_destroyed', "Phòng đã giải tán");
-        
+        io.to(pin).emit('room_destroyed', "Phòng đã giải tán");       
         io.in(pin).socketsLeave(pin);
         
         delete lobbies[pin];
