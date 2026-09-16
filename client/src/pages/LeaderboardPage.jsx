@@ -1,22 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { LeaderboardPageLogic } from '../pages_logic/LeaderboardPageLogic';
 
 const LeaderboardPage = () => {
-  const [leaders, setLeaders] = useState([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/auth/leaderboard');
-        setLeaders(res.data);
-      } catch (err) {
-        console.error("Lỗi lấy BXH:", err);
-      }
-    };
-    fetchLeaderboard();
-  }, []);
+  const { leaders, navigate } = LeaderboardPageLogic();
 
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', textAlign: 'center', fontFamily: 'Arial' }}>

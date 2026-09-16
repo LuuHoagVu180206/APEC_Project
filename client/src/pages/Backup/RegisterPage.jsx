@@ -1,65 +1,13 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { RegisterPageLogic } from '../pages_logic/RegisterPageLogic';
 
 const RegisterPage = () => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
-    
-    const navigate = useNavigate();
 
-    const handleRegister = async (e) => {
-        e.preventDefault(); // Ngăn trang web tải lại khi bấm submit
-        setError(""); // Xóa lỗi cũ (nếu có)
-        
-        if (username.length < 6) {
-            return setError("Tên đăng nhập phải có ít nhất 6 ký tự!");
-        }
-        if (password.length < 6) {
-            return setError("Mật khẩu phải có ít nhất 6 ký tự!");
-        }
-
-        // 1. Kiểm tra mật khẩu nhập lại
-        if (password !== confirmPassword) {
-            return setError("Mật khẩu nhập lại không khớp!");
-        }
-
-        // 2. Gửi dữ liệu xuống Server
-        try {
-            await axios.post('http://localhost:5000/api/auth/register', {
-                username: username,
-                password: password
-            });
-            
-            // Nếu thành công
-            alert("Đăng ký thành công! Đăng nhập ngay thôi nào.");
-            navigate('/login'); // Chuyển hướng sang trang Đăng nhập
-            
-        } catch (err) {
-            // 1. Kiểm tra xem Server có phản hồi lại không (hay là sập/mất mạng)
-            if (err.response && err.response.data) {
-                const serverError = err.response.data;
-                
-                // 2. Bắt đúng mạch bệnh: MongoDB báo mã 11000 (Trùng lặp dữ liệu)
-                if (serverError.code === 11000) {
-                    setError("Tên đăng nhập này đã có người dùng. Hãy chọn tên khác nhé!");
-                } 
-                // 3. Nếu Server tự gửi một câu thông báo lỗi dạng chữ (Ví dụ: "Mật khẩu quá ngắn")
-                else if (typeof serverError === 'string') {
-                    setError(serverError);
-                } 
-                // 4. Các lỗi linh tinh khác từ Database
-                else {
-                    setError("Lỗi hệ thống: Không thể tạo tài khoản lúc này.");
-                }
-            } else {
-                // 5. Rớt mạng hoặc chưa bật máy chủ Backend
-                setError("Mất kết nối với máy chủ. Vui lòng kiểm tra lại mạng!");
-            }
-        }
-    };
+    const {
+        username, setUsername, password, setPassword,
+        confirmPassword, setConfirmPassword, error, handleRegister
+    } = RegisterPageLogic();
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f4f6f8' }}>

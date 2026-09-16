@@ -1,0 +1,174 @@
+/* === GAME PAGE === */
+.game-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.game-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    background-color: white;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.game-version {
+    margin-left: 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--bg-search);
+    padding: 5px 10px;
+    border-radius: 12px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    background-color: var(--primary-yellow);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.username {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.highscore {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.btn-logout {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    transition: background-color var(--transition-speed);
+}
+
+.btn-logout:hover {
+    background-color: #fce8e8;
+    color: var(--error-red);
+}
+
+.game-container {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-iframe {
+    width: 100%;
+    max-width: 1200px;
+    height: 100%;
+    max-height: 800px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+/* === DROPDOWN MENU === */
+.dropdown-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.btn-icon:hover {
+    background-color: var(--bg-search);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background-color: white;
+    min-width: 220px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    z-index: 100;
+    border: 1px solid var(--border-color);
+    /* Animation nhẹ khi mở */
+    animation: slideDown 0.2s ease-out;
+}
+
+.dropdown-item {
+    background: transparent;
+    border: none;
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+    width: 100%;
+}
+
+.dropdown-item:hover {
+    background-color: var(--bg-search);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 8px 0;
+}
+
+.text-danger {
+    color: var(--error-red);
+}
+
+.text-danger:hover {
+    background-color: #fff0f0;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

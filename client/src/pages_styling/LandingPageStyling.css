@@ -1,0 +1,415 @@
+/* BIẾN MÀU SẮC & FONT */
+:root {
+    --primary-blue: #4255ff;
+    --primary-yellow: #ffd028;
+    --text-main: #1a1d28;
+    --text-muted: #586380;
+    --bg-main: #f9f9fa;
+    --bg-search: #f6f7fb;
+    --border-color: #ededed;
+    --card-green: #d1f4da;
+    --card-teal: #18d2d6;
+    --card-gray: #e8e8eb;
+    --transition-speed: 0.2s;
+}
+
+/* TỔNG THỂ */
+.landing-wrapper {
+    font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+    color: var(--text-main);
+    background-color: var(--bg-main);
+    min-height: 100vh;
+}
+
+/* 1. NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: white;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.logo {
+    color: var(--primary-blue);
+    font-size: 28px;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.nav-item {
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color var(--transition-speed);
+}
+
+.nav-item:hover {
+    color: var(--primary-blue);
+}
+
+.nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 0 20px;
+}
+
+.search-bar {
+    background-color: var(--bg-search);
+    border-radius: 20px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid transparent;
+    transition: border var(--transition-speed), background-color var(--transition-speed);
+}
+
+.nav-right {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.btn-create, .btn-login {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all var(--transition-speed);
+}
+
+.btn-create {
+    background: transparent;
+    color: var(--text-main);
+}
+
+.btn-create:hover {
+    background: var(--bg-search);
+}
+
+.btn-login {
+    background-color: var(--primary-yellow);
+    color: var(--text-main);
+}
+
+.btn-login:hover {
+    background-color: #f0c117;
+}
+
+/* 2. HERO SECTION */
+.hero-section {
+    text-align: center;
+    padding: 100px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hero-title {
+    font-size: 52px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    line-height: 1.2;
+    letter-spacing: -1px;
+}
+
+.hero-subtitle {
+    font-size: 20px;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-primary {
+    background-color: var(--primary-blue);
+    color: white;
+    padding: 16px 45px;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(66, 85, 255, 0.3);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 85, 255, 0.4);
+}
+
+.link-teacher {
+    color: var(--primary-blue);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.link-teacher:hover {
+    text-decoration: underline;
+}
+
+/* === 3. KHU VỰC DANH SÁCH GAME (CODEDEX STYLE) === */
+.game-library-section {
+
+    padding: 80px 20px;
+    font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+}
+
+.gl-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Tiêu đề */
+.gl-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.gl-title {
+    font-family: 'VT323', monospace; /* Font Pixel-art */
+    font-size: 48px;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+.gl-subtitle {
+    font-size: 18px;
+}
+
+/* Thanh công cụ (Tìm kiếm & Lọc) */
+.gl-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.gl-search {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 15px;
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+    transition: border-color 0.2s;
+}
+
+.gl-search:focus-within {
+    border-color: #58a6ff; /* Màu xanh sáng khi focus */
+}
+
+.gl-search-icon {
+    color: #8b949e;
+    margin-right: 10px;
+}
+
+.gl-search input {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 15px;
+    width: 100%;
+    outline: none;
+}
+
+.gl-search input::placeholder {
+    color: #8b949e;
+}
+
+/* Các nút lọc (Pills) */
+.gl-filters {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.gl-pill {
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gl-pill:hover {
+    background-color: #21262d;
+    border-color: #8b949e;
+}
+
+.gl-pill.active {
+    border-color: #58a6ff;
+    color: #58a6ff;
+    background-color: rgba(88, 166, 255, 0.1);
+}
+
+/* Lưới Thẻ Game */
+.gl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+/* Thẻ Game (Card) */
+.gl-card {
+    background-color: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.gl-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    border-color: #484f58;
+}
+
+/* Hình ảnh Placeholder giả lập phong cách pixel art */
+.gl-card-image {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: rgba(255,255,255,0.4);
+    font-family: 'VT323', monospace;
+    font-size: 24px;
+}
+
+.placeholder-math { background: linear-gradient(135deg, #1f6f50, #144733); }
+.placeholder-english { background: linear-gradient(135deg, #2d4586, #1a2850); }
+.placeholder-science { background: linear-gradient(135deg, #7b3887, #4a2151); }
+
+/* Nội dung thẻ */
+.gl-card-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.gl-category {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #8b949e;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.gl-card-title {
+    font-size: 20px;
+    color: #ffffff;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+}
+
+.gl-card-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #8b949e;
+    margin-bottom: 24px;
+    flex: 1;
+}
+
+/* Huy hiệu (Badge) */
+.gl-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #21262d;
+    color: #c9d1d9;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    align-self: flex-start;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1024px) {
+    .cards-wrapper {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-wrap: wrap;
+        padding: 15px 20px;
+    }
+    
+    .nav-center {
+        order: 3;
+        width: 100%;
+        margin-top: 15px;
+        padding: 0;
+    }
+    
+
+    
+    .nav-item {
+        display: none; /* Ẩn menu chữ trên mobile */
+    }
+
+    .hero-title {
+        font-size: 36px;
+    }
+    
+    .hero-subtitle {
+        font-size: 16px;
+    }
+    
+    .nav-arrow {
+        display: none; /* Ẩn nút mũi tên, dùng vuốt ngang */
+    }
+    
+
+}
+
+@media (max-width: 768px) {
+    .gl-title { font-size: 36px; }
+    .gl-toolbar { flex-direction: column; align-items: stretch; }
+    .gl-search { max-width: 100%; }
+    .gl-filters { overflow-x: auto; padding-bottom: 10px; flex-wrap: nowrap; }
+    .gl-pill { white-space: nowrap; }
+}
