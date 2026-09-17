@@ -25,6 +25,7 @@ function App() {
         <Route path="/library" element={<LibraryPage />} />
         <Route path="/set/:id" element={<QuestionSetPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/landing" element={<LandingPage />} />
       </Routes>
     </Router>
   );

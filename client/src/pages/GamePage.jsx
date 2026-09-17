@@ -19,7 +19,7 @@ return (
             {/* Thanh điều hướng rút gọn */}
             <nav className="game-navbar">
                 <div className="nav-left">
-                    <h2 className="logo">EduGame</h2>
+                    <h2 className="logo" onClick={() => navigate('/Landing')}>EasyLearn</h2>
                     {gameVersion && <span className="game-version">Phiên bản: {gameVersion}</span>}
                 </div>
                 
@@ -49,13 +49,13 @@ return (
                                 {/* Chỉ hiện các nút quản trị nếu là Admin, ở đây tạm thời hiển thị luôn */}
                                 <button 
                                     className="dropdown-item"
-                                    onClick={() => navigate('/manage-questions')}
+                                    onClick={() => navigate('/studio')}
                                 >
                                     Quản lý câu hỏi
                                 </button>
                                 <button 
                                     className="dropdown-item"
-                                    onClick={() => navigate('/admin-dashboard')}
+                                    onClick={() => navigate('/admin')}
                                 >
                                     Quản trị hệ thống
                                 </button>

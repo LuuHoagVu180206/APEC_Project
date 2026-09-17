@@ -1,16 +1,32 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDarkMode } from '../pages_logic/useDarkMode'; // Import hook vừa tạo
 import '../pages_styling/LandingPageStyling.css';
-import { Search, Signal, BarChart2, Zap } from 'lucide-react';
+import { Search, Signal, BarChart2, Zap, Sun, Moon } from 'lucide-react';
 const LandingPage = () => {
     const navigate = useNavigate();
+    const { isDark, toggleTheme } = useDarkMode(); // Sử dụng hook
 
     return (
         <div className="landing-wrapper">
             {/* 1. THANH ĐIỀU HƯỚNG (NAVBAR) */}
             <nav className="navbar">
                 <div className="nav-left">
-                    <h2 className="logo">EasyLearn</h2>
+                    <h2 className="logo" onClick={() => navigate('/Landing')}>EasyLearn</h2>
+                    <button 
+                        onClick={toggleTheme} 
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: 'var(--text-main)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '8px'
+                        }}
+                    >
+                        {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
                 </div>
                 
                
@@ -32,7 +48,7 @@ const LandingPage = () => {
                 </p>
                 <div className="hero-actions">
                     <button className="btn-primary" onClick={() => navigate('/register')}>
-                        Đăng ký miễn phí
+                        Đăng ký miễn phí ngay!
                     </button>
                     <a href="#teacher" className="link-teacher">Tôi là giáo viên</a>
                 </div>
@@ -55,10 +71,10 @@ const LandingPage = () => {
                         </div>
                         <div className="gl-filters">
                             <button className="gl-pill active">Phổ biến</button>
-                            <button className="gl-pill">Toán học</button>
+                            <button className="gl-pill">Toán</button>
                             <button className="gl-pill">Tiếng Anh</button>
                             <button className="gl-pill">Lịch sử</button>
-                            <button className="gl-pill">Khoa học</button>
+                            <button className="gl-pill">Hoá học</button>
                         </div>
                     </div>
 
@@ -68,13 +84,13 @@ const LandingPage = () => {
                         <div className="gl-card">
                             <div className="gl-card-image placeholder-math">
                                 {/* Chỗ này bạn sẽ thay bằng thẻ <img> chứa ảnh thật của game */}
-                                <span>[Ảnh Game 1]</span>
+                                <span>[Ảnh 1]</span>
                             </div>
                             <div className="gl-card-content">
-                                <span className="gl-category">MÔN TOÁN</span>
-                                <h3 className="gl-card-title">Hành Trình Số Học</h3>
+                                <span className="gl-category">TOÁN</span>
+                                <h3 className="gl-card-title">Đại số tuyến tính</h3>
                                 <p className="gl-card-desc">
-                                    Tìm hiểu các nguyên lý cơ bản của phép tính như cộng, trừ, nhân, chia thông qua hành trình giải cứu vương quốc.
+                                    Ôn luyện đại số tuyến tính.
                                 </p>
                                 <div className="gl-badge">
                                     <Signal size={14} /> DỄ
@@ -85,13 +101,13 @@ const LandingPage = () => {
                         {/* Thẻ 2 */}
                         <div className="gl-card">
                             <div className="gl-card-image placeholder-english">
-                                <span>[Ảnh Game 2]</span>
+                                <span>[Ảnh 2]</span>
                             </div>
                             <div className="gl-card-content">
                                 <span className="gl-category">TIẾNG ANH</span>
-                                <h3 className="gl-card-title">Hiệp Sĩ Ngữ Pháp</h3>
+                                <h3 className="gl-card-title">Tổng ôn trung học phổ thông</h3>
                                 <p className="gl-card-desc">
-                                    Vượt qua các ải từ vựng và sắp xếp câu chuẩn xác để đánh bại rồng ma thuật.
+                                    Bộ câu hỏi dành cho ôn luyện THPTQG.
                                 </p>
                                 <div className="gl-badge">
                                     <BarChart2 size={14} /> TRUNG BÌNH
@@ -102,13 +118,13 @@ const LandingPage = () => {
                         {/* Thẻ 3 */}
                         <div className="gl-card">
                             <div className="gl-card-image placeholder-science">
-                                <span>[Ảnh Game 3]</span>
+                                <span>[Ảnh 3]</span>
                             </div>
                             <div className="gl-card-content">
-                                <span className="gl-category">KHOA HỌC</span>
-                                <h3 className="gl-card-title">Phòng Thí Nghiệm Điên Rồ</h3>
+                                <span className="gl-category">HOÁ HỌC</span>
+                                <h3 className="gl-card-title">Hữu cơ cấp 3</h3>
                                 <p className="gl-card-desc">
-                                    Thực hành kết hợp các nguyên tố hóa học để tạo ra các phản ứng thú vị và giải mã câu đố.
+                                    Tổng ôn kiến thức về hữu cơ cấp 3.
                                 </p>
                                 <div className="gl-badge">
                                     <Zap size={14} /> KHÓ
@@ -183,10 +199,10 @@ const LandingPage = () => {
                         {/* Thẻ 3 */}
                         <div className="gl-card">
                             <div className="gl-card-image placeholder-science">
-                                <span>[Ảnh Game 3]</span>
+                                <span>[Ảnh 3]</span>
                             </div>
                             <div className="gl-card-content">
-                                <span className="gl-category">KHOA HỌC</span>
+                                <span className="gl-category">GAME</span>
                                 <h3 className="gl-card-title">Phòng Thí Nghiệm Điên Rồ</h3>
                                 <p className="gl-card-desc">
                                     Thực hành kết hợp các nguyên tố hóa học để tạo ra các phản ứng thú vị và giải mã câu đố.
