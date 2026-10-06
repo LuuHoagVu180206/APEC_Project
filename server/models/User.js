@@ -5,7 +5,7 @@ const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     highScore: { type: Number, default: 0 },
-    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    role: { type: String, enum: ['user', 'admin', 'teacher'], default: 'user' },
     playHistory: [{ score: Number, playedAt: { type: Date, default: Date.now } }],
     savedQuestions: { type: [String], default: []},
     savedSets: { type: [String], default: []},

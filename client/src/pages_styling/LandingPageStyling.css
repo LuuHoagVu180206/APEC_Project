@@ -135,6 +135,85 @@ body {
     background-color: #f0c117;
 }
 
+.nav-username {
+    color: var(--text-main);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.nav-username:hover {
+    text-decoration: underline;
+}
+
+.class-nav-link {
+    color: var(--primary-blue);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.class-nav-link:hover {
+    text-decoration: underline;
+}
+
+.teacher-account-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+}
+
+.teacher-account-dropdown {
+    position: absolute;
+    top: calc(100% - 2px);
+    right: 0;
+    z-index: 110;
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    padding: 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(20, 35, 32, 0.14);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+}
+
+.teacher-account-menu:hover .teacher-account-dropdown,
+.teacher-account-menu:focus-within .teacher-account-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.teacher-account-dropdown a,
+.teacher-account-dropdown button {
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-main);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+}
+
+.teacher-account-dropdown a:hover {
+    background: var(--bg-search);
+}
+
+.teacher-account-dropdown button:not(:disabled):hover {
+    background: var(--bg-search);
+}
+
+.teacher-account-dropdown button:disabled {
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
 /* 2. HERO SECTION */
 .hero-section {
     text-align: center;
@@ -431,4 +510,22 @@ body {
     .gl-search { max-width: 100%; }
     .gl-filters { overflow-x: auto; padding-bottom: 10px; flex-wrap: nowrap; }
     .gl-pill { white-space: nowrap; }
+}
+
+.landing-logout {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: white;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.landing-logout:hover {
+    border-color: #d9aaa5;
+    background: #fff4f2;
+    color: #a33d35;
 }

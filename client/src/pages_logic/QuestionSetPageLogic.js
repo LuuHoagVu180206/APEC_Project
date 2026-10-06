@@ -5,6 +5,13 @@ import axios from 'axios';
 export const QuestionSetPageLogic = () => {
     const { id } = useParams(); 
     const navigate = useNavigate();
+    const currentUser = (() => {
+        try {
+            return JSON.parse(localStorage.getItem('user'));
+        } catch {
+            return null;
+        }
+    })();
     
     const [setData, setSetData] = useState(null);
     const [questions, setQuestions] = useState([]);
@@ -12,7 +19,9 @@ export const QuestionSetPageLogic = () => {
     useEffect(() => {
         const fetchSetDetails = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/sets/${id}`);
+                const res = await axios.get(`http://localhost:5000/api/sets/${id}`, {
+                    headers: currentUser?.accessToken ? { token: currentUser.accessToken } : {}
+                });
                 setSetData(res.data.set);
                 setQuestions(res.data.questions);
             } catch (err) {
@@ -21,7 +30,7 @@ export const QuestionSetPageLogic = () => {
             }
         };
         fetchSetDetails();
-    }, [id]);
+    }, [currentUser?.accessToken, id]);
 
     return { navigate, setData, questions };
 };

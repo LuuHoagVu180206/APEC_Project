@@ -4,7 +4,7 @@ const StudioPage = () => {
 
     const {
         navigate, currentUser, questions, formData, setFormData,
-        mySets, questionSetFormData, setQuestionSetFormData, savedSetsData,
+        mySets, questionSetFormData, setQuestionSetFormData, teacherClasses, savedSetsData,
         handleCreateSet, handleCreateQuestion, handleAddToSet, handleDeleteSet,
         handleDeleteQuestion, handleRemoveSavedSet, handleExport
     } = StudioPageLogic();
@@ -34,6 +34,29 @@ const StudioPage = () => {
                             onChange={(e) => setQuestionSetFormData({...questionSetFormData, description: e.target.value})} 
                             style={{ padding: '8px', minHeight: '60px' }} 
                         />
+                        {currentUser?.role === 'teacher' && (
+                            <>
+                                <label htmlFor="question-set-class">Thêm bộ câu hỏi vào lớp</label>
+                                <select
+                                    id="question-set-class"
+                                    value={questionSetFormData.classId}
+                                    onChange={(e) => setQuestionSetFormData({ ...questionSetFormData, classId: e.target.value })}
+                                    style={{ padding: '8px' }}
+                                >
+                                    <option value="">Không thêm vào lớp</option>
+                                    {teacherClasses.map((classItem) => (
+                                        <option key={classItem._id} value={classItem._id}>
+                                            {classItem.className}{classItem.semester ? ` - ${classItem.semester}` : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                {teacherClasses.length === 0 && (
+                                    <button type="button" onClick={() => navigate('/teacher/classes/new')}>
+                                        Tạo lớp mới
+                                    </button>
+                                )}
+                            </>
+                        )}
                         <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                             <input 
                                 type="checkbox" 

@@ -73,7 +73,8 @@
     letter-spacing: 0.5px;
 }
 
-.input-group input {
+.input-group input,
+.input-group select {
     width: 100%;
     padding: 16px;
     border: 2px solid transparent;
@@ -86,7 +87,8 @@
     box-sizing: border-box;
 }
 
-.input-group input:focus {
+.input-group input:focus,
+.input-group select:focus {
     border-color: var(--primary-blue);
     background-color: white;
 }
@@ -179,6 +181,40 @@
 
 .auth-footer a:hover {
     text-decoration: underline;
+}
+
+.auth-notice {
+    color: var(--text-muted);
+    line-height: 1.5;
+    text-align: center;
+}
+
+.auth-text-button {
+    display: block;
+    margin: 16px auto 0;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--primary-blue);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-text-button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.auth-login-link {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.auth-forgot-link {
+    margin: 14px 0;
 }
 
 .error-message {

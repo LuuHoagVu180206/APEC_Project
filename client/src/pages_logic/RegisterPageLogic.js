@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-export const RegisterPageLogic = () => {
+export const RegisterPageLogic = (role = 'user') => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,7 +19,7 @@ export const RegisterPageLogic = () => {
         if (password !== confirmPassword) return setError("Mật khẩu nhập lại không khớp!");
 
         try {
-            await axios.post('http://localhost:5000/api/auth/register', { username, password });
+            await axios.post('http://localhost:5000/api/auth/register', { username, password, role });
             alert("Đăng ký thành công! Đăng nhập ngay thôi nào.");
             navigate('/login'); 
         } catch (err) {

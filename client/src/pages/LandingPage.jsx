@@ -1,11 +1,41 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../pages_logic/useDarkMode'; // Import hook vừa tạo
 import '../pages_styling/LandingPageStyling.css';
-import { Search, Signal, BarChart2, Zap, Sun, Moon } from 'lucide-react';
+import { Search, Signal, BarChart2, Zap, Sun, Moon, LogOut } from 'lucide-react';
 const LandingPage = () => {
     const navigate = useNavigate();
     const { isDark, toggleTheme } = useDarkMode(); // Sử dụng hook
+    const [user, setUser] = useState(() => {
+        try {
+            const savedUser = JSON.parse(localStorage.getItem('user'));
+            return savedUser?.username ? savedUser : null;
+        } catch {
+            return null;
+        }
+    });
+    const [schoolMemberships, setSchoolMemberships] = useState([]);
+
+    useEffect(() => {
+        if (!user?.accessToken) return undefined;
+        let isActive = true;
+        axios.get('http://localhost:5000/api/schools/mine', {
+            headers: { token: user.accessToken }
+        }).then((response) => {
+            if (isActive) setSchoolMemberships(response.data);
+        }).catch(() => {});
+        return () => { isActive = false; };
+    }, [user]);
+
+    const schoolActionLabel = schoolMemberships.length > 0 ? 'My School' : 'Join Your School';
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        setUser(null);
+        setSchoolMemberships([]);
+        navigate('/');
+    };
 
     return (
         <div className="landing-wrapper">
@@ -31,9 +61,35 @@ const LandingPage = () => {
                 
                
                 <div className="nav-right">
-                    <button className="btn-login" onClick={() => navigate('/login')}>
-                        Đăng nhập
-                    </button>
+                    {user?.role === 'teacher' ? (
+                        <div className="teacher-account-menu">
+                            <Link className="nav-username" to="/profile">{user.username}</Link>
+                            <div className="teacher-account-dropdown">
+                                <Link to="/teacher/dashboard">Go to Dashboard</Link>
+                                <Link to="/schools">{schoolActionLabel}</Link>
+                                <button type="button" disabled title="Tính năng xác minh trường học sẽ được bổ sung sau">
+                                    Verify official school
+                                </button>
+                                <button type="button" onClick={handleLogout}>
+                                    <LogOut size={16} /> Đăng xuất
+                                </button>
+                            </div>
+                        </div>
+                    ) : user ? (
+                        <>
+                            {user.role === 'admin' && <Link className="btn-login" to="/admin">Quản trị hệ thống</Link>}
+                            {user.role === 'user' && <Link className="school-nav-link" to="/schools">{schoolActionLabel}</Link>}
+                            {user.role === 'user' && <Link className="class-nav-link" to="/student/classes">Join Class</Link>}
+                            <Link className="nav-username" to="/profile">{user.username}</Link>
+                            <button className="landing-logout" type="button" onClick={handleLogout} title="Đăng xuất" aria-label="Đăng xuất">
+                                <LogOut size={18} />
+                            </button>
+                        </>
+                    ) : (
+                        <button className="btn-login" onClick={() => navigate('/login')}>
+                            Đăng nhập
+                        </button>
+                    )}
                 </div>
             </nav>
 
@@ -50,7 +106,7 @@ const LandingPage = () => {
                     <button className="btn-primary" onClick={() => navigate('/register')}>
                         Đăng ký miễn phí ngay!
                     </button>
-                    <a href="#teacher" className="link-teacher">Tôi là giáo viên</a>
+                    <Link to="/register/teacher" className="link-teacher">Tôi là giáo viên</Link>
                 </div>
             </header>
             {/* 4. KHU VỰC DANH SÁCH GAME DO DEV TẠO RA (PHONG CÁCH CODEDEX) */}

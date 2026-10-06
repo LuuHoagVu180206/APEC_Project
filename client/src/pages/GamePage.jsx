@@ -53,12 +53,14 @@ return (
                                 >
                                     Quản lý câu hỏi
                                 </button>
-                                <button 
-                                    className="dropdown-item"
-                                    onClick={() => navigate('/admin')}
-                                >
-                                    Quản trị hệ thống
-                                </button>
+                                {user?.role === 'admin' && (
+                                    <button
+                                        className="dropdown-item"
+                                        onClick={() => navigate('/admin')}
+                                    >
+                                        Quản trị hệ thống
+                                    </button>
+                                )}
                                 
                                 <div className="dropdown-divider"></div>
                                 

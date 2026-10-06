@@ -3,18 +3,20 @@ import { Link } from 'react-router-dom';
 import { RegisterPageLogic } from '../pages_logic/RegisterPageLogic'; 
 import '../pages_styling/AuthPageStyling.css';
 
-const RegisterPage = () => {
+const RegisterPage = ({ role = 'user' }) => {
     const {
         username, setUsername, 
         password, setPassword,
         confirmPassword, setConfirmPassword, 
         error, handleRegister
-    } = RegisterPageLogic(); //[cite: 4]
+    } = RegisterPageLogic(role); //[cite: 4]
 
     return (
         <div className="auth-wrapper">
             <div className="auth-card">
-                <h1 className="auth-title">Tạo tài khoản</h1>
+                <h1 className="auth-title">
+                    {role === 'teacher' ? 'Đăng ký tài khoản giáo viên' : 'Tạo tài khoản'}
+                </h1>
                 
                 {error && <div className="error-message">{error}</div>} {/*[cite: 4] */}
 

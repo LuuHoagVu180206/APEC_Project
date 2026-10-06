@@ -68,6 +68,10 @@ const LoginPage = () => {
                     </button>
                 </form>
 
+                <p className="auth-footer auth-forgot-link">
+                    <Link to="/forgot-password">Quên mật khẩu?</Link>
+                </p>
+
                 <div className="auth-divider">
                     <span>hoặc</span>
                 </div>
