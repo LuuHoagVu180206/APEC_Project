@@ -1,26 +1,45 @@
 /* BIẾN MÀU SẮC & FONT */
 :root {
+ 
     --primary-blue: #4255ff;
     --primary-yellow: #ffd028;
+    
+ 
     --text-main: #1a1d28;
     --text-muted: #586380;
+    --border-color: #1a1d28;
+    
+
     --bg-main: #f9f9fa;
     --bg-search: #f6f7fb;
-    --border-color: #ededed;
+    --navbar-bg: #f6f7fb;
+    --bg-card: #ffffff;
+    --bg-hover: #CAF0F8;
+    
+  
     --card-green: #d1f4da;
     --card-teal: #18d2d6;
     --card-gray: #e8e8eb;
+    
     --transition-speed: 0.2s;
 }
 
 [data-theme='dark'] {
-    --primary-blue: #58a6ff;
+    /* Màu cơ bản */
     --primary-yellow: #e3b341;
-    --text-main: #c9d1d9;
+    
+    /* Màu chữ và viền */
+    --text-main: #f6f7fb;
     --text-muted: #8b949e;
-    --bg-main: #0d1117;
-    --bg-search: #161b22;
     --border-color: #30363d;
+    
+    --bg-main: #161b22; 
+    --bg-search: #161b22;
+    --navbar-bg: #161b22;
+    --bg-card: #161b22;
+    --bg-hover: #023E8A;
+    
+    /* Màu riêng cho thẻ Card (Landing Page) */
     --card-green: #113426; 
     --card-teal: #0c3e41;
     --card-gray: #21262d;
@@ -40,7 +59,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px 30px;
-    background-color: white;
+    background-color: var(--navbar-bg);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -60,7 +79,7 @@ body {
 }
 
 .logo {
-    color: var(--primary-blue);
+    color: #4255ff;
     font-size: 28px;
     margin: 0;
     font-weight: 800;
@@ -88,6 +107,7 @@ body {
 }
 
 .search-bar {
+    color: #000000;
     background-color: var(--bg-search);
     border-radius: 20px;
     padding: 10px 20px;
@@ -233,7 +253,7 @@ body {
 
 .hero-subtitle {
     font-size: 20px;
-    color: var(--text-muted);
+    color: var(--text-main);
     margin-bottom: 40px;
     line-height: 1.6;
 }
@@ -313,6 +333,7 @@ body {
 }
 
 .gl-search {
+    color: var(--text-main);
     display: flex;
     align-items: center;
     background-color: transparent;

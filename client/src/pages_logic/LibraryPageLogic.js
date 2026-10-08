@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export const LibraryPageLogic = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const currentUser = JSON.parse(localStorage.getItem('user'));
 
+    const searchParams = new URLSearchParams(location.search);
+    const initialSearch = searchParams.get('search') || "";
+    const initialCategory = searchParams.get('category') || "Tất cả";
+
     const [questionSets, setQuestionSets] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState(initialSearch);
+    const [activeCategory, setActiveCategory] = useState(initialCategory);
     const [savedSets, setSavedSets] = useState(currentUser?.savedSets || []);
 
-    useEffect(() => {
+ useEffect(() => {
         fetchLibrary();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchLibrary = async () => {
@@ -112,11 +117,21 @@ export const LibraryPageLogic = () => {
         }
     };
 
-    const filteredSets = questionSets.filter(set => 
-        set.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredSets = questionSets.filter(set => {
+        const searchLower = searchTerm.toLowerCase();
+        
+        const matchesSearch = 
+        set.title.toLowerCase().includes(searchLower) || 
+        (set.topic && set.topic.toLowerCase().includes(searchLower));
+        
+    const matchesCategory = 
+            activeCategory === "Tất cả" || 
+            activeCategory === "Phổ biến" || 
+            (set.topic && set.topic === activeCategory);
+            
+        return matchesSearch && matchesCategory;
+    });
 
-    // Xuất ra tất cả những gì Giao diện cần
     return {
         navigate,
         currentUser,

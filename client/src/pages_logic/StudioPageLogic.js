@@ -8,12 +8,12 @@ export const StudioPageLogic = () => {
 
     const [questions, setQuestions] = useState([]);
     const [formData, setFormData] = useState({
-        questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', setId: ''
+        questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', topic:'Toán', setId: ''
     });
   
     const [mySets, setMySets] = useState([]);
     const [questionSetFormData, setQuestionSetFormData] = useState({
-        title: '', description: '', isPublic: false, classId: ''
+        title: '', description: '', topic: 'Toán', isPublic: false, classId: ''
     });
     const [teacherClasses, setTeacherClasses] = useState([]);
     const [savedSetsData, setSavedSetsData] = useState([]);
@@ -116,6 +116,7 @@ export const StudioPageLogic = () => {
                 options: [formData.optionA, formData.optionB, formData.optionC, formData.optionD],
                 correctAnswer: getCorrectText(formData.correctAnswer), 
                 difficulty: formData.difficulty,
+                topic: formData.topic || 'Khác',
                 owner: currentUser._id
             };
 

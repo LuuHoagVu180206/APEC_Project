@@ -4,10 +4,20 @@
     --text-main: #1a1d28;
     --text-muted: #586380;
     --bg-main: #f9f9fa;
-    --bg-search: #f6f7fb;
-    --border-color: #ededed;
-    --error-red: #ff4b4b;
+    --border-color: #1a1d28;
     --transition-speed: 0.2s;
+    --bg-card: #ffffff;
+}
+
+[data-theme='dark'] {
+    --primary-yellow: #e3b341;
+    --text-main: #f6f7fb;
+    --text-muted: #8b949e;
+    --bg-main: #4255ff;
+    --bg-search: #161b22;
+    --navbar-bg: #161b22;
+    --border-color: #FEE3D4;
+    --bg-card: #161b22;
 }
 
 .navbar {
@@ -15,7 +25,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px 30px;
-    background-color: white;
+    background-color: var(--navbar-bg);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -35,7 +45,7 @@
 
 /* === THẺ ĐĂNG NHẬP / ĐĂNG KÝ (STYLE QUIZLET) === */
 .auth-card {
-    background: white;
+    background: var(--bg-card);
     width: 100%;
     max-width: 480px;
     padding: 40px;
@@ -68,7 +78,7 @@
 .input-group label {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--text-main);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -77,7 +87,7 @@
 .input-group select {
     width: 100%;
     padding: 16px;
-    border: 2px solid transparent;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     background-color: var(--bg-search);
     font-size: 16px;
@@ -87,10 +97,18 @@
     box-sizing: border-box;
 }
 
+.input-group input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+}
+
 .input-group input:focus,
 .input-group select:focus {
     border-color: var(--primary-blue);
-    background-color: white;
+    background-color: var(--bg-card);
+}
+    border-color: var(--primary-blue);
+    background-color: var(--bg-card);
 }
 
 /* === NÚT BẤM === */
@@ -100,10 +118,10 @@
     padding: 16px;
     font-size: 18px;
     font-weight: 700;
-    border: none;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     cursor: pointer;
-    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    transition: all var(--transition-speed);
 }
 
 .btn-primary:hover {
@@ -112,20 +130,24 @@
 }
 
 .btn-secondary {
-    background-color: transparent;
+    background-color: var(--bg-hover);
     color: var(--text-main);
     padding: 16px;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
-    border: 2px solid var(--border-color);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     cursor: pointer;
+    transition: all var(--transition-speed);
     width: 100%;
-    transition: background-color var(--transition-speed);
 }
 
+
+
 .btn-secondary:hover {
-    background-color: var(--bg-search);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .auth-submit {
@@ -146,7 +168,7 @@
     left: 0;
     width: 40%;
     height: 1px;
-    background-color: var(--border-color);
+    background-color: var(--text-main);
 }
 
 .auth-divider::after {
@@ -156,14 +178,14 @@
     right: 0;
     width: 40%;
     height: 1px;
-    background-color: var(--border-color);
+    background-color: var(--text-main);
 }
 
 .auth-divider span {
-    color: var(--text-muted);
+    color: var(--text-main);
     font-size: 14px;
     font-weight: 600;
-    background: white;
+    background: var(--bg-card);
     padding: 0 10px;
 }
 

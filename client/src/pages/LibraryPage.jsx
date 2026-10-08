@@ -45,6 +45,9 @@ const LibraryPage = () => {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div>
                                     <h3 style={{ margin: '0 0 10px 0', color: '#34495e' }}>{qSet.title}</h3>
+                                    <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#3498db', textTransform: 'uppercase', marginBottom: '5px', display: 'inline-block' }}>
+                                        🏷️ CHỦ ĐỀ: {qSet.topic || 'KHÁC'}
+                                    </span>
                                     <p style={{ margin: '0 0 10px 0', color: '#7f8c8d', fontSize: '14px' }}>{qSet.description || "Không có mô tả"}</p>
                                     <p style={{ margin: 0, fontSize: '12px', color: '#95a5a6' }}>Tác giả: {qSet.owner?.username || "Ẩn danh"}</p>
                                 </div>

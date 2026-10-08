@@ -1,9 +1,40 @@
-/* === GAME PAGE === */
+:root {
+    --primary-yellow: #ffd028;
+    --text-main: #1a1d28;
+    --text-muted: #586380;
+    --bg-main: #f9f9fa;
+    --navbar-bg: #f6f7fb;
+    --border-color: #1a1d28;
+    --bg-hover: #CAF0F8;
+    --transition-speed: 0.2s;
+}
+
+[data-theme='dark'] {
+    --primary-yellow: #e3b341;
+    --text-main: #f6f7fb;
+    --text-muted: #8b949e;
+    --bg-main: #161b22;
+    --bg-hover: #023E8A;
+    --navbar-bg: #161b22;
+    --border-color: #30363d;
+}
+
+.clickable-name {
+    cursor: pointer;
+    transition: color var(--transition-speed);
+}
+
+.clickable-name:hover {
+    color: var(--primary-yellow);
+    text-decoration: underline;
+}
+
 .game-page-wrapper {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background-color: #f0f2f5;
+    background-color: var(--bg-main);
+    transition: background-color var(--transition-speed);
 }
 
 .game-navbar {
@@ -11,18 +42,20 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 30px;
-    background-color: white;
+    background-color: var(--navbar-bg);
     border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
 }
 
 .game-version {
     margin-left: 20px;
-    color: var(--text-muted);
+    color: var(--text-main);
     font-size: 14px;
     font-weight: 600;
-    background: var(--bg-search);
+    background: var(--bg-main);
     padding: 5px 10px;
     border-radius: 12px;
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
 }
 
 .user-info {
@@ -42,6 +75,7 @@
     border-radius: 50%;
     font-weight: 800;
     font-size: 18px;
+    transition: color var(--transition-speed);
 }
 
 .username {
@@ -84,9 +118,10 @@
     max-width: 1200px;
     height: 100%;
     max-height: 800px;
-    background: white;
+    background: var(--bg-main);
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    transition: background-color var(--transition-speed);
 }
 
 /* === DROPDOWN MENU === */
@@ -111,14 +146,14 @@
 }
 
 .btn-icon:hover {
-    background-color: var(--bg-search);
+    background-color: var(--bg-hover);
 }
 
 .dropdown-menu {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    background-color: white;
+    background-color: var(--bg-navbar);
     min-width: 220px;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.12);
@@ -127,8 +162,8 @@
     padding: 8px 0;
     z-index: 100;
     border: 1px solid var(--border-color);
-    /* Animation nhẹ khi mở */
     animation: slideDown 0.2s ease-out;
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
 }
 
 .dropdown-item {
@@ -145,13 +180,14 @@
 }
 
 .dropdown-item:hover {
-    background-color: var(--bg-search);
+    background-color: var(--bg-hover);
 }
 
 .dropdown-divider {
     height: 1px;
     background-color: var(--border-color);
     margin: 8px 0;
+    transition: background-color var(--transition-speed);
 }
 
 .text-danger {
