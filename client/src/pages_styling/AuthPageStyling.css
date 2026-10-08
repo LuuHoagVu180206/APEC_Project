@@ -4,9 +4,7 @@
     --text-main: #1a1d28;
     --text-muted: #586380;
     --bg-main: #f9f9fa;
-    --bg-search: #f6f7fb;
-    --border-color: #ededed;
-    --error-red: #ff4b4b;
+    --border-color: #1a1d28;
     --transition-speed: 0.2s;
     --bg-card: #ffffff;
 }
@@ -88,7 +86,7 @@
 .input-group input {
     width: 100%;
     padding: 16px;
-    border: 2px solid var(--text-main);
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     background-color: var(--bg-search);
     font-size: 16px;
@@ -115,10 +113,10 @@
     padding: 16px;
     font-size: 18px;
     font-weight: 700;
-    border: none;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     cursor: pointer;
-    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    transition: all var(--transition-speed);
 }
 
 .btn-primary:hover {
@@ -127,20 +125,24 @@
 }
 
 .btn-secondary {
-    background-color: transparent;
+    background-color: var(--bg-hover);
     color: var(--text-main);
     padding: 16px;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
-    border: 2px solid var(--text-main);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     cursor: pointer;
+    transition: all var(--transition-speed);
     width: 100%;
-    transition: background-color var(--transition-speed);
 }
 
+
+
 .btn-secondary:hover {
-    background-color: var(--bg-search);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .auth-submit {

@@ -3,11 +3,10 @@
     --text-main: #1a1d28;
     --text-muted: #586380;
     --bg-main: #f9f9fa;
-    --bg-search: #f6f7fb;
     --navbar-bg: #f6f7fb;
-    --border-color: #ededed;
+    --border-color: #1a1d28;
+    --bg-hover: #CAF0F8;
     --transition-speed: 0.2s;
-    --bg-card: #ffffff;
 }
 
 [data-theme='dark'] {
@@ -15,10 +14,9 @@
     --text-main: #f6f7fb;
     --text-muted: #8b949e;
     --bg-main: #161b22;
-    --bg-search: #161b22;
+    --bg-hover: #023E8A;
     --navbar-bg: #161b22;
     --border-color: #30363d;
-    --bg-card: #161b22;
 }
 
 .clickable-name {
@@ -54,7 +52,7 @@
     color: var(--text-main);
     font-size: 14px;
     font-weight: 600;
-    background: var(--bg-search);
+    background: var(--bg-main);
     padding: 5px 10px;
     border-radius: 12px;
     transition: background-color var(--transition-speed), border-color var(--transition-speed);
@@ -120,7 +118,7 @@
     max-width: 1200px;
     height: 100%;
     max-height: 800px;
-    background: var(--bg-card);
+    background: var(--bg-main);
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     transition: background-color var(--transition-speed);
@@ -148,14 +146,14 @@
 }
 
 .btn-icon:hover {
-    background-color: var(--bg-search);
+    background-color: var(--bg-hover);
 }
 
 .dropdown-menu {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    background-color: var(--bg-card);
+    background-color: var(--bg-navbar);
     min-width: 220px;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.12);
@@ -182,7 +180,7 @@
 }
 
 .dropdown-item:hover {
-    background-color: var(--bg-search);
+    background-color: var(--bg-hover);
 }
 
 .dropdown-divider {

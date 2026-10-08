@@ -18,11 +18,12 @@ const GamePage = () => {
 
 return (
         <div className="game-page-wrapper">
-            {/* Thanh điều hướng rút gọn */}
             <nav className="game-navbar">
                 <div className="nav-left">
+
                     <h2 className="logo" onClick={() => navigate('/Landing')}>EasyLearn</h2>
-                        <button 
+                        
+                    <button 
                         onClick={toggleTheme} 
                         style={{
                             background: 'transparent',
@@ -36,28 +37,30 @@ return (
                     >
                         {isDark ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
+
                     {gameVersion && <span className="game-version">Phiên bản: {gameVersion}</span>}
                 </div>
                 
                 <div className="nav-right">
                     {user && (
                         <div className="user-info">
+
                             <span className="user-avatar">{user.username.charAt(0).toUpperCase()}</span>
-                            <span 
-                                className="username clickable-name" 
-                                onClick={() => navigate('/profile')}
-                                title="Đến trang cá nhân"
-                            >
+
+                            <span className="username clickable-name" onClick={() => navigate('/profile')} title="Đến trang cá nhân">
                                 {user.username}
                             </span>
+
                             {user.highScore !== undefined && (
                                 <span className="highscore">🏆 Điểm cao: {user.highScore}</span>
                             )}
+
                         </div>
                     )}
 
                     {/* Dropdown Menu */}
                     <div className="dropdown-container">
+
                         <button 
                             className="btn-icon" 
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -68,19 +71,21 @@ return (
 
                         {isMenuOpen && (
                             <div className="dropdown-menu">
-                                {/* Chỉ hiện các nút quản trị nếu là Admin, ở đây tạm thời hiển thị luôn */}
                                 <button 
                                     className="dropdown-item"
                                     onClick={() => navigate('/studio')}
                                 >
                                     Quản lý câu hỏi
                                 </button>
-                                <button 
-                                    className="dropdown-item"
-                                    onClick={() => navigate('/admin')}
-                                >
-                                    Quản trị hệ thống
-                                </button>
+
+                                {user?.role === 'admin' && (
+                                    <button 
+                                        className="dropdown-item"
+                                        onClick={() => navigate('/admin')}
+                                    >
+                                        Quản trị hệ thống
+                                    </button>
+                                )}
 
                                 <button className="dropdown-item" onClick={() => navigate('/library')}>
                                     Thư viện

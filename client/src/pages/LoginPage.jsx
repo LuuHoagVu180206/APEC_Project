@@ -72,7 +72,7 @@ const LoginPage = () => {
                     <span>hoặc</span>
                 </div>
 
-                <button onClick={handleGuestLogin} className="btn-secondary guest-btn"> {/*[cite: 3] */}
+                <button onClick={handleGuestLogin} className="btn-secondary guest-btn">
                     Chơi ngay
                 </button>
 
