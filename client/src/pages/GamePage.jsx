@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Menu } from 'lucide-react'; // Thêm icon 3 gạch
+import { Menu, Sun, Moon } from 'lucide-react'; // Thêm icon 3 gạch
 import { GamePageLogic } from '../pages_logic/GamePageLogic';
 import '../pages_styling/GamePageStyling.css';
-
+import { useDarkMode } from '../pages_logic/useDarkMode';
 const GamePage = () => {
     const {
         user,
         gameVersion,
         iframeRef,
+        isDark,
+        toggleTheme,
         navigate,
         handleLogout
     } = GamePageLogic(); //[cite: 5]
@@ -20,6 +22,20 @@ return (
             <nav className="game-navbar">
                 <div className="nav-left">
                     <h2 className="logo" onClick={() => navigate('/Landing')}>EasyLearn</h2>
+                        <button 
+                        onClick={toggleTheme} 
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: 'var(--text-main)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '8px'
+                        }}
+                    >
+                        {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
                     {gameVersion && <span className="game-version">Phiên bản: {gameVersion}</span>}
                 </div>
                 

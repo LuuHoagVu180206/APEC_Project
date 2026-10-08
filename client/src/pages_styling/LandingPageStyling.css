@@ -1,29 +1,31 @@
 /* BIẾN MÀU SẮC & FONT */
 :root {
-    --primary-blue: #4255ff;
     --primary-yellow: #ffd028;
     --text-main: #1a1d28;
     --text-muted: #586380;
     --bg-main: #f9f9fa;
     --bg-search: #f6f7fb;
+    --navbar-bg: #f6f7fb;
     --border-color: #ededed;
     --card-green: #d1f4da;
     --card-teal: #18d2d6;
     --card-gray: #e8e8eb;
     --transition-speed: 0.2s;
+    --bg-card: #ffffff;
 }
 
 [data-theme='dark'] {
-    --primary-blue: #58a6ff;
     --primary-yellow: #e3b341;
-    --text-main: #c9d1d9;
+    --text-main: #f6f7fb;
     --text-muted: #8b949e;
-    --bg-main: #0d1117;
+    --bg-main: #161b22;
     --bg-search: #161b22;
+    --navbar-bg: #161b22;
     --border-color: #30363d;
     --card-green: #113426; 
     --card-teal: #0c3e41;
     --card-gray: #21262d;
+    --bg-card: #161b22;
 }
 
 /* TỔNG THỂ */
@@ -40,7 +42,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px 30px;
-    background-color: white;
+    background-color: var(--navbar-bg);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -60,7 +62,7 @@ body {
 }
 
 .logo {
-    color: var(--primary-blue);
+    color: #4255ff;
     font-size: 28px;
     margin: 0;
     font-weight: 800;
@@ -88,6 +90,7 @@ body {
 }
 
 .search-bar {
+    color: #000000;
     background-color: var(--bg-search);
     border-radius: 20px;
     padding: 10px 20px;
@@ -154,7 +157,7 @@ body {
 
 .hero-subtitle {
     font-size: 20px;
-    color: var(--text-muted);
+    color: var(--text-main);
     margin-bottom: 40px;
     line-height: 1.6;
 }
@@ -234,6 +237,7 @@ body {
 }
 
 .gl-search {
+    color: var(--text-main);
     display: flex;
     align-items: center;
     background-color: transparent;

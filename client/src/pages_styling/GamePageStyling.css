@@ -1,3 +1,27 @@
+:root {
+    --primary-yellow: #ffd028;
+    --text-main: #1a1d28;
+    --text-muted: #586380;
+    --bg-main: #f9f9fa;
+    --bg-search: #f6f7fb;
+    --navbar-bg: #f6f7fb;
+    --border-color: #ededed;
+    --transition-speed: 0.2s;
+    --bg-card: #ffffff;
+}
+
+[data-theme='dark'] {
+    --primary-yellow: #e3b341;
+    --text-main: #f6f7fb;
+    --text-muted: #8b949e;
+    --bg-main: #161b22;
+    --bg-search: #161b22;
+    --navbar-bg: #161b22;
+    --border-color: #30363d;
+    --bg-card: #161b22;
+}
+
+
 /* === GAME PAGE === */
 .game-page-wrapper {
     display: flex;

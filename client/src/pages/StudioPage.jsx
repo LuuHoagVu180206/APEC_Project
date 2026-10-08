@@ -34,6 +34,17 @@ const StudioPage = () => {
                             onChange={(e) => setQuestionSetFormData({...questionSetFormData, description: e.target.value})} 
                             style={{ padding: '8px', minHeight: '60px' }} 
                         />
+                        <select 
+                            value={questionSetFormData.topic} 
+                            onChange={(e) => setQuestionSetFormData({...questionSetFormData, topic: e.target.value})} 
+                            style={{ padding: '8px', borderRadius: '5px', border: '1px solid #ccc' }}
+                        >
+                            <option value="Toán">Toán</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                            <option value="Lịch sử">Lịch sử</option>
+                            <option value="Hoá học">Hoá học</option>
+                            <option value="Khác">Khác</option>
+                        </select>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                             <input 
                                 type="checkbox" 
@@ -123,6 +134,13 @@ const StudioPage = () => {
                             <option value="easy">Dễ</option>
                             <option value="medium">Trung bình</option>
                             <option value="hard">Khó</option>
+                        </select>
+                        <select name="topic" value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} style={{ padding: '5px', flex: 1 }}>
+                            <option value="Toán">Toán</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                            <option value="Lịch sử">Lịch sử</option>
+                            <option value="Hoá học">Hoá học</option>
+                            <option value="Khác">Khác</option>
                         </select>
                     </div>
 
