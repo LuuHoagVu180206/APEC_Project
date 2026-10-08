@@ -106,7 +106,6 @@
 .input-group select:focus {
     border-color: var(--primary-blue);
     background-color: var(--bg-card);
-}
     border-color: var(--primary-blue);
     background-color: var(--bg-card);
 }
@@ -152,6 +151,29 @@
 
 .auth-submit {
     margin-top: 10px;
+}
+
+.auth-role-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.auth-role-option input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--primary-blue);
+}
+
+.auth-mode-toggle {
+    display: inline;
+    margin: 0;
+    padding: 0;
 }
 
 /* === DIVIDER & FOOTER === */

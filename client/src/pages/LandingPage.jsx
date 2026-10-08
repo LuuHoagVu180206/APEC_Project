@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDarkMode } from '../pages_logic/useDarkMode';
+import { Link } from 'react-router-dom';
 import { LandingPageLogic } from '../pages_logic/LandingPageLogic';
 import '../pages_styling/LandingPageStyling.css';
 import { Search, Signal, BarChart2, Zap, Sun, Moon, LogOut } from 'lucide-react';
@@ -110,10 +109,9 @@ const LandingPage = () => {
                     Cùng EasyLearn, 
                 </p>
                 <div className="hero-actions">
-                    <button className="btn-primary" onClick={() => navigate('/register')}>
+                    <button className="btn-primary" onClick={() => navigate('/login?mode=register')}>
                         Đăng ký miễn phí ngay!
                     </button>
-                    <Link to="/register/teacher" className="link-teacher">Tôi là giáo viên</Link>
                 </div>
             </header>
 
