@@ -8,11 +8,11 @@ const GamePage = () => {
         user,
         gameVersion,
         iframeRef,
-        isDark,
-        toggleTheme,
         navigate,
         handleLogout
     } = GamePageLogic(); //[cite: 5]
+
+    const { isDark, toggleTheme } = useDarkMode();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -43,7 +43,13 @@ return (
                     {user && (
                         <div className="user-info">
                             <span className="user-avatar">{user.username.charAt(0).toUpperCase()}</span>
-                            <span className="username">{user.username}</span>
+                            <span 
+                                className="username clickable-name" 
+                                onClick={() => navigate('/profile')}
+                                title="Đến trang cá nhân"
+                            >
+                                {user.username}
+                            </span>
                             {user.highScore !== undefined && (
                                 <span className="highscore">🏆 Điểm cao: {user.highScore}</span>
                             )}
@@ -74,6 +80,14 @@ return (
                                     onClick={() => navigate('/admin')}
                                 >
                                     Quản trị hệ thống
+                                </button>
+
+                                <button className="dropdown-item" onClick={() => navigate('/library')}>
+                                    Thư viện
+                                </button>
+
+                                <button className="dropdown-item" onClick={() => navigate('/leaderboard')}>
+                                    Bảng xếp hạng
                                 </button>
                                 
                                 <div className="dropdown-divider"></div>
