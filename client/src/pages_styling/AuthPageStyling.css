@@ -1,25 +1,3 @@
-:root {
-    --primary-blue: #4255ff;
-    --primary-yellow: #ffd028;
-    --text-main: #1a1d28;
-    --text-muted: #586380;
-    --bg-main: #f9f9fa;
-    --border-color: #1a1d28;
-    --transition-speed: 0.2s;
-    --bg-card: #ffffff;
-}
-
-[data-theme='dark'] {
-    --primary-yellow: #e3b341;
-    --text-main: #f6f7fb;
-    --text-muted: #8b949e;
-    --bg-main: #4255ff;
-    --bg-search: #161b22;
-    --navbar-bg: #161b22;
-    --border-color: #FEE3D4;
-    --bg-card: #161b22;
-}
-
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -32,7 +10,6 @@
     z-index: 100;
 }
 
-/* === LAYOUT CHUNG === */
 .auth-wrapper {
     display: flex;
     justify-content: center;
@@ -43,7 +20,6 @@
     padding: 20px;
 }
 
-/* === THẺ ĐĂNG NHẬP / ĐĂNG KÝ (STYLE QUIZLET) === */
 .auth-card {
     background: var(--bg-card);
     width: 100%;
@@ -125,8 +101,8 @@
 }
 
 .btn-secondary {
-    background-color: var(--bg-hover);
-    color: var(--text-main);
+    background-color: #023E8A;
+    color: #f6f7fb;
     padding: 16px;
     font-size: 18px;
     font-weight: 700;

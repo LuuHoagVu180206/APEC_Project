@@ -14,7 +14,6 @@ const AdminPage = () => {
       
       <h1 style={{ textAlign: 'center' }}>⚙️ Quản trị hệ thống</h1>
       
-
       <div style={{ background: '#e3f2fd', padding: '15px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #90caf9' }}>
         <h3>🚀 Phiên bản Game hiện tại: <span style={{ color: 'red' }}>{currentVersion}</span></h3>
         <div style={{ display: 'flex', gap: '10px' }}>

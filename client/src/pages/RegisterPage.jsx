@@ -9,16 +9,16 @@ const RegisterPage = () => {
         password, setPassword,
         confirmPassword, setConfirmPassword, 
         error, handleRegister
-    } = RegisterPageLogic(); //[cite: 4]
+    } = RegisterPageLogic();
 
     return (
         <div className="auth-wrapper">
             <div className="auth-card">
                 <h1 className="auth-title">Tạo tài khoản</h1>
                 
-                {error && <div className="error-message">{error}</div>} {/*[cite: 4] */}
+                {error && <div className="error-message">{error}</div>}
 
-                <form onSubmit={handleRegister} className="auth-form"> {/*[cite: 4] */}
+                <form onSubmit={handleRegister} className="auth-form">
                     <div className="input-group">
                         <label>Tên đăng nhập</label>
                         <input 
@@ -34,8 +34,8 @@ const RegisterPage = () => {
                         <input 
                             type="password" 
                             placeholder="Tạo mật khẩu (ít nhất 6 ký tự)"
-                            value={password} /*[cite: 4] */
-                            onChange={(e) => setPassword(e.target.value)} /*[cite: 4] */
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             required 
                         />
                     </div>
@@ -44,8 +44,8 @@ const RegisterPage = () => {
                         <input 
                             type="password" 
                             placeholder="Nhập lại mật khẩu"
-                            value={confirmPassword} /*[cite: 4] */
-                            onChange={(e) => setConfirmPassword(e.target.value)} /*[cite: 4] */
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                             required 
                         />
                     </div>
