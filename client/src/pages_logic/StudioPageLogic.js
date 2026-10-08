@@ -13,8 +13,9 @@ export const StudioPageLogic = () => {
   
     const [mySets, setMySets] = useState([]);
     const [questionSetFormData, setQuestionSetFormData] = useState({
-        title: '', description: '', topic: 'Toán', isPublic: false
+        title: '', description: '', topic: 'Toán', isPublic: false, classId: ''
     });
+    const [teacherClasses, setTeacherClasses] = useState([]);
     const [savedSetsData, setSavedSetsData] = useState([]);
 
     useEffect(() => {
@@ -26,6 +27,7 @@ export const StudioPageLogic = () => {
         fetchQuestions();
         fetchMySets();
         fetchSavedSets();
+        if (currentUser.role === 'teacher') fetchTeacherClasses();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [navigate]);
 
@@ -46,6 +48,17 @@ export const StudioPageLogic = () => {
         } catch (err) { console.error(err); }
     };
 
+    const fetchTeacherClasses = async () => {
+        try {
+            const res = await axios.get('http://localhost:5000/api/classes/mine', {
+                headers: { token: currentUser.accessToken }
+            });
+            setTeacherClasses(res.data);
+        } catch (err) {
+            console.error('Lỗi tải danh sách lớp:', err);
+        }
+    };
+
     const fetchSavedSets = async () => {
         try {
             const res = await axios.get('http://localhost:5000/api/sets/library');
@@ -58,10 +71,30 @@ export const StudioPageLogic = () => {
     const handleCreateSet = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/api/sets', questionSetFormData, { headers: { token: currentUser.accessToken }});
-            alert("Tạo Bộ Câu Hỏi thành công!");
+            const { classId, ...setData } = questionSetFormData;
+            const res = await axios.post('http://localhost:5000/api/sets', setData, {
+                headers: { token: currentUser.accessToken }
+            });
+
+            if (currentUser.role === 'teacher' && classId) {
+                try {
+                    await axios.post(`http://localhost:5000/api/classes/${classId}/question-sets`, {
+                        questionSetId: res.data._id
+                    }, { headers: { token: currentUser.accessToken } });
+                } catch (linkError) {
+                    const errorMessage = typeof linkError.response?.data === 'string'
+                        ? linkError.response.data
+                        : 'Không thể thêm bộ câu hỏi vào lớp đã chọn.';
+                    alert(`Đã tạo bộ câu hỏi nhưng chưa thêm được vào lớp: ${errorMessage}`);
+                    fetchMySets();
+                    setQuestionSetFormData({ title: '', description: '', isPublic: false, classId: '' });
+                    return;
+                }
+            }
+
+            alert(classId ? 'Đã tạo bộ câu hỏi và thêm vào lớp!' : 'Tạo Bộ Câu Hỏi thành công!');
             fetchMySets();
-            setQuestionSetFormData({ title: '', description: '', isPublic: false });
+            setQuestionSetFormData({ title: '', description: '', isPublic: false, classId: '' });
         } catch (err) {
             alert("Lỗi tạo bộ câu hỏi!");
             console.error(err);
@@ -147,7 +180,10 @@ export const StudioPageLogic = () => {
 
     const handleExport = async (setId, type) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/sets/${setId}/export?type=${type}`, { responseType: 'blob' });
+            const res = await axios.get(`http://localhost:5000/api/sets/${setId}/export?type=${type}`, {
+                responseType: 'blob',
+                headers: { token: currentUser.accessToken }
+            });
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -163,7 +199,7 @@ export const StudioPageLogic = () => {
 
     return {
         navigate, currentUser, questions, formData, setFormData,
-        mySets, questionSetFormData, setQuestionSetFormData, savedSetsData,
+        mySets, questionSetFormData, setQuestionSetFormData, teacherClasses, savedSetsData,
         handleCreateSet, handleCreateQuestion, handleAddToSet, handleDeleteSet,
         handleDeleteQuestion, handleRemoveSavedSet, handleExport
     };

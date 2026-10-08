@@ -2,8 +2,36 @@ const router = require('express').Router();
 const QuestionSet = require('../models/QuestionSet');
 const Question = require('../models/Question');
 const User = require('../models/User');
+const TeacherClass = require('../models/TeacherClass');
+const jwt = require('jsonwebtoken');
 const excelJS = require('exceljs');
 const { verifyToken } = require('../verifyToken');
+
+const canViewClassQuestionSet = async (req, res, questionSetId) => {
+    const isUsedInClass = await TeacherClass.exists({ questionSets: questionSetId });
+    if (!isUsedInClass) return true;
+
+    const token = req.headers.token;
+    if (!token) {
+        res.status(401).json('Cần đăng nhập để xem question set của lớp!');
+        return false;
+    }
+
+    let tokenUser;
+    try {
+        tokenUser = jwt.verify(token, process.env.JWT_SECRET || 'mat_khau_bi_mat_cua_server');
+    } catch (err) {
+        res.status(401).json('Token không hợp lệ!');
+        return false;
+    }
+
+    const currentUser = await User.findById(tokenUser.id).select('role');
+    if (!currentUser || currentUser.role === 'user') {
+        res.status(403).json('Student chỉ được xem số lượng question set trong lớp!');
+        return false;
+    }
+    return true;
+};
 
 // 1. TẠO BỘ CÂU HỎI MỚI (Chỉ User mới được tạo)
 router.post('/', verifyToken, async (req, res) => {
@@ -93,6 +121,7 @@ router.get('/:id/export', async (req, res) => {
         // 1. Tìm bộ câu hỏi trong DB
         const set = await QuestionSet.findById(req.params.id);
         if (!set) return res.status(404).json("Không tìm thấy bộ câu hỏi!");
+        if (!await canViewClassQuestionSet(req, res, set._id)) return;
 
         // 2. Lấy danh sách toàn bộ câu hỏi nằm trong bộ này
         // (Giả sử trong schema Set của bạn có lưu mảng questions chứa các ID câu hỏi)
@@ -228,6 +257,7 @@ router.get('/:id', async (req, res) => {
     try {
         const set = await QuestionSet.findById(req.params.id);
         if (!set) return res.status(404).json("Không tìm thấy bộ câu hỏi!");
+        if (!await canViewClassQuestionSet(req, res, set._id)) return;
 
         // Tìm tất cả các câu hỏi có ID nằm trong mảng questions của bộ này
         const questions = await Question.find({ _id: { $in: set.questions } });

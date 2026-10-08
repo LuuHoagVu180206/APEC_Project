@@ -59,7 +59,8 @@
     letter-spacing: 0.5px;
 }
 
-.input-group input {
+.input-group input,
+.input-group select {
     width: 100%;
     padding: 16px;
     border: 2px solid var(--border-color);
@@ -77,7 +78,10 @@
     opacity: 1;
 }
 
-.input-group input:focus {
+.input-group input:focus,
+.input-group select:focus {
+    border-color: var(--primary-blue);
+    background-color: var(--bg-card);
     border-color: var(--primary-blue);
     background-color: var(--bg-card);
 }
@@ -123,6 +127,29 @@
 
 .auth-submit {
     margin-top: 10px;
+}
+
+.auth-role-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.auth-role-option input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--primary-blue);
+}
+
+.auth-mode-toggle {
+    display: inline;
+    margin: 0;
+    padding: 0;
 }
 
 /* === DIVIDER & FOOTER === */
@@ -174,6 +201,40 @@
 
 .auth-footer a:hover {
     text-decoration: underline;
+}
+
+.auth-notice {
+    color: var(--text-muted);
+    line-height: 1.5;
+    text-align: center;
+}
+
+.auth-text-button {
+    display: block;
+    margin: 16px auto 0;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--primary-blue);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-text-button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.auth-login-link {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.auth-forgot-link {
+    margin: 14px 0;
 }
 
 .error-message {

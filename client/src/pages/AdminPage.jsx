@@ -11,6 +11,9 @@ const AdminPage = () => {
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       <button onClick={() => navigate('/game')} style={{ marginBottom: '20px' }}>⬅ Quay lại Game</button>
+    <button onClick={() => navigate('/')} style={{ margin: '0 0 20px 10px' }}>⬅ Quay lại Landing</button>
+    <button onClick={() => navigate('/school-requests/admin')} style={{ margin: '0 0 20px 10px' }}>School Requests</button>
+    <button onClick={() => navigate('/admin/schools')} style={{ margin: '0 0 20px 10px' }}>School Communities</button>
       
       <h1 style={{ textAlign: 'center' }}>⚙️ Quản trị hệ thống</h1>
       

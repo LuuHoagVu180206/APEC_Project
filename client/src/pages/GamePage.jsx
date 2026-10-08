@@ -77,16 +77,14 @@ return (
                                 >
                                     Quản lý câu hỏi
                                 </button>
-
                                 {user?.role === 'admin' && (
-                                    <button 
+                                    <button
                                         className="dropdown-item"
                                         onClick={() => navigate('/admin')}
                                     >
                                         Quản trị hệ thống
                                     </button>
                                 )}
-
                                 <button className="dropdown-item" onClick={() => navigate('/library')}>
                                     Thư viện
                                 </button>
