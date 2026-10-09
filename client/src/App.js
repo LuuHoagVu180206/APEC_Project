@@ -29,7 +29,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/register" element={<Navigate to="/login?mode=register" replace />} />
-        <Route path="/register/teacher" element={<Navigate to="/login?mode=register" replace />} />
+        <Route path="/register/teacher" element={<Navigate to="/login?mode=register&role=teacher" replace />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/game" element={<GamePage />} />
         <Route path="/admin" element={<AdminPage />} />

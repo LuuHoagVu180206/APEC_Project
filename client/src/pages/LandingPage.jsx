@@ -112,6 +112,9 @@ const LandingPage = () => {
                     <button className="btn-primary" onClick={() => navigate('/login?mode=register')}>
                         Đăng ký miễn phí ngay!
                     </button>
+                    <button className="btn-teacher" onClick={() => navigate('/register/teacher')}>
+                        Tôi là giáo viên
+                    </button>
                 </div>
             </header>
 

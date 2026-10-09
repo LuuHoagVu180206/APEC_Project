@@ -283,6 +283,23 @@ body {
     box-shadow: 0 6px 20px rgba(66, 85, 255, 0.4);
 }
 
+.btn-teacher {
+    padding: 12px 24px;
+    border: 1px solid var(--primary-blue);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--primary-blue);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform var(--transition-speed);
+}
+
+.btn-teacher:hover {
+    background-color: var(--bg-hover);
+    transform: translateY(-2px);
+}
+
 .link-teacher {
     color: var(--primary-blue);
     font-weight: 600;

@@ -17,7 +17,7 @@ const LoginPage = () => {
     } = LoginPageLogic(); //[cite: 3]
     const [searchParams, setSearchParams] = useSearchParams();
     const isRegister = searchParams.get('mode') === 'register';
-    const [isTeacher, setIsTeacher] = useState(false);
+    const [isTeacher, setIsTeacher] = useState(searchParams.get('role') === 'teacher');
     const {
         username: registerUsername,
         setUsername: setRegisterUsername,
