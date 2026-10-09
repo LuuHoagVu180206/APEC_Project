@@ -81,11 +81,20 @@ const LandingPage = () => {
                                 </button>
                             </div>
                         </div>
+                    ) : user?.role === 'user' ? (
+                        <div className="teacher-account-menu">
+                            <Link className="nav-username" to="/profile">{user.username}</Link>
+                            <div className="teacher-account-dropdown">
+                                <Link to="/schools">{schoolActionLabel}</Link>
+                                <Link to="/student/classes">Join Class</Link>
+                                <button type="button" onClick={handleLogout}>
+                                    <LogOut size={16} /> Đăng xuất
+                                </button>
+                            </div>
+                        </div>
                     ) : user ? (
                         <>
                             {user.role === 'admin' && <Link className="btn-login" to="/admin">Quản trị hệ thống</Link>}
-                            {user.role === 'user' && <Link className="school-nav-link" to="/schools">{schoolActionLabel}</Link>}
-                            {user.role === 'user' && <Link className="class-nav-link" to="/student/classes">Join Class</Link>}
                             <Link className="nav-username" to="/profile">{user.username}</Link>
                             <button className="landing-logout" type="button" onClick={handleLogout} title="Đăng xuất" aria-label="Đăng xuất">
                                 <LogOut size={18} />
