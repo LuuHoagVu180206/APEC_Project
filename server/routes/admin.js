@@ -163,7 +163,7 @@ router.get('/schools/:schoolId', async (req, res) => {
                 .limit(20)
                 .lean(),
             TeacherClass.find({ school: schoolId })
-                .select('className classCode semester description teacherName teacher students questionSets createdAt')
+                .select('className classCode semester description teacherName teacher teachers students questionSets createdAt')
                 .populate('teacher', 'username fullName')
                 .populate('questionSets', 'title description')
                 .sort({ createdAt: -1 })
@@ -197,6 +197,10 @@ router.get('/schools/:schoolId', async (req, res) => {
             classes: classes.map((classItem) => ({
                 ...classItem,
                 studentCount: classItem.students.length,
+                teacherCount: new Set([
+                    classItem.teacher._id.toString(),
+                    ...classItem.teachers.map((teacherId) => teacherId.toString())
+                ]).size,
                 questionSetCount: classItem.questionSets.length,
                 assignmentCount: 0,
                 assignments: []

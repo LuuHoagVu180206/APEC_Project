@@ -14,6 +14,7 @@ export const StudentClassesPageLogic = () => {
     const navigate = useNavigate();
     const [currentUser] = useState(readCurrentUser);
     const [classCode, setClassCode] = useState('');
+    const [joinAsTeacher, setJoinAsTeacher] = useState(false);
     const [classes, setClasses] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [error, setError] = useState('');
@@ -29,7 +30,7 @@ export const StudentClassesPageLogic = () => {
     }, [currentUser]);
 
     useEffect(() => {
-        if (!currentUser || currentUser.role !== 'user') {
+        if (!currentUser || !['user', 'teacher'].includes(currentUser.role)) {
             navigate(currentUser ? '/' : '/login', { replace: true });
             return;
         }
@@ -60,10 +61,15 @@ export const StudentClassesPageLogic = () => {
         setIsJoining(true);
         try {
             const response = await axios.post('http://localhost:5000/api/classes/join-by-code', {
-                classCode: classCode.trim().toLowerCase()
+                classCode: classCode.trim().toLowerCase(),
+                joinAsTeacher: currentUser.role === 'teacher' && joinAsTeacher
             }, { headers: { token: currentUser.accessToken } });
             setNotice(response.data.message);
             setClassCode('');
+            if (response.data.joinAsTeacher) {
+                navigate(`/teacher/classes/${response.data.classId}`);
+                return;
+            }
             await loadClasses();
             await openClass(response.data.classId);
         } catch (requestError) {
@@ -78,6 +84,9 @@ export const StudentClassesPageLogic = () => {
     return {
         classCode,
         setClassCode,
+        joinAsTeacher,
+        setJoinAsTeacher,
+        isTeacher: currentUser?.role === 'teacher',
         classes,
         selectedClass,
         error,

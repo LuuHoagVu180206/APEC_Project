@@ -34,6 +34,9 @@ const TeacherDashboardPage = () => {
                         <button className="teacher-action-button" onClick={() => navigate('/studio')}>
                             <BookOpen size={19} /> Tạo bộ câu hỏi
                         </button>
+                        <button className="teacher-action-button" onClick={() => navigate('/student/classes')}>
+                            <School size={19} /> Tham gia lớp bằng mã
+                        </button>
                     </div>
                 </section>
 

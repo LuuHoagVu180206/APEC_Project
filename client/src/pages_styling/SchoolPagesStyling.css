@@ -250,6 +250,23 @@
     font: inherit;
 }
 
+.school-join-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    color: #334d47;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.school-join-role input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #276b5d;
+}
+
 .school-empty {
     padding: 24px 14px;
     color: #71817d;

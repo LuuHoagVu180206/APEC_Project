@@ -59,6 +59,11 @@ const TeacherClassPage = () => {
                 <section className="teacher-metrics" aria-label="Thống kê lớp">
                     <div className="teacher-metric">
                         <span className="teacher-metric-icon"><Users size={20} /></span>
+                        <span className="teacher-metric-label">Sĩ số giáo viên</span>
+                        <strong>{classInfo.teacherCount ?? 1}</strong>
+                    </div>
+                    <div className="teacher-metric">
+                        <span className="teacher-metric-icon"><Users size={20} /></span>
                         <span className="teacher-metric-label">Sĩ số học sinh</span>
                         <strong>{classInfo.studentCount ?? 0}</strong>
                     </div>

@@ -5,17 +5,18 @@ import '../pages_styling/SchoolPagesStyling.css';
 
 const StudentClassesPage = () => {
     const {
-        classCode, setClassCode, classes, selectedClass, error, notice,
+        classCode, setClassCode, joinAsTeacher, setJoinAsTeacher, isTeacher,
+        classes, selectedClass, error, notice,
         isLoading, isJoining, handleJoinByCode, openClass, closeClass, navigate
     } = StudentClassesPageLogic();
 
     return (
         <main className="school-page">
             <div className="school-page-inner">
-                <button className="school-back" onClick={() => navigate('/')}><ArrowLeft size={17} /> Landing</button>
+                <button className="school-back" onClick={() => navigate(isTeacher ? '/teacher/dashboard' : '/')}><ArrowLeft size={17} /> {isTeacher ? 'Dashboard giáo viên' : 'Landing'}</button>
                 <header className="school-page-header">
-                    <p className="school-eyebrow">Student</p>
-                    <h1>My Classes</h1>
+                    <p className="school-eyebrow">{isTeacher ? 'Teacher' : 'Student'}</p>
+                    <h1>{isTeacher ? 'Lớp đã tham gia' : 'My Classes'}</h1>
                     <p>Nhập mã lớp do giáo viên chia sẻ để tham gia lớp.</p>
                 </header>
 
@@ -34,6 +35,16 @@ const StudentClassesPage = () => {
                             {isJoining ? 'Đang tham gia...' : 'Join class'}
                         </button>
                     </form>
+                    {isTeacher && (
+                        <label className="school-join-role">
+                            <input
+                                type="checkbox"
+                                checked={joinAsTeacher}
+                                onChange={(event) => setJoinAsTeacher(event.target.checked)}
+                            />
+                            <span>Tham gia dưới vai trò giáo viên đồng quản lý (bỏ chọn để tham gia như học sinh)</span>
+                        </label>
+                    )}
                     {notice && <p className="school-success" role="status">{notice}</p>}
                     {error && <p className="school-error" role="alert">{error}</p>}
                 </section>
@@ -47,7 +58,7 @@ const StudentClassesPage = () => {
                                     <School size={18} />
                                     <div>
                                         <strong>{classItem.className}</strong>
-                                        <small>Mã {classItem.classCode} · {classItem.semester || 'Không ghi học kỳ'} · {classItem.teacher?.fullName || classItem.teacher?.username || classItem.teacherName}</small>
+                                        <small>Mã {classItem.classCode} · {classItem.semester || 'Không ghi học kỳ'} · {classItem.teacherCount} giáo viên · {classItem.teacher?.fullName || classItem.teacher?.username || classItem.teacherName}</small>
                                     </div>
                                     <span className="school-class-counts"><Users size={15} /> {classItem.studentCount} <BookOpen size={15} /> {classItem.questionSetCount} sets</span>
                                 </button>
@@ -65,6 +76,7 @@ const StudentClassesPage = () => {
                         <p>{selectedClass.description || 'Chưa có mô tả.'}</p>
                         <p>Giáo viên: {selectedClass.teacher?.fullName || selectedClass.teacher?.username || selectedClass.teacherName}</p>
                         <div className="school-stats-grid school-class-stats">
+                            <div className="school-stat"><Users size={19} /><span>Teachers</span><strong>{selectedClass.teacherCount}</strong></div>
                             <div className="school-stat"><Users size={19} /><span>Students</span><strong>{selectedClass.studentCount}</strong></div>
                             <div className="school-stat"><BookOpen size={19} /><span>Assignments</span><strong>{selectedClass.assignmentCount}</strong></div>
                             <div className="school-stat"><BookOpen size={19} /><span>Question sets</span><strong>{selectedClass.questionSetCount}</strong></div>

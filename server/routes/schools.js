@@ -9,6 +9,14 @@ const QuestionSet = require('../models/QuestionSet');
 const User = require('../models/User');
 const { verifyToken } = require('../verifyToken');
 
+const getTeacherCount = (classItem) => {
+    const primaryTeacherId = classItem.teacher._id || classItem.teacher;
+    return new Set([
+        primaryTeacherId.toString(),
+        ...classItem.teachers.map((teacherId) => teacherId.toString())
+    ]).size;
+};
+
 router.get('/search', async (req, res) => {
     const search = typeof req.query.q === 'string' ? req.query.q.trim() : '';
     const filter = search
@@ -160,11 +168,13 @@ router.get('/:schoolId/dashboard', requireMembership, async (req, res) => {
         const safeClasses = classes.map((classItem) => {
             const classData = classItem.toObject();
             delete classData.students;
+            delete classData.teachers;
             if (req.user.role === 'user') delete classData.questionSets;
             return {
                 ...classData,
                 questionSetCount: classItem.questionSets.length,
                 studentCount: classItem.students.length,
+                teacherCount: getTeacherCount(classItem),
                 assignmentCount: 0,
                 assignments: []
             };
@@ -369,11 +379,13 @@ router.get('/:schoolId/classes/:classId', requireMembership, async (req, res) =>
         const classData = classItem.toObject();
         const joined = classItem.students.some((studentId) => studentId.toString() === req.user.id);
         delete classData.students;
+        delete classData.teachers;
         if (req.user.role === 'user') delete classData.questionSets;
         res.status(200).json({
             ...classData,
             questionSetCount: classItem.questionSets.length,
             studentCount: classItem.students.length,
+            teacherCount: getTeacherCount(classItem),
             joined,
             assignmentCount: 0,
             assignments: []

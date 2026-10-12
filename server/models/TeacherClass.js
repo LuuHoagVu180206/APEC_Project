@@ -8,10 +8,23 @@ const TeacherClassSchema = new mongoose.Schema({
     classCode: { type: String, lowercase: true, match: /^[a-z]{8}$/, unique: true, sparse: true },
     teacherName: { type: String, required: true, trim: true },
     teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     school: { type: mongoose.Schema.Types.ObjectId, ref: 'School', default: null },
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     questionSets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'QuestionSet' }]
-}, { timestamps: true });
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+
+TeacherClassSchema.virtual('teacherCount').get(function () {
+    const primaryTeacherId = this.teacher._id || this.teacher;
+    return new Set([
+        primaryTeacherId.toString(),
+        ...this.teachers.map((teacherId) => teacherId.toString())
+    ]).size;
+});
 
 TeacherClassSchema.pre('validate', async function () {
     if (this.classCode) return;

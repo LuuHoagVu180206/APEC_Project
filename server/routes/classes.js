@@ -13,18 +13,28 @@ const requireTeacher = (req, res, next) => {
 };
 
 const requireStudent = (req, res, next) => {
-    if (req.user.role !== 'user') {
-        return res.status(403).json('Chỉ Student mới có thể tham gia lớp bằng mã!');
+    if (!['user', 'teacher'].includes(req.user.role)) {
+        return res.status(403).json('Chỉ Student hoặc Teacher mới có thể tham gia lớp bằng mã!');
     }
     next();
+};
+
+const getTeacherCount = (classDoc) => {
+    const primaryTeacherId = classDoc.teacher._id || classDoc.teacher;
+    return new Set([
+        primaryTeacherId.toString(),
+        ...classDoc.teachers.map((teacherId) => teacherId.toString())
+    ]).size;
 };
 
 const serializeStudentClass = (classDoc) => {
     const classData = classDoc.toObject();
     delete classData.students;
+    delete classData.teachers;
     delete classData.questionSets;
     return {
         ...classData,
+        teacherCount: getTeacherCount(classDoc),
         questionSetCount: classDoc.questionSets.length,
         assignmentCount: 0,
         assignments: []
@@ -55,6 +65,13 @@ router.post('/join-by-code', verifyToken, requireStudent, async (req, res) => {
     if (!/^[a-z]{8}$/.test(classCode)) {
         return res.status(400).json('Mã lớp phải gồm đúng 8 chữ cái a-z!');
     }
+    const joinAsTeacher = req.body?.joinAsTeacher === true;
+    if (req.body?.joinAsTeacher !== undefined && typeof req.body.joinAsTeacher !== 'boolean') {
+        return res.status(400).json('Vai trò tham gia lớp không hợp lệ!');
+    }
+    if (joinAsTeacher && req.user.role !== 'teacher') {
+        return res.status(403).json('Chỉ tài khoản giáo viên mới có thể tham gia lớp với quyền giáo viên!');
+    }
 
     try {
         const classDoc = await TeacherClass.findOne({ classCode });
@@ -65,17 +82,28 @@ router.post('/join-by-code', verifyToken, requireStudent, async (req, res) => {
             if (!membership) return res.status(403).json('Bạn cần tham gia School Community của lớp trước!');
         }
 
-        const alreadyJoined = classDoc.students.some((studentId) => studentId.toString() === req.user.id);
-        if (!alreadyJoined) {
-            await TeacherClass.updateOne(
-                { _id: classDoc._id, students: { $ne: req.user.id } },
-                { $addToSet: { students: req.user.id } }
-            );
+        const alreadyJoined = classDoc.teacher.toString() === req.user.id
+            || classDoc.teachers.some((teacherId) => teacherId.toString() === req.user.id)
+            || classDoc.students.some((studentId) => studentId.toString() === req.user.id);
+        if (alreadyJoined) return res.status(409).json('Bạn đã tham gia hoặc đang quản lý lớp này rồi!');
+
+        const update = joinAsTeacher
+            ? { $addToSet: { teachers: req.user.id } }
+            : { $addToSet: { students: req.user.id } };
+        const result = await TeacherClass.updateOne({
+            _id: classDoc._id,
+            teacher: { $ne: req.user.id },
+            teachers: { $ne: req.user.id },
+            students: { $ne: req.user.id }
+        }, update);
+        if (result.modifiedCount === 0) {
+            return res.status(409).json('Bạn đã tham gia hoặc đang quản lý lớp này rồi!');
         }
 
         res.status(200).json({
-            message: alreadyJoined ? 'Bạn đã tham gia lớp này rồi!' : 'Tham gia lớp thành công!',
-            classId: classDoc._id
+            message: joinAsTeacher ? 'Đã tham gia lớp với quyền giáo viên!' : 'Tham gia lớp thành công!',
+            classId: classDoc._id,
+            joinAsTeacher
         });
     } catch (err) {
         res.status(500).json('Không thể tham gia lớp bằng mã!');
@@ -105,13 +133,18 @@ router.use(verifyToken, requireTeacher);
 
 router.get('/mine', async (req, res) => {
     try {
-        const classes = await TeacherClass.find({ teacher: req.user.id })
-            .select('className semester description teacherName classCode school questionSets createdAt')
+        const classes = await TeacherClass.find({
+            $or: [{ teacher: req.user.id }, { teachers: req.user.id }]
+        })
+            .select('className semester description teacherName teacher teachers classCode school questionSets createdAt')
             .sort({ createdAt: -1 });
         await Promise.all(classes.map(async (classDoc) => {
             if (!classDoc.classCode) await classDoc.save();
         }));
-        res.status(200).json(classes);
+        res.status(200).json(classes.map((classDoc) => ({
+            ...classDoc.toObject(),
+            teacherCount: getTeacherCount(classDoc)
+        })));
     } catch (err) {
         res.status(500).json('Không thể tải danh sách lớp học!');
     }
@@ -148,16 +181,21 @@ router.get('/:id', async (req, res) => {
     }
 
     try {
-        const classDoc = await TeacherClass.findOne({ _id: req.params.id, teacher: req.user.id })
+        const classDoc = await TeacherClass.findOne({
+            _id: req.params.id,
+            $or: [{ teacher: req.user.id }, { teachers: req.user.id }]
+        })
             .populate('questionSets', 'title description questions');
         if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
         if (!classDoc.classCode) await classDoc.save();
 
         const classData = classDoc.toObject();
         const { students, ...details } = classData;
+        delete details.teachers;
         res.status(200).json({
             ...details,
             studentCount: students.length,
+            teacherCount: getTeacherCount(classDoc),
             questionSetCount: classDoc.questionSets.length,
             assignmentCount: 0,
             assignments: []
@@ -174,7 +212,10 @@ router.post('/:id/question-sets', async (req, res) => {
     }
 
     try {
-        const classDoc = await TeacherClass.findOne({ _id: req.params.id, teacher: req.user.id });
+        const classDoc = await TeacherClass.findOne({
+            _id: req.params.id,
+            $or: [{ teacher: req.user.id }, { teachers: req.user.id }]
+        });
         if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
 
         const questionSet = await QuestionSet.findOne({ _id: questionSetId, owner: req.user.id });
