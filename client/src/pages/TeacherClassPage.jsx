@@ -6,6 +6,16 @@ import '../pages_styling/TeacherPagesStyling.css';
 const TeacherClassPage = () => {
     const {
         classInfo,
+        isTeacherAccount,
+        studentList,
+        assistantList,
+        studentSearch,
+        setStudentSearch,
+        assistantSearch,
+        setAssistantSearch,
+        loadMembers,
+        handlePromoteAssistant,
+        handleDemoteAssistant,
         availableSets,
         selectedSetId,
         setSelectedSetId,
@@ -27,8 +37,8 @@ const TeacherClassPage = () => {
         return (
             <main className="teacher-page">
                 <div className="teacher-page-inner">
-                    <button className="teacher-back-button" onClick={() => navigate('/teacher/dashboard')}>
-                        <ArrowLeft size={18} /> Dashboard giáo viên
+                    <button className="teacher-back-button" onClick={() => navigate(isTeacherAccount ? '/teacher/dashboard' : '/student/classes')}>
+                        <ArrowLeft size={18} /> {isTeacherAccount ? 'Dashboard giáo viên' : 'Lớp đã tham gia'}
                     </button>
                     <p className="teacher-error" role="alert">{error || 'Không tìm thấy lớp học.'}</p>
                 </div>
@@ -41,14 +51,15 @@ const TeacherClassPage = () => {
     return (
         <main className="teacher-page">
             <div className="teacher-page-inner">
-                <button className="teacher-back-button" onClick={() => navigate('/teacher/dashboard')}>
-                    <ArrowLeft size={18} /> Dashboard giáo viên
+                <button className="teacher-back-button" onClick={() => navigate(isTeacherAccount ? '/teacher/dashboard' : '/student/classes')}>
+                    <ArrowLeft size={18} /> {isTeacherAccount ? 'Dashboard giáo viên' : 'Lớp đã tham gia'}
                 </button>
                 <header className="teacher-page-header teacher-class-header">
                     <div>
                         <p className="teacher-eyebrow">{classInfo.semester || 'Lớp học'}</p>
                         <h1>{classInfo.className}</h1>
-                        <p className="teacher-subtitle">Giáo viên: {classInfo.teacherName}</p>
+                        <p className="teacher-subtitle">Giáo viên chính: {classInfo.teacherName}</p>
+                        {!classInfo.isPrimaryTeacher && <p className="teacher-subtitle">Bạn là trợ giảng của lớp.</p>}
                         <p className="teacher-subtitle">Mã lớp: <strong>{classInfo.classCode}</strong></p>
                         {classInfo.description && <p className="teacher-description">{classInfo.description}</p>}
                     </div>
@@ -86,6 +97,110 @@ const TeacherClassPage = () => {
                         <strong>{classInfo.questionSetCount ?? questionSets.length}</strong>
                     </button>
                 </section>
+
+                {classInfo.isPrimaryTeacher && (
+                    <section className="teacher-section teacher-members-section">
+                        <div className="teacher-section-heading">
+                            <div>
+                                <p className="teacher-eyebrow">Quản lý thành viên</p>
+                                <h2>Học sinh ({studentList.pagination.totalItems})</h2>
+                            </div>
+                        </div>
+                        <form
+                            className="teacher-member-search"
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                loadMembers('students', 1, studentSearch);
+                            }}
+                        >
+                            <input
+                                aria-label="Tìm học sinh"
+                                value={studentSearch}
+                                onChange={(event) => setStudentSearch(event.target.value)}
+                                placeholder="Tìm theo họ tên hoặc tên đăng nhập"
+                            />
+                            <button className="teacher-action-button" type="submit">Tìm</button>
+                        </form>
+                        {studentList.data.length ? (
+                            <div className="teacher-member-list">
+                                {studentList.data.map((student) => (
+                                    <div className="teacher-member-row" key={student._id}>
+                                        <span><strong>{student.fullName || student.username}</strong><small>{student.username}</small></span>
+                                        <button
+                                            className="teacher-action-button"
+                                            onClick={() => handlePromoteAssistant(student._id)}
+                                        >
+                                            Thêm làm trợ giảng
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : <p className="teacher-empty-state">Không tìm thấy học sinh.</p>}
+                        <div className="teacher-member-pagination">
+                            <button
+                                className="teacher-action-button"
+                                disabled={studentList.pagination.page <= 1}
+                                onClick={() => loadMembers('students', studentList.pagination.page - 1, studentSearch)}
+                            >Trước</button>
+                            <span>Trang {studentList.pagination.page} / {studentList.pagination.totalPages || 1}</span>
+                            <button
+                                className="teacher-action-button"
+                                disabled={studentList.pagination.page >= studentList.pagination.totalPages}
+                                onClick={() => loadMembers('students', studentList.pagination.page + 1, studentSearch)}
+                            >Tiếp</button>
+                        </div>
+
+                        <div className="teacher-section-heading teacher-assistant-heading">
+                            <div>
+                                <p className="teacher-eyebrow">Đồng quản lý lớp</p>
+                                <h2>Trợ giảng ({assistantList.pagination.totalItems})</h2>
+                            </div>
+                        </div>
+                        <form
+                            className="teacher-member-search"
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                loadMembers('teachers', 1, assistantSearch);
+                            }}
+                        >
+                            <input
+                                aria-label="Tìm trợ giảng"
+                                value={assistantSearch}
+                                onChange={(event) => setAssistantSearch(event.target.value)}
+                                placeholder="Tìm theo họ tên hoặc tên đăng nhập"
+                            />
+                            <button className="teacher-action-button" type="submit">Tìm</button>
+                        </form>
+                        {assistantList.data.length ? (
+                            <div className="teacher-member-list">
+                                {assistantList.data.map((assistant) => (
+                                    <div className="teacher-member-row" key={assistant._id}>
+                                        <span><strong>{assistant.fullName || assistant.username}</strong><small>{assistant.username}</small></span>
+                                        <button
+                                            className="teacher-action-button teacher-action-danger"
+                                            onClick={() => handleDemoteAssistant(assistant._id)}
+                                        >
+                                            Chuyển về học sinh
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : <p className="teacher-empty-state">Lớp chưa có trợ giảng.</p>}
+                        <div className="teacher-member-pagination">
+                            <button
+                                className="teacher-action-button"
+                                disabled={assistantList.pagination.page <= 1}
+                                onClick={() => loadMembers('teachers', assistantList.pagination.page - 1, assistantSearch)}
+                            >Trước</button>
+                            <span>Trang {assistantList.pagination.page} / {assistantList.pagination.totalPages || 1}</span>
+                            <button
+                                className="teacher-action-button"
+                                disabled={assistantList.pagination.page >= assistantList.pagination.totalPages}
+                                onClick={() => loadMembers('teachers', assistantList.pagination.page + 1, assistantSearch)}
+                            >Tiếp</button>
+                        </div>
+                    </section>
+                )}
 
                 {showAssignments && (
                     <section className="teacher-section">

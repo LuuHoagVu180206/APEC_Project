@@ -15,6 +15,10 @@ export const TeacherClassPageLogic = () => {
     const { id } = useParams();
     const [currentUser] = useState(readCurrentUser);
     const [classInfo, setClassInfo] = useState(null);
+    const [studentList, setStudentList] = useState({ data: [], pagination: { page: 1, totalPages: 0, totalItems: 0 } });
+    const [assistantList, setAssistantList] = useState({ data: [], pagination: { page: 1, totalPages: 0, totalItems: 0 } });
+    const [studentSearch, setStudentSearch] = useState('');
+    const [assistantSearch, setAssistantSearch] = useState('');
     const [mySets, setMySets] = useState([]);
     const [selectedSetId, setSelectedSetId] = useState('');
     const [showQuestionSets, setShowQuestionSets] = useState(false);
@@ -29,25 +33,40 @@ export const TeacherClassPageLogic = () => {
         setClassInfo(response.data);
     }, [currentUser, id]);
 
+    const loadMembers = useCallback(async (role, page = 1, search = '') => {
+        const response = await axios.get(`http://localhost:5000/api/classes/${id}/members`, {
+            headers: { token: currentUser.accessToken },
+            params: { role, page, limit: 20, search }
+        });
+        if (role === 'students') setStudentList(response.data);
+        else setAssistantList(response.data);
+    }, [currentUser, id]);
+
     useEffect(() => {
-        if (!currentUser || currentUser.role !== 'teacher') {
+        if (!currentUser || !['teacher', 'user'].includes(currentUser.role)) {
             navigate(currentUser ? '/' : '/login', { replace: true });
             return;
         }
 
         let isActive = true;
-        Promise.all([
-            axios.get(`http://localhost:5000/api/classes/${id}`, {
+        const loadPage = async () => {
+            const classResponse = await axios.get(`http://localhost:5000/api/classes/${id}`, {
                 headers: { token: currentUser.accessToken }
-            }),
-            axios.get('http://localhost:5000/api/sets/my-sets', {
+            });
+            const setsResponse = await axios.get('http://localhost:5000/api/sets/my-sets', {
                 headers: { token: currentUser.accessToken }
-            })
-        ]).then(([classResponse, setsResponse]) => {
+            });
             if (!isActive) return;
             setClassInfo(classResponse.data);
             setMySets(setsResponse.data);
-        }).catch((requestError) => {
+            if (classResponse.data.isPrimaryTeacher) {
+                await Promise.all([
+                    loadMembers('students'),
+                    loadMembers('teachers')
+                ]);
+            }
+        };
+        loadPage().catch((requestError) => {
             if (isActive) {
                 setError(typeof requestError.response?.data === 'string'
                     ? requestError.response.data
@@ -58,7 +77,7 @@ export const TeacherClassPageLogic = () => {
         });
 
         return () => { isActive = false; };
-    }, [currentUser, id, navigate]);
+    }, [currentUser, id, loadMembers, navigate]);
 
     const availableSets = mySets.filter((set) =>
         !classInfo?.questionSets?.some((classSet) => classSet._id === set._id)
@@ -80,8 +99,54 @@ export const TeacherClassPageLogic = () => {
         }
     };
 
+    const handlePromoteAssistant = async (userId) => {
+        setError('');
+        try {
+            await axios.post(`http://localhost:5000/api/classes/${id}/assistants/${userId}`, {}, {
+                headers: { token: currentUser.accessToken }
+            });
+            await Promise.all([
+                loadClass(),
+                loadMembers('students', studentList.pagination.page, studentSearch),
+                loadMembers('teachers', assistantList.pagination.page, assistantSearch)
+            ]);
+        } catch (requestError) {
+            setError(typeof requestError.response?.data === 'string'
+                ? requestError.response.data
+                : 'Không thể thêm trợ giảng.');
+        }
+    };
+
+    const handleDemoteAssistant = async (userId) => {
+        setError('');
+        try {
+            await axios.delete(`http://localhost:5000/api/classes/${id}/assistants/${userId}`, {
+                headers: { token: currentUser.accessToken }
+            });
+            await Promise.all([
+                loadClass(),
+                loadMembers('students', studentList.pagination.page, studentSearch),
+                loadMembers('teachers', assistantList.pagination.page, assistantSearch)
+            ]);
+        } catch (requestError) {
+            setError(typeof requestError.response?.data === 'string'
+                ? requestError.response.data
+                : 'Không thể chuyển trợ giảng về vai trò học sinh.');
+        }
+    };
+
     return {
         classInfo,
+        isTeacherAccount: currentUser?.role === 'teacher',
+        studentList,
+        assistantList,
+        studentSearch,
+        setStudentSearch,
+        assistantSearch,
+        setAssistantSearch,
+        loadMembers,
+        handlePromoteAssistant,
+        handleDemoteAssistant,
         availableSets,
         selectedSetId,
         setSelectedSetId,

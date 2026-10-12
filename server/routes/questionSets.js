@@ -3,6 +3,7 @@ const QuestionSet = require('../models/QuestionSet');
 const Question = require('../models/Question');
 const User = require('../models/User');
 const TeacherClass = require('../models/TeacherClass');
+const SchoolMember = require('../models/SchoolMember');
 const jwt = require('jsonwebtoken');
 const excelJS = require('exceljs');
 const { verifyToken } = require('../verifyToken');
@@ -26,7 +27,12 @@ const canViewClassQuestionSet = async (req, res, questionSetId) => {
     }
 
     const currentUser = await User.findById(tokenUser.id).select('role');
-    if (!currentUser || currentUser.role === 'user') {
+    const assistantClass = currentUser?.role === 'user'
+        ? await TeacherClass.findOne({ questionSets: questionSetId, teachers: tokenUser.id }).select('school')
+        : null;
+    const isClassAssistant = Boolean(assistantClass)
+        && (!assistantClass.school || await SchoolMember.exists({ school: assistantClass.school, user: tokenUser.id }));
+    if (!currentUser || (currentUser.role === 'user' && !isClassAssistant)) {
         res.status(403).json('Student chỉ được xem số lượng question set trong lớp!');
         return false;
     }

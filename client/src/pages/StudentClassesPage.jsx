@@ -54,11 +54,17 @@ const StudentClassesPage = () => {
                     {isLoading ? <p className="school-empty">Đang tải lớp...</p> : classes.length === 0 ? <p className="school-empty">Bạn chưa tham gia lớp nào.</p> : (
                         <div className="school-resource-list">
                             {classes.map((classItem) => (
-                                <button className="school-resource-row school-resource-button" key={classItem._id} onClick={() => openClass(classItem._id)}>
+                                <button
+                                    className="school-resource-row school-resource-button"
+                                    key={classItem._id}
+                                    onClick={() => classItem.isAssistant
+                                        ? navigate(`/teacher/classes/${classItem._id}`)
+                                        : openClass(classItem._id)}
+                                >
                                     <School size={18} />
                                     <div>
                                         <strong>{classItem.className}</strong>
-                                        <small>Mã {classItem.classCode} · {classItem.semester || 'Không ghi học kỳ'} · {classItem.teacherCount} giáo viên · {classItem.teacher?.fullName || classItem.teacher?.username || classItem.teacherName}</small>
+                                        <small>Mã {classItem.classCode} · {classItem.semester || 'Không ghi học kỳ'} · {classItem.teacherCount} giáo viên · {classItem.teacher?.fullName || classItem.teacher?.username || classItem.teacherName}{classItem.isAssistant ? ' · Trợ giảng' : ''}</small>
                                     </div>
                                     <span className="school-class-counts"><Users size={15} /> {classItem.studentCount} <BookOpen size={15} /> {classItem.questionSetCount} sets</span>
                                 </button>

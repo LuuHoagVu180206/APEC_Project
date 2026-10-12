@@ -41,10 +41,48 @@ const serializeStudentClass = (classDoc) => {
     };
 };
 
+const requireClassTeacher = async (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json('Mã lớp không hợp lệ!');
+    }
+    try {
+        const classDoc = await TeacherClass.findOne({
+            _id: req.params.id,
+            $or: [{ teacher: req.user.id }, { teachers: req.user.id }]
+        }).select('_id school');
+        if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
+        if (req.user.role === 'user' && classDoc.school) {
+            const membership = await SchoolMember.exists({ school: classDoc.school, user: req.user.id });
+            if (!membership) return res.status(403).json('Bạn không còn là thành viên của School Community này!');
+        }
+        next();
+    } catch (err) {
+        res.status(500).json('Không thể xác thực quyền truy cập lớp!');
+    }
+};
+
+const requirePrimaryTeacher = async (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json('Mã lớp không hợp lệ!');
+    }
+    try {
+        const classDoc = await TeacherClass.findOne({
+            _id: req.params.id,
+            teacher: req.user.id
+        }).select('_id');
+        if (!classDoc) return res.status(403).json('Chỉ giáo viên chính mới có thể quản lý trợ giảng!');
+        next();
+    } catch (err) {
+        res.status(500).json('Không thể xác thực quyền giáo viên chính!');
+    }
+};
+
 router.get('/student/mine', verifyToken, requireStudent, async (req, res) => {
     try {
         const [classes, memberships] = await Promise.all([
-            TeacherClass.find({ students: req.user.id }).populate('teacher', 'username fullName'),
+            TeacherClass.find({
+                $or: [{ students: req.user.id }, { teachers: req.user.id }]
+            }).populate('teacher', 'username fullName'),
             SchoolMember.find({ user: req.user.id }).select('school')
         ]);
         const memberSchoolIds = new Set(memberships.map((membership) => membership.school.toString()));
@@ -54,7 +92,10 @@ router.get('/student/mine', verifyToken, requireStudent, async (req, res) => {
         await Promise.all(visibleClasses.map(async (classDoc) => {
             if (!classDoc.classCode) await classDoc.save();
         }));
-        res.status(200).json(visibleClasses.map(serializeStudentClass));
+        res.status(200).json(visibleClasses.map((classDoc) => ({
+            ...serializeStudentClass(classDoc),
+            isAssistant: classDoc.teachers.some((teacherId) => teacherId.toString() === req.user.id)
+        })));
     } catch (err) {
         res.status(500).json('Không thể tải danh sách lớp của bạn!');
     }
@@ -115,7 +156,10 @@ router.get('/student/:id', verifyToken, requireStudent, async (req, res) => {
         return res.status(400).json('Mã lớp không hợp lệ!');
     }
     try {
-        const classDoc = await TeacherClass.findOne({ _id: req.params.id, students: req.user.id })
+        const classDoc = await TeacherClass.findOne({
+            _id: req.params.id,
+            $or: [{ students: req.user.id }, { teachers: req.user.id }]
+        })
             .populate('teacher', 'username fullName');
         if (!classDoc) return res.status(404).json('Không tìm thấy lớp bạn đã tham gia!');
         if (classDoc.school) {
@@ -123,13 +167,16 @@ router.get('/student/:id', verifyToken, requireStudent, async (req, res) => {
             if (!membership) return res.status(403).json('Bạn không còn là thành viên của School Community này!');
         }
         if (!classDoc.classCode) await classDoc.save();
-        res.status(200).json(serializeStudentClass(classDoc));
+        res.status(200).json({
+            ...serializeStudentClass(classDoc),
+            isAssistant: classDoc.teachers.some((teacherId) => teacherId.toString() === req.user.id)
+        });
     } catch (err) {
         res.status(500).json('Không thể tải lớp học!');
     }
 });
 
-router.use(verifyToken, requireTeacher);
+router.use(verifyToken);
 
 router.get('/mine', async (req, res) => {
     try {
@@ -143,6 +190,7 @@ router.get('/mine', async (req, res) => {
         }));
         res.status(200).json(classes.map((classDoc) => ({
             ...classDoc.toObject(),
+            isPrimaryTeacher: classDoc.teacher.toString() === req.user.id,
             teacherCount: getTeacherCount(classDoc)
         })));
     } catch (err) {
@@ -150,7 +198,7 @@ router.get('/mine', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', requireTeacher, async (req, res) => {
     const { className, semester = '', description = '', teacherName } = req.body;
     const semesterPattern = /^Kỳ\s+\d+\s+20\d{2}-20\d{2}$/;
 
@@ -175,7 +223,124 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id/members', requirePrimaryTeacher, async (req, res) => {
+    const memberRole = req.query.role;
+    if (!['students', 'teachers'].includes(memberRole)) {
+        return res.status(400).json('Loại thành viên không hợp lệ!');
+    }
+    const requestedPage = Number.parseInt(req.query.page, 10);
+    const requestedLimit = Number.parseInt(req.query.limit, 10);
+    const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+    const limit = Number.isInteger(requestedLimit) && requestedLimit > 0
+        ? Math.min(requestedLimit, 50)
+        : 20;
+    const search = typeof req.query.search === 'string'
+        ? req.query.search.trim().slice(0, 80)
+        : '';
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const userFilter = escapedSearch
+        ? { $or: [
+            { 'user.username': { $regex: `^${escapedSearch}`, $options: 'i' } },
+            { 'user.fullName': { $regex: `^${escapedSearch}`, $options: 'i' } }
+        ] }
+        : null;
+
+    try {
+        const pipeline = [
+            { $match: { _id: new mongoose.Types.ObjectId(req.params.id) } },
+            { $project: { memberIds: `$${memberRole}` } },
+            { $unwind: '$memberIds' },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'memberIds',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            { $unwind: '$user' },
+            ...(userFilter ? [{ $match: userFilter }] : []),
+            {
+                $facet: {
+                    data: [
+                        { $sort: { 'user.fullName': 1, 'user.username': 1, 'user._id': 1 } },
+                        { $skip: (page - 1) * limit },
+                        { $limit: limit },
+                        {
+                            $project: {
+                                _id: '$user._id',
+                                username: '$user.username',
+                                fullName: '$user.fullName'
+                            }
+                        }
+                    ],
+                    metadata: [{ $count: 'totalItems' }]
+                }
+            }
+        ];
+        const [result] = await TeacherClass.aggregate(pipeline);
+        const totalItems = result?.metadata[0]?.totalItems || 0;
+        res.status(200).json({
+            data: result?.data || [],
+            pagination: {
+                page,
+                limit,
+                totalItems,
+                totalPages: Math.ceil(totalItems / limit)
+            }
+        });
+    } catch (err) {
+        res.status(500).json('Không thể tải danh sách thành viên lớp!');
+    }
+});
+
+router.post('/:id/assistants/:userId', requirePrimaryTeacher, async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
+        return res.status(400).json('Mã người dùng không hợp lệ!');
+    }
+    try {
+        const result = await TeacherClass.updateOne({
+            _id: req.params.id,
+            teacher: req.user.id,
+            students: req.params.userId,
+            teachers: { $ne: req.params.userId }
+        }, {
+            $pull: { students: req.params.userId },
+            $addToSet: { teachers: req.params.userId }
+        });
+        if (result.modifiedCount === 0) {
+            return res.status(409).json('Người dùng không còn là học sinh của lớp hoặc đã là trợ giảng!');
+        }
+        res.status(200).json({ message: 'Đã thêm trợ giảng cho lớp!' });
+    } catch (err) {
+        res.status(500).json('Không thể thêm trợ giảng!');
+    }
+});
+
+router.delete('/:id/assistants/:userId', requirePrimaryTeacher, async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
+        return res.status(400).json('Mã người dùng không hợp lệ!');
+    }
+    try {
+        const result = await TeacherClass.updateOne({
+            _id: req.params.id,
+            teacher: req.user.id,
+            teachers: req.params.userId,
+            students: { $ne: req.params.userId }
+        }, {
+            $pull: { teachers: req.params.userId },
+            $addToSet: { students: req.params.userId }
+        });
+        if (result.modifiedCount === 0) {
+            return res.status(409).json('Người dùng không còn là trợ giảng của lớp!');
+        }
+        res.status(200).json({ message: 'Đã chuyển trợ giảng về vai trò học sinh!' });
+    } catch (err) {
+        res.status(500).json('Không thể phế truất trợ giảng!');
+    }
+});
+
+router.get('/:id', requireClassTeacher, async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
         return res.status(400).json('Mã lớp không hợp lệ!');
     }
@@ -194,6 +359,7 @@ router.get('/:id', async (req, res) => {
         delete details.teachers;
         res.status(200).json({
             ...details,
+            isPrimaryTeacher: classDoc.teacher.toString() === req.user.id,
             studentCount: students.length,
             teacherCount: getTeacherCount(classDoc),
             questionSetCount: classDoc.questionSets.length,
@@ -205,7 +371,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.post('/:id/question-sets', async (req, res) => {
+router.post('/:id/question-sets', requireClassTeacher, async (req, res) => {
     const { questionSetId } = req.body;
     if (!mongoose.Types.ObjectId.isValid(req.params.id) || !mongoose.Types.ObjectId.isValid(questionSetId)) {
         return res.status(400).json('Mã lớp hoặc bộ câu hỏi không hợp lệ!');
