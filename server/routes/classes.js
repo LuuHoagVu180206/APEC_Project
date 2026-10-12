@@ -13,8 +13,8 @@ const requireTeacher = (req, res, next) => {
 };
 
 const requireStudent = (req, res, next) => {
-    if (!['user', 'teacher'].includes(req.user.role)) {
-        return res.status(403).json('Chỉ Student hoặc Teacher mới có thể tham gia lớp bằng mã!');
+    if (!['user', 'teacher', 'admin'].includes(req.user.role)) {
+        return res.status(403).json('Chỉ Student, Teacher hoặc Admin mới có thể tham gia lớp bằng mã!');
     }
     next();
 };

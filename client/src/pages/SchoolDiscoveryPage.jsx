@@ -8,6 +8,7 @@ const SchoolDiscoveryPage = () => {
         currentUser, schools, memberships, searchTerm, setSearchTerm, selectedSchool, setSelectedSchool,
         joinData, setJoinData, error, isLoading, isJoining, membershipIds, handleSearch, startJoin, handleJoin, navigate
     } = SchoolDiscoveryPageLogic();
+    const isStudentAccount = ['user', 'admin'].includes(currentUser?.role);
     const roleLabel = currentUser?.role === 'user' ? 'Student' : currentUser?.role === 'teacher' ? 'Teacher' : 'Admin';
 
     return (
@@ -59,7 +60,7 @@ const SchoolDiscoveryPage = () => {
                                             <small>{school.abbreviation}{school.location ? ` · ${school.location}` : ''}</small>
                                             {school.description && <p>{school.description}</p>}
                                         </div>
-                                        {isMember ? <button className="school-button" onClick={() => navigate(`/schools/${school._id}`)}>Mở community</button> : !['user', 'teacher'].includes(currentUser?.role) ? null : (
+                                        {isMember ? <button className="school-button" onClick={() => navigate(`/schools/${school._id}`)}>Mở community</button> : !['user', 'teacher', 'admin'].includes(currentUser?.role) ? null : (
                                             <button className="school-button school-button-primary" onClick={() => startJoin(school)}>Tham gia</button>
                                         )}
                                     </article>
@@ -81,7 +82,7 @@ const SchoolDiscoveryPage = () => {
                             {error && <p className="school-error" role="alert">{error}</p>}
                             <label className="school-field"><span>Họ tên</span><input required value={joinData.fullName} onChange={(event) => setJoinData({ ...joinData, fullName: event.target.value })} /></label>
                             <label className="school-field"><span>Role trong account</span><input value={roleLabel} readOnly /></label>
-                            {currentUser?.role === 'user' ? (
+                            {isStudentAccount ? (
                                 <label className="school-field"><span>Lớp hiện tại</span><input required value={joinData.className} onChange={(event) => setJoinData({ ...joinData, className: event.target.value })} placeholder="Ví dụ: 10A1" /></label>
                             ) : (
                                 <label className="school-field"><span>Khoa/bộ môn hoặc lớp phụ trách</span><textarea required rows={3} value={joinData.teachingInfo} onChange={(event) => setJoinData({ ...joinData, teachingInfo: event.target.value })} /></label>

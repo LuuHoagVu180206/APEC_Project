@@ -140,11 +140,11 @@ const SchoolDashboardPage = () => {
                             <p>Giáo viên: {selectedClass.teacher?.fullName || selectedClass.teacher?.username || selectedClass.teacherName}</p>
                             <p>Mã lớp: <strong>{selectedClass.classCode}</strong></p>
                             <p>{selectedClass.studentCount} students · {selectedClass.assignmentCount} assignments</p>
-                            {currentUser?.role === 'user' && !selectedClass.joined && <button className="school-button school-button-primary" onClick={joinClass}>Join class</button>}
+                            {['user', 'admin'].includes(currentUser?.role) && !selectedClass.joined && <button className="school-button school-button-primary" onClick={joinClass}>Join class</button>}
                             <h4>Assignments ({selectedClass.assignmentCount ?? 0})</h4>
                             {selectedClass.assignments?.length ? selectedClass.assignments.map((assignment) => <p key={assignment._id}>{assignment.title}</p>) : <p className="school-empty">Chưa có assignment trong lớp.</p>}
                             <h4>Question sets ({selectedClass.questionSetCount ?? selectedClass.questionSets?.length ?? 0})</h4>
-                            {currentUser?.role === 'user' ? (
+                            {['user', 'admin'].includes(currentUser?.role) ? (
                                 <p className="school-empty">Student chỉ xem được tổng số question set trong lớp.</p>
                             ) : selectedClass.questionSets?.length ? selectedClass.questionSets.map((set) => (
                                 <Link className="school-class-set" key={set._id} to={`/set/${set._id}`}>{set.title}</Link>

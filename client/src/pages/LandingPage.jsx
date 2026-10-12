@@ -81,10 +81,11 @@ const LandingPage = () => {
                                 </button>
                             </div>
                         </div>
-                    ) : user?.role === 'user' ? (
+                    ) : user?.role === 'user' || user?.role === 'admin' ? (
                         <div className="teacher-account-menu">
                             <Link className="nav-username" to="/profile">{user.username}</Link>
                             <div className="teacher-account-dropdown">
+                                {user.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
                                 <Link to="/schools">{schoolActionLabel}</Link>
                                 <Link to="/student/classes">Join Class</Link>
                                 <button type="button" onClick={handleLogout}>

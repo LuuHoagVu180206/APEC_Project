@@ -56,13 +56,13 @@ router.post('/:schoolId/join', async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.schoolId)) {
         return res.status(400).json('Mã trường không hợp lệ!');
     }
-    if (req.user.role === 'admin' || !['user', 'teacher'].includes(req.user.role)) {
+    if (!['user', 'teacher', 'admin'].includes(req.user.role)) {
         return res.status(403).json('Tài khoản này không thể tham gia School Community!');
     }
     if (typeof fullName !== 'string' || !fullName.trim()) {
         return res.status(400).json('Vui lòng nhập họ tên!');
     }
-    if (req.user.role === 'user' && (typeof className !== 'string' || !className.trim())) {
+    if (['user', 'admin'].includes(req.user.role) && (typeof className !== 'string' || !className.trim())) {
         return res.status(400).json('Student cần nhập lớp hiện tại!');
     }
     if (req.user.role === 'teacher' && (typeof teachingInfo !== 'string' || !teachingInfo.trim())) {
@@ -81,7 +81,7 @@ router.post('/:schoolId/join', async (req, res) => {
             user: req.user.id,
             fullName: fullName.trim(),
             globalRole: req.user.role,
-            className: req.user.role === 'user' ? className.trim() : '',
+            className: ['user', 'admin'].includes(req.user.role) ? className.trim() : '',
             teachingInfo: req.user.role === 'teacher' ? teachingInfo.trim() : '',
             status: 'pending'
         });
@@ -91,7 +91,7 @@ router.post('/:schoolId/join', async (req, res) => {
                 school: school._id,
                 user: req.user.id,
                 fullName: fullName.trim(),
-                className: req.user.role === 'user' ? className.trim() : '',
+                className: ['user', 'admin'].includes(req.user.role) ? className.trim() : '',
                 teachingInfo: req.user.role === 'teacher' ? teachingInfo.trim() : '',
                 communityRole: 'member'
             });
@@ -169,7 +169,7 @@ router.get('/:schoolId/dashboard', requireMembership, async (req, res) => {
             const classData = classItem.toObject();
             delete classData.students;
             delete classData.teachers;
-            if (req.user.role === 'user') delete classData.questionSets;
+            if (['user', 'admin'].includes(req.user.role)) delete classData.questionSets;
             return {
                 ...classData,
                 questionSetCount: classItem.questionSets.length,
@@ -352,7 +352,7 @@ router.delete('/:schoolId/classes/:classId', requireMembership, requireManager, 
 });
 
 router.post('/:schoolId/classes/:classId/join', requireMembership, async (req, res) => {
-    if (req.user.role !== 'user') {
+    if (!['user', 'admin'].includes(req.user.role)) {
         return res.status(403).json('Chỉ Student mới có thể tham gia lớp!');
     }
     try {
@@ -372,7 +372,7 @@ router.get('/:schoolId/classes/:classId', requireMembership, async (req, res) =>
     try {
         let classQuery = TeacherClass.findOne({ _id: req.params.classId, school: req.params.schoolId })
             .populate('teacher', 'username fullName');
-        if (req.user.role !== 'user') classQuery = classQuery.populate('questionSets', 'title description');
+        if (!['user', 'admin'].includes(req.user.role)) classQuery = classQuery.populate('questionSets', 'title description');
         const classItem = await classQuery;
         if (!classItem) return res.status(404).json('Không tìm thấy lớp!');
         if (!classItem.classCode) await classItem.save();
@@ -380,7 +380,7 @@ router.get('/:schoolId/classes/:classId', requireMembership, async (req, res) =>
         const joined = classItem.students.some((studentId) => studentId.toString() === req.user.id);
         delete classData.students;
         delete classData.teachers;
-        if (req.user.role === 'user') delete classData.questionSets;
+        if (['user', 'admin'].includes(req.user.role)) delete classData.questionSets;
         res.status(200).json({
             ...classData,
             questionSetCount: classItem.questionSets.length,

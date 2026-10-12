@@ -30,7 +30,7 @@ export const StudentClassesPageLogic = () => {
     }, [currentUser]);
 
     useEffect(() => {
-        if (!currentUser || !['user', 'teacher'].includes(currentUser.role)) {
+        if (!currentUser || !['user', 'teacher', 'admin'].includes(currentUser.role)) {
             navigate(currentUser ? '/' : '/login', { replace: true });
             return;
         }
