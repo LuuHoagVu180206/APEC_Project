@@ -10,10 +10,11 @@ const User = require('../models/User');
 const { verifyToken } = require('../verifyToken');
 
 const getTeacherCount = (classItem) => {
-    const primaryTeacherId = classItem.teacher._id || classItem.teacher;
+    const primaryTeacherId = classItem.teacher?._id || classItem.teacher;
+    const coTeachers = Array.isArray(classItem.teachers) ? classItem.teachers : [];
     return new Set([
-        primaryTeacherId.toString(),
-        ...classItem.teachers.map((teacherId) => teacherId.toString())
+        ...(primaryTeacherId ? [primaryTeacherId.toString()] : []),
+        ...coTeachers.map((teacherId) => teacherId.toString())
     ]).size;
 };
 
@@ -170,6 +171,7 @@ router.get('/:schoolId/dashboard', requireMembership, async (req, res) => {
             delete classData.students;
             delete classData.teachers;
             if (['user', 'admin'].includes(req.user.role)) delete classData.questionSets;
+            if (req.user.role === 'user') delete classData.classCode;
             return {
                 ...classData,
                 questionSetCount: classItem.questionSets.length,
@@ -381,6 +383,7 @@ router.get('/:schoolId/classes/:classId', requireMembership, async (req, res) =>
         delete classData.students;
         delete classData.teachers;
         if (['user', 'admin'].includes(req.user.role)) delete classData.questionSets;
+        if (req.user.role === 'user') delete classData.classCode;
         res.status(200).json({
             ...classData,
             questionSetCount: classItem.questionSets.length,

@@ -175,6 +175,7 @@ export const SchoolDashboardLogic = () => {
 
     const isManager = dashboard?.membership?.communityRole === 'community_manager';
     const canCreateClasses = isManager || currentUser?.role === 'teacher';
+    const canViewClassCode = currentUser?.role === 'teacher' || currentUser?.role === 'admin';
     const sharedSetIds = new Set((dashboard?.sharedQuestionSets || [])
         .map((entry) => entry.questionSet?._id)
         .filter(Boolean));
@@ -185,6 +186,7 @@ export const SchoolDashboardLogic = () => {
         dashboard,
         isManager,
         canCreateClasses,
+        canViewClassCode,
         availableSets,
         availableClasses: myClasses,
         selectedClassId,

@@ -24,7 +24,7 @@ import '../pages_styling/SchoolDashboardStyling.css';
 
 const SchoolDashboardPage = () => {
     const {
-        currentUser, dashboard, isManager, canCreateClasses, availableSets, availableClasses, selectedClassId, setSelectedClassId,
+        currentUser, dashboard, isManager, canCreateClasses, canViewClassCode, availableSets, availableClasses, selectedClassId, setSelectedClassId,
         addExistingClass, selectedSetId, setSelectedSetId,
         announcementText, setAnnouncementText, classForm, setClassForm,
         selectedClass, setSelectedClass, error, isLoading, createAnnouncement,
@@ -399,7 +399,7 @@ const SchoolDashboardPage = () => {
                                         <div className="school-dash-item-text">
                                             <strong>{classItem.className}</strong>
                                             <small>
-                                                Mã: {classItem.classCode} · {classItem.semester || 'Chưa ghi học kỳ'} · {classItem.studentCount} học sinh · {classItem.assignmentCount} bài tập · {classItem.questionSetCount} bộ đề
+                                                {canViewClassCode && classItem.classCode ? `Mã: ${classItem.classCode} · ` : ''}{classItem.semester || 'Chưa ghi học kỳ'} · {classItem.studentCount} học sinh · {classItem.assignmentCount} bài tập · {classItem.questionSetCount} bộ đề
                                             </small>
                                         </div>
                                     </div>
@@ -457,7 +457,10 @@ const SchoolDashboardPage = () => {
                                 Giáo viên giảng dạy: <strong style={{ color: '#ffffff' }}>{selectedClass.teacher?.fullName || selectedClass.teacher?.username || selectedClass.teacherName}</strong>
                             </p>
                             <p style={{ margin: '0 0 16px', color: 'var(--sh-text-muted)', fontSize: '13px' }}>
-                                Mã lớp mời: <strong style={{ color: 'var(--sh-gold-hover)' }}>{selectedClass.classCode}</strong> · {selectedClass.studentCount} học sinh · {selectedClass.assignmentCount} bài tập
+                                {canViewClassCode && selectedClass.classCode ? (
+                                    <>Mã lớp mời: <strong style={{ color: 'var(--sh-gold-hover)' }}>{selectedClass.classCode}</strong> · </>
+                                ) : null}
+                                {selectedClass.studentCount} học sinh · {selectedClass.assignmentCount} bài tập
                             </p>
 
                             {['user', 'admin'].includes(currentUser?.role) && !selectedClass.joined && (

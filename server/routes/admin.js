@@ -4,6 +4,8 @@ const School = require('../models/School');
 const SchoolMember = require('../models/SchoolMember');
 const CommunityPost = require('../models/CommunityPost');
 const TeacherClass = require('../models/TeacherClass');
+const User = require('../models/User');
+const QuestionSet = require('../models/QuestionSet');
 const { verifyAdmin } = require('../verifyToken');
 
 router.use(verifyAdmin);
@@ -196,12 +198,12 @@ router.get('/schools/:schoolId', async (req, res) => {
             sharedQuestionSets: school.sharedQuestionSets,
             classes: classes.map((classItem) => ({
                 ...classItem,
-                studentCount: classItem.students.length,
+                studentCount: Array.isArray(classItem.students) ? classItem.students.length : 0,
                 teacherCount: new Set([
-                    classItem.teacher._id.toString(),
-                    ...classItem.teachers.map((teacherId) => teacherId.toString())
+                    ...((classItem.teacher?._id || classItem.teacher) ? [(classItem.teacher._id || classItem.teacher).toString()] : []),
+                    ...(Array.isArray(classItem.teachers) ? classItem.teachers.map((teacherId) => teacherId.toString()) : [])
                 ]).size,
-                questionSetCount: classItem.questionSets.length,
+                questionSetCount: Array.isArray(classItem.questionSets) ? classItem.questionSets.length : 0,
                 assignmentCount: 0,
                 assignments: []
             }))
