@@ -10,10 +10,11 @@ const User = require('../models/User');
 const { verifyToken } = require('../verifyToken');
 
 const getTeacherCount = (classItem) => {
-    const primaryTeacherId = classItem.teacher._id || classItem.teacher;
+    const primaryTeacherId = classItem.teacher?._id || classItem.teacher;
+    const coTeachers = Array.isArray(classItem.teachers) ? classItem.teachers : [];
     return new Set([
-        primaryTeacherId.toString(),
-        ...classItem.teachers.map((teacherId) => teacherId.toString())
+        ...(primaryTeacherId ? [primaryTeacherId.toString()] : []),
+        ...coTeachers.map((teacherId) => teacherId.toString())
     ]).size;
 };
 
