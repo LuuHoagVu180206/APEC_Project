@@ -1,0 +1,676 @@
+/* ==========================================================================
+   MODERN EDTECH & CLEAN NEO-BRUTALIST STYLING FOR SCHOOL DASHBOARD PAGE
+   Strictly scoped to .school-dash-root
+   No pixel art font or pixel images - 100% Vietnamese Unicode compatible
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+.school-dash-root {
+    --sh-bg: #0b0f19;
+    --sh-surface: #111827;
+    --sh-surface-hover: #1f2937;
+    --sh-surface-card: #151d30;
+    --sh-border: #1f293d;
+    --sh-border-light: #2d3b55;
+    
+    --sh-text: #f9fafb;
+    --sh-text-muted: #9ca3af;
+    --sh-text-subtle: #6b7280;
+    
+    /* Modern Accent Palette */
+    --sh-gold: #f59e0b;
+    --sh-gold-hover: #fbbf24;
+    --sh-gold-shadow: #b45309;
+    
+    --sh-cyan: #0ea5e9;
+    --sh-cyan-hover: #38bdf8;
+    --sh-cyan-shadow: #0369a1;
+    
+    --sh-purple: #8b5cf6;
+    --sh-purple-hover: #a78bfa;
+    --sh-purple-shadow: #6d28d9;
+    
+    --sh-emerald: #10b981;
+    --sh-emerald-shadow: #047857;
+    
+    --sh-danger: #ef4444;
+    --sh-danger-hover: #f87171;
+    --sh-danger-shadow: #b91c1c;
+    
+    --sh-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    min-height: 100vh;
+    background-color: var(--sh-bg);
+    background-image: 
+        radial-gradient(circle at 10% 12%, rgba(14, 165, 233, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 90% 88%, rgba(245, 158, 11, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.04) 0%, transparent 60%);
+    color: var(--sh-text);
+    font-family: var(--sh-font);
+    padding: 32px 24px 80px;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+.school-dash-inner {
+    width: min(100%, 1160px);
+    margin: 0 auto;
+}
+
+/* ================= TOP NAVIGATION / HUD ================= */
+.school-dash-top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.school-dash-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--sh-surface);
+    color: var(--sh-text-muted);
+    border: 1.5px solid var(--sh-border-light);
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.6);
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.school-dash-back-btn:hover {
+    color: var(--sh-cyan);
+    border-color: var(--sh-cyan);
+    background: var(--sh-surface-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+.school-dash-back-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+.school-dash-manager-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    border-radius: 9999px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1.5px solid rgba(245, 158, 11, 0.35);
+    color: var(--sh-gold-hover);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+/* ================= HERO HEADER ================= */
+.school-dash-hero {
+    background: linear-gradient(135deg, #131c31 0%, #0e1526 100%);
+    border: 1.5px solid var(--sh-border-light);
+    border-radius: 20px;
+    padding: 32px 36px;
+    margin-bottom: 32px;
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 4px 0 0 #050811;
+    position: relative;
+    overflow: hidden;
+}
+
+.school-dash-hero::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.school-dash-hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--sh-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+}
+
+.school-dash-hero h1 {
+    font-size: 34px;
+    font-weight: 900;
+    margin: 4px 0 10px;
+    letter-spacing: -0.6px;
+    color: #ffffff;
+    line-height: 1.25;
+}
+
+.school-dash-hero-desc {
+    margin: 0;
+    color: var(--sh-text-muted);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 780px;
+}
+
+/* ================= STATS HUD GRID ================= */
+.school-dash-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 36px;
+}
+
+.school-dash-stat-card {
+    background: var(--sh-surface-card);
+    border: 1.5px solid var(--sh-border-light);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 3px 0 0 #050811;
+}
+
+.school-dash-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-icon-blue {
+    background: rgba(14, 165, 233, 0.15);
+    border: 1.5px solid rgba(14, 165, 233, 0.4);
+    color: var(--sh-cyan-hover);
+}
+
+.stat-icon-gold {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1.5px solid rgba(245, 158, 11, 0.4);
+    color: var(--sh-gold-hover);
+}
+
+.stat-icon-purple {
+    background: rgba(139, 92, 246, 0.15);
+    border: 1.5px solid rgba(139, 92, 246, 0.4);
+    color: var(--sh-purple-hover);
+}
+
+.stat-icon-emerald {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1.5px solid rgba(16, 185, 129, 0.4);
+    color: #34d399;
+}
+
+.school-dash-stat-info strong {
+    font-size: 26px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.1;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.school-dash-stat-info span {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sh-text-muted);
+}
+
+/* ================= SECTION CARDS ================= */
+.school-dash-section {
+    background: var(--sh-surface-card);
+    border: 1.5px solid var(--sh-border-light);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 4px 0 0 #050811;
+}
+
+.school-dash-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--sh-border);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.school-dash-section-header h2 {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.4px;
+}
+
+.school-dash-section-tag {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--sh-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ================= ANNOUNCEMENTS ================= */
+.school-dash-announcement-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+    background: var(--sh-surface);
+    border: 1.5px solid var(--sh-border-light);
+    border-radius: 16px;
+    padding: 18px 20px;
+}
+
+.school-dash-announcement-form textarea {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-family: var(--sh-font);
+    font-size: 14px;
+    line-height: 1.55;
+    resize: vertical;
+    width: 100%;
+}
+
+.school-dash-announcement-form textarea::placeholder {
+    color: var(--sh-text-subtle);
+}
+
+.school-dash-announcement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.school-dash-post-card {
+    background: var(--sh-surface);
+    border: 1.5px solid var(--sh-border);
+    border-radius: 14px;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    transition: border-color 0.15s ease;
+}
+
+.school-dash-post-card:hover {
+    border-color: var(--sh-border-light);
+}
+
+.school-dash-post-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--sh-text-muted);
+}
+
+.school-dash-post-meta strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.school-dash-post-content {
+    margin: 0;
+    font-size: 14.5px;
+    color: #e2e8f0;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+/* ================= SHARED QUESTION SETS & CLASSES ================= */
+.school-dash-controls-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+
+.school-dash-select {
+    background: var(--sh-surface);
+    border: 1.5px solid var(--sh-border-light);
+    border-radius: 12px;
+    color: #ffffff;
+    font-family: var(--sh-font);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    flex: 1;
+    min-width: 260px;
+    outline: none;
+    cursor: pointer;
+    box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.school-dash-select:focus {
+    border-color: var(--sh-cyan);
+}
+
+.school-dash-create-class-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto;
+    gap: 12px;
+    margin-bottom: 22px;
+    background: var(--sh-surface);
+    border: 1.5px solid var(--sh-border-light);
+    border-radius: 16px;
+    padding: 16px 20px;
+    align-items: center;
+}
+
+.school-dash-create-class-form input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--sh-border-light);
+    border-radius: 10px;
+    padding: 9px 14px;
+    color: #ffffff;
+    font-family: var(--sh-font);
+    font-size: 13.5px;
+    outline: none;
+}
+
+.school-dash-create-class-form input:focus {
+    border-color: var(--sh-cyan);
+}
+
+.school-dash-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.school-dash-item-row {
+    background: var(--sh-surface);
+    border: 1.5px solid var(--sh-border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.school-dash-item-row:hover {
+    border-color: var(--sh-border-light);
+    background: var(--sh-surface-hover);
+}
+
+.school-dash-item-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+
+.school-dash-item-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(14, 165, 233, 0.15);
+    border: 1.5px solid rgba(14, 165, 233, 0.35);
+    color: var(--sh-cyan-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.school-dash-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.school-dash-item-text strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    overflow-wrap: anywhere;
+}
+
+.school-dash-item-text small {
+    font-size: 12.5px;
+    color: var(--sh-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.school-dash-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* ================= MEMBERS ================= */
+.school-dash-member-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.school-dash-member-card {
+    background: var(--sh-surface);
+    border: 1.5px solid var(--sh-border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.school-dash-member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1.5px solid rgba(139, 92, 246, 0.35);
+    color: var(--sh-purple-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.school-dash-recent-members-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 18px;
+    border-top: 1px solid var(--sh-border);
+    font-size: 13px;
+    color: var(--sh-text-muted);
+}
+
+.school-dash-recent-pill {
+    background: var(--sh-surface);
+    border: 1px solid var(--sh-border-light);
+    border-radius: 9999px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+/* ================= BUTTONS ================= */
+.school-dash-btn {
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.5);
+    user-select: none;
+}
+
+.school-dash-btn-ghost {
+    background: var(--sh-surface);
+    color: #ffffff;
+    border: 1.5px solid var(--sh-border-light);
+}
+
+.school-dash-btn-ghost:hover {
+    border-color: var(--sh-cyan);
+    color: var(--sh-cyan-hover);
+    transform: translateY(-2px);
+}
+
+.school-dash-btn-primary {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    border: 1px solid var(--sh-cyan-shadow);
+    box-shadow: 0 3px 0 0 var(--sh-cyan-shadow);
+}
+
+.school-dash-btn-primary:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 0 var(--sh-cyan-shadow);
+}
+
+.school-dash-btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.school-dash-btn-danger-icon {
+    background: transparent;
+    color: var(--sh-text-subtle);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.school-dash-btn-danger-icon:hover {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* ================= SELECTED CLASS MODAL / DETAIL ================= */
+.school-dash-class-detail-card {
+    background: var(--sh-surface);
+    border: 1.5px solid var(--sh-border-light);
+    border-radius: 18px;
+    padding: 24px 28px;
+    margin-top: 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.school-dash-empty {
+    background: rgba(17, 24, 39, 0.6);
+    border: 1.5px dashed var(--sh-border-light);
+    border-radius: 14px;
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--sh-text-muted);
+    font-size: 14px;
+}
+
+.school-dash-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 20px;
+    gap: 16px;
+    color: var(--sh-cyan);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.school-dash-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3.5px solid var(--sh-border-light);
+    border-top-color: var(--sh-cyan);
+    border-radius: 50%;
+    animation: sh-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes sh-spin {
+    to { transform: rotate(360deg); }
+}
+
+.school-dash-alert-error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1.5px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+    padding: 14px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .school-dash-root {
+        padding: 24px 16px 60px;
+    }
+    .school-dash-hero {
+        padding: 24px 20px;
+    }
+    .school-dash-hero h1 {
+        font-size: 26px;
+    }
+    .school-dash-create-class-form {
+        grid-template-columns: 1fr;
+    }
+}
+
