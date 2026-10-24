@@ -105,9 +105,6 @@ const TeacherDashboardPage = () => {
                                     <p>Khởi tạo không gian học tập và sinh mã lớp tự động</p>
                                 </div>
                             </div>
-                            <div className="teacher-dash-action-btn-pill teacher-dash-pill-gold">
-                                <Plus size={15} /> Bắt đầu tạo lớp
-                            </div>
                         </div>
 
                         {/* ACTION 2: TẠO BỘ CÂU HỎI */}
@@ -127,9 +124,6 @@ const TeacherDashboardPage = () => {
                                     <p>Thiết kế các bộ quiz trắc nghiệm trong Studio</p>
                                 </div>
                             </div>
-                            <div className="teacher-dash-action-btn-pill teacher-dash-pill-cyan">
-                                <BookOpen size={15} /> Vào Studio
-                            </div>
                         </div>
 
                         {/* ACTION 3: THAM GIA LỚP BẰNG MÃ */}
@@ -148,9 +142,6 @@ const TeacherDashboardPage = () => {
                                     <h3>Tham gia bằng mã</h3>
                                     <p>Nhập mã mời 8 chữ cái để tham gia lớp khác</p>
                                 </div>
-                            </div>
-                            <div className="teacher-dash-action-btn-pill teacher-dash-pill-purple">
-                                <School size={15} /> Nhập mã lớp
                             </div>
                         </div>
                     </div>
