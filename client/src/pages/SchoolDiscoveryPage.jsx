@@ -1,68 +1,237 @@
 import React from 'react';
-import { ArrowLeft, MapPin, Search, School } from 'lucide-react';
+import { 
+    ArrowLeft, 
+    MapPin, 
+    Search, 
+    School, 
+    Building2, 
+    Sparkles, 
+    ChevronRight, 
+    Plus, 
+    Users, 
+    CheckCircle2, 
+    AlertCircle, 
+    X, 
+    ShieldCheck 
+} from 'lucide-react';
 import { SchoolDiscoveryPageLogic } from '../pages_logic/SchoolDiscoveryPageLogic';
-import '../pages_styling/SchoolPagesStyling.css';
+import '../pages_styling/SchoolDiscoveryStyling.css';
 
 const SchoolDiscoveryPage = () => {
     const {
         currentUser, schools, memberships, searchTerm, setSearchTerm, selectedSchool, setSelectedSchool,
         joinData, setJoinData, error, isLoading, isJoining, membershipIds, handleSearch, startJoin, handleJoin, navigate
     } = SchoolDiscoveryPageLogic();
+
     const isStudentAccount = ['user', 'admin'].includes(currentUser?.role);
     const roleLabel = currentUser?.role === 'user' ? 'Student' : currentUser?.role === 'teacher' ? 'Teacher' : 'Admin';
 
     return (
-        <main className="school-page">
-            <div className="school-page-inner">
-                <button className="school-back" onClick={() => navigate('/')}><ArrowLeft size={17} /> Quay lại</button>
-                <header className="school-page-header school-heading-row">
-                    <div>
-                        <p className="school-eyebrow">Cộng đồng học đường</p>
-                        <h1>{memberships.length > 0 ? 'My School' : 'Join Your School'}</h1>
-                        <p>Tìm community của trường và kết nối với thành viên.</p>
+        <main className="school-disc-root">
+            <div className="school-disc-inner">
+                {/* TOP NAVIGATION / HUD */}
+                <div className="school-disc-top-nav">
+                    <button 
+                        type="button"
+                        className="school-disc-back-btn" 
+                        onClick={() => navigate('/')}
+                    >
+                        <ArrowLeft size={16} /> Quay lại trang chủ
+                    </button>
+                    <button 
+                        type="button"
+                        className="school-disc-btn-propose" 
+                        onClick={() => navigate('/school-requests/new')}
+                    >
+                        <Plus size={16} color="var(--sd-gold-hover)" />
+                        <span>Đề xuất tạo trường mới</span>
+                    </button>
+                </div>
+
+                {/* HERO HEADER */}
+                <header className="school-disc-hero">
+                    <div className="school-disc-hero-info">
+                        <div className="school-disc-hero-tag">
+                            <Building2 size={14} /> Không gian Cộng đồng Học đường
+                        </div>
+                        <h1>{memberships.length > 0 ? 'Cộng Đồng Trường Của Bạn' : 'Khám Phá School Community'}</h1>
+                        <p className="school-disc-hero-sub">
+                            Tìm kiếm cộng đồng trường học của bạn để kết nối với các thầy cô và bạn bè, cùng tham gia các lớp học và chia sẻ kho đề thi quiz mini-game.
+                        </p>
                     </div>
-                    <button className="school-button" onClick={() => navigate('/school-requests/new')}>Đề xuất tạo trường</button>
                 </header>
 
-                {error && <p className="school-error" role="alert">{error}</p>}
+                {error && (
+                    <div className="school-disc-alert-error" role="alert">
+                        <AlertCircle size={20} />
+                        <span>{error}</span>
+                    </div>
+                )}
 
+                {/* SECTION 1: MY SCHOOL MEMBERSHIPS (NẾU ĐÃ THAM GIA) */}
                 {memberships.length > 0 && (
-                    <section className="school-section">
-                        <div className="school-section-heading"><div><p className="school-eyebrow">Membership của bạn</p><h2>My School</h2></div></div>
-                        <div className="school-card-grid">
+                    <section className="school-disc-section">
+                        <div className="school-disc-section-header">
+                            <div>
+                                <div className="school-disc-section-tag">
+                                    <Sparkles size={13} /> Membership đã tham gia
+                                </div>
+                                <h2>
+                                    Trường của bạn
+                                    <span className="school-disc-count-badge">{memberships.length}</span>
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div className="school-disc-grid">
                             {memberships.map((membership) => (
-                                <button className="school-card school-card-button" key={membership._id} onClick={() => navigate(`/schools/${membership.school._id}`)}>
-                                    <span className="school-card-icon"><School size={20} /></span>
-                                    <span className="school-card-main"><strong>{membership.school.name}</strong><small>{membership.school.abbreviation} · {membership.communityRole === 'community_manager' ? `Community Manager · ${roleLabel}` : roleLabel}</small></span>
-                                    <span className="school-arrow" aria-hidden="true">&#8594;</span>
-                                </button>
+                                <div
+                                    className="school-disc-card school-disc-card-btn"
+                                    key={membership._id}
+                                    onClick={() => navigate(`/schools/${membership.school._id}`)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => e.key === 'Enter' && navigate(`/schools/${membership.school._id}`)}
+                                >
+                                    <div className="school-disc-card-top">
+                                        <div className="school-disc-card-icon">
+                                            <School size={24} />
+                                        </div>
+                                        <span className="school-disc-badge-joined">
+                                            <CheckCircle2 size={12} /> Thành viên
+                                        </span>
+                                    </div>
+
+                                    <div className="school-disc-card-body">
+                                        <h3>{membership.school.name}</h3>
+                                        <div className="school-disc-card-meta">
+                                            <span>Mã: <strong style={{ color: 'var(--sd-cyan-hover)' }}>{membership.school.abbreviation}</strong></span>
+                                            <span>·</span>
+                                            <span>Vai trò: <strong>{membership.communityRole === 'community_manager' ? `Quản trị viên · ${roleLabel}` : roleLabel}</strong></span>
+                                        </div>
+                                    </div>
+
+                                    <div className="school-disc-card-footer">
+                                        <span style={{ fontSize: '13px', color: 'var(--sd-text-muted)', fontWeight: 600 }}>
+                                            Vào School Dashboard
+                                        </span>
+                                        <div className="school-disc-enter-arrow">
+                                            <span>Truy cập</span>
+                                            <ChevronRight size={16} />
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </section>
                 )}
 
-                <section className="school-section">
-                    <div className="school-section-heading"><div><p className="school-eyebrow">Khám phá</p><h2>Tìm School Community</h2></div></div>
-                    <form className="school-search-form" onSubmit={handleSearch}>
-                        <Search size={18} />
-                        <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Tên trường, viết tắt hoặc địa điểm" />
-                        <button className="school-button school-button-primary">Tìm</button>
-                    </form>
-                    {isLoading ? <p className="school-empty">Đang tải danh sách trường...</p> : schools.length === 0 ? <p className="school-empty">Không tìm thấy School Community phù hợp.</p> : (
-                        <div className="school-card-grid">
+                {/* SECTION 2: DISCOVER SCHOOLS */}
+                <section className="school-disc-section">
+                    <div className="school-disc-section-header">
+                        <div>
+                            <div className="school-disc-section-tag" style={{ color: 'var(--sd-cyan)' }}>
+                                <Search size={13} /> Tra cứu & Gia nhập
+                            </div>
+                            <h2>
+                                Tìm School Community
+                                <span className="school-disc-count-badge" style={{ background: 'rgba(14, 165, 233, 0.15)', borderColor: 'rgba(14, 165, 233, 0.4)', color: 'var(--sd-cyan-hover)' }}>
+                                    {schools.length}
+                                </span>
+                            </h2>
+                        </div>
+                    </div>
+
+                    {/* SEARCH CARD */}
+                    <div className="school-disc-search-card">
+                        <form className="school-disc-search-form" onSubmit={handleSearch}>
+                            <div className="school-disc-search-input-wrap">
+                                <Search size={18} color="var(--sd-text-subtle)" />
+                                <input 
+                                    value={searchTerm} 
+                                    onChange={(event) => setSearchTerm(event.target.value)} 
+                                    placeholder="Tìm theo tên trường, mã viết tắt hoặc tỉnh thành..." 
+                                />
+                            </div>
+                            <button type="submit" className="school-disc-btn-search">
+                                <Search size={16} />
+                                <span>Tìm kiếm</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* SCHOOLS GRID */}
+                    {isLoading ? (
+                        <div className="school-disc-loading">
+                            <div className="school-disc-spinner" />
+                            <span>Đang tải danh sách cộng đồng trường...</span>
+                        </div>
+                    ) : schools.length === 0 ? (
+                        <div className="school-disc-empty">
+                            <School size={36} color="var(--sd-text-subtle)" />
+                            <p style={{ margin: 0, fontWeight: 700, fontSize: '15px' }}>Không tìm thấy School Community nào phù hợp.</p>
+                            <small style={{ color: 'var(--sd-text-subtle)' }}>Bạn có thể thử tìm kiếm từ khóa khác hoặc đề xuất mở trường mới.</small>
+                        </div>
+                    ) : (
+                        <div className="school-disc-grid">
                             {schools.map((school) => {
                                 const isMember = membershipIds.has(school._id);
                                 return (
-                                    <article className="school-card" key={school._id}>
-                                        <span className="school-card-icon"><School size={20} /></span>
-                                        <div className="school-card-main">
-                                            <strong>{school.name}</strong>
-                                            <small>{school.abbreviation}{school.location ? ` · ${school.location}` : ''}</small>
-                                            {school.description && <p>{school.description}</p>}
+                                    <article className="school-disc-card" key={school._id}>
+                                        <div className="school-disc-card-top">
+                                            <div className="school-disc-card-icon">
+                                                <Building2 size={24} />
+                                            </div>
+                                            {isMember ? (
+                                                <span className="school-disc-badge-joined">
+                                                    <CheckCircle2 size={12} /> Đã tham gia
+                                                </span>
+                                            ) : (
+                                                <span style={{ fontSize: '12px', color: 'var(--sd-text-subtle)', fontWeight: 700 }}>
+                                                    {school.abbreviation}
+                                                </span>
+                                            )}
                                         </div>
-                                        {isMember ? <button className="school-button" onClick={() => navigate(`/schools/${school._id}`)}>Mở community</button> : !['user', 'teacher', 'admin'].includes(currentUser?.role) ? null : (
-                                            <button className="school-button school-button-primary" onClick={() => startJoin(school)}>Tham gia</button>
-                                        )}
+
+                                        <div className="school-disc-card-body">
+                                            <h3>{school.name}</h3>
+                                            <div className="school-disc-card-meta">
+                                                {school.location && (
+                                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                        <MapPin size={13} color="var(--sd-cyan)" /> {school.location}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {school.description ? (
+                                                <p className="school-disc-card-desc">{school.description}</p>
+                                            ) : (
+                                                <p className="school-disc-card-desc" style={{ fontStyle: 'italic', opacity: 0.6 }}>
+                                                    Cộng đồng trường học chính thức
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="school-disc-card-footer">
+                                            {isMember ? (
+                                                <button 
+                                                    type="button"
+                                                    className="school-disc-btn-action" 
+                                                    onClick={() => navigate(`/schools/${school._id}`)}
+                                                >
+                                                    <span>Mở community</span>
+                                                    <ChevronRight size={14} />
+                                                </button>
+                                            ) : !['user', 'teacher', 'admin'].includes(currentUser?.role) ? null : (
+                                                <button 
+                                                    type="button"
+                                                    className="school-disc-btn-action school-disc-btn-primary" 
+                                                    onClick={() => startJoin(school)}
+                                                >
+                                                    <Users size={15} />
+                                                    <span>Tham gia trường</span>
+                                                </button>
+                                            )}
+                                        </div>
                                     </article>
                                 );
                             })}
@@ -71,26 +240,113 @@ const SchoolDiscoveryPage = () => {
                 </section>
             </div>
 
+            {/* MODAL DIALOG: THAM GIA TRƯỜNG */}
             {selectedSchool && (
-                <div className="school-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedSchool(null); }}>
-                    <section className="school-modal" role="dialog" aria-modal="true" aria-labelledby="join-school-title">
-                        <div className="school-modal-heading">
-                            <div><p className="school-eyebrow">Tham gia trường của bạn</p><h2 id="join-school-title">{selectedSchool.name}</h2></div>
-                            {selectedSchool.location && <span><MapPin size={15} /> {selectedSchool.location}</span>}
+                <div 
+                    className="school-disc-modal-backdrop" 
+                    role="presentation" 
+                    onMouseDown={(event) => { 
+                        if (event.target === event.currentTarget) setSelectedSchool(null); 
+                    }}
+                >
+                    <section className="school-disc-modal" role="dialog" aria-modal="true" aria-labelledby="join-school-title">
+                        <div className="school-disc-modal-header">
+                            <div>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: 'var(--sd-cyan)', textTransform: 'uppercase' }}>
+                                    <School size={13} /> Gia nhập cộng đồng trường
+                                </div>
+                                <h2 id="join-school-title">{selectedSchool.name}</h2>
+                                {selectedSchool.location && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12.5px', color: 'var(--sd-text-muted)', marginTop: '4px' }}>
+                                        <MapPin size={13} color="var(--sd-cyan)" /> {selectedSchool.location}
+                                    </div>
+                                )}
+                            </div>
+                            <button 
+                                type="button"
+                                className="school-disc-btn-close" 
+                                aria-label="Đóng bảng" 
+                                onClick={() => setSelectedSchool(null)}
+                            >
+                                <X size={18} />
+                            </button>
                         </div>
-                        <form className="school-form" onSubmit={handleJoin}>
-                            {error && <p className="school-error" role="alert">{error}</p>}
-                            <label className="school-field"><span>Họ tên</span><input required value={joinData.fullName} onChange={(event) => setJoinData({ ...joinData, fullName: event.target.value })} /></label>
-                            <label className="school-field"><span>Role trong account</span><input value={roleLabel} readOnly /></label>
-                            {isStudentAccount ? (
-                                <label className="school-field"><span>Lớp hiện tại</span><input required value={joinData.className} onChange={(event) => setJoinData({ ...joinData, className: event.target.value })} placeholder="Ví dụ: 10A1" /></label>
-                            ) : (
-                                <label className="school-field"><span>Khoa/bộ môn hoặc lớp phụ trách</span><textarea required rows={3} value={joinData.teachingInfo} onChange={(event) => setJoinData({ ...joinData, teachingInfo: event.target.value })} /></label>
+
+                        <form onSubmit={handleJoin}>
+                            {error && (
+                                <div className="school-disc-alert-error" role="alert" style={{ marginBottom: '16px', padding: '10px 16px' }}>
+                                    <AlertCircle size={16} />
+                                    <span>{error}</span>
+                                </div>
                             )}
-                            <p className="school-form-note">Yêu cầu tham gia được duyệt tự động trong phiên bản demo.</p>
-                            <div className="school-form-actions">
-                                <button type="button" className="school-button" onClick={() => setSelectedSchool(null)}>Hủy</button>
-                                <button className="school-button school-button-primary" disabled={isJoining}>{isJoining ? 'Đang tham gia...' : 'Gửi yêu cầu & tham gia'}</button>
+
+                            <div className="school-disc-modal-field">
+                                <label className="school-disc-modal-label">Họ và tên của bạn</label>
+                                <div className="school-disc-modal-input-wrap">
+                                    <input 
+                                        required 
+                                        value={joinData.fullName} 
+                                        onChange={(event) => setJoinData({ ...joinData, fullName: event.target.value })} 
+                                        placeholder="Nhập họ và tên đầy đủ"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="school-disc-modal-field">
+                                <label className="school-disc-modal-label">Vai trò tài khoản</label>
+                                <div className="school-disc-modal-input-wrap" style={{ opacity: 0.8 }}>
+                                    <input value={roleLabel} readOnly />
+                                </div>
+                            </div>
+
+                            {isStudentAccount ? (
+                                <div className="school-disc-modal-field">
+                                    <label className="school-disc-modal-label">Lớp đang theo học</label>
+                                    <div className="school-disc-modal-input-wrap">
+                                        <input 
+                                            required 
+                                            value={joinData.className} 
+                                            onChange={(event) => setJoinData({ ...joinData, className: event.target.value })} 
+                                            placeholder="Ví dụ: 10A1, 11 Chuyên Toán..." 
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="school-disc-modal-field">
+                                    <label className="school-disc-modal-label">Khoa / Bộ môn hoặc lớp giảng dạy phụ trách</label>
+                                    <div className="school-disc-modal-input-wrap">
+                                        <textarea 
+                                            required 
+                                            rows={3} 
+                                            value={joinData.teachingInfo} 
+                                            onChange={(event) => setJoinData({ ...joinData, teachingInfo: event.target.value })} 
+                                            placeholder="Ví dụ: Tổ Toán - Tin, phụ trách các lớp khối 10..."
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <p className="school-disc-modal-note">
+                                <ShieldCheck size={14} color="var(--sd-cyan)" style={{ verticalAlign: 'text-bottom', marginRight: '4px' }} />
+                                Yêu cầu tham gia được xét duyệt nhanh chóng để bảo đảm kết nối an toàn trong nội bộ trường.
+                            </p>
+
+                            <div className="school-disc-modal-actions">
+                                <button 
+                                    type="button" 
+                                    className="school-disc-btn-action" 
+                                    onClick={() => setSelectedSchool(null)}
+                                >
+                                    Hủy bỏ
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    className="school-disc-btn-action school-disc-btn-primary" 
+                                    disabled={isJoining}
+                                >
+                                    <Users size={15} />
+                                    <span>{isJoining ? 'Đang gửi yêu cầu...' : 'Gửi yêu cầu & Tham gia'}</span>
+                                </button>
                             </div>
                         </form>
                     </section>
