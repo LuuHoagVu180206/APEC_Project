@@ -89,16 +89,6 @@ const SchoolAdminRequestsPage = () => {
                             <span>Kiểm duyệt Quản trị viên</span>
                         </div>
                     </div>
-
-                    <div className="school-admin-req-nav-right">
-                        <button 
-                            type="button"
-                            className="school-admin-req-quick-link"
-                            onClick={() => navigate('/admin/schools')}
-                        >
-                            <Building2 size={15} /> School Communities
-                        </button>
-                    </div>
                 </div>
 
                 {/* HERO HEADER */}

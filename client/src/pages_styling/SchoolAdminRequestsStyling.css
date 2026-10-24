@@ -137,28 +137,7 @@
     letter-spacing: 0.3px;
 }
 
-.school-admin-req-quick-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--sar-surface);
-    color: var(--sar-text-muted);
-    border: 1.5px solid var(--sar-border-light);
-    border-radius: 12px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.15s ease;
-}
 
-.school-admin-req-quick-link:hover {
-    color: var(--sar-purple-hover);
-    border-color: var(--sar-purple);
-    background: var(--sar-surface-hover);
-    transform: translateY(-2px);
-}
 
 /* ================= HERO HEADER BANNER ================= */
 .school-admin-req-hero {
