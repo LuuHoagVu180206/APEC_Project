@@ -5,7 +5,15 @@ import { useNavigate, useLocation } from 'react-router-dom';
 export const LibraryPageLogic = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const currentUser = JSON.parse(localStorage.getItem('user'));
+
+    const [currentUser, setCurrentUser] = useState(() => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('user'));
+            return saved?.username ? saved : null;
+        } catch {
+            return null;
+        }
+    });
 
     const searchParams = new URLSearchParams(location.search);
     const initialSearch = searchParams.get('search') || "";
@@ -15,17 +23,34 @@ export const LibraryPageLogic = () => {
     const [searchTerm, setSearchTerm] = useState(initialSearch);
     const [activeCategory, setActiveCategory] = useState(initialCategory);
     const [savedSets, setSavedSets] = useState(currentUser?.savedSets || []);
+    const [schoolMemberships, setSchoolMemberships] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
- useEffect(() => {
+    useEffect(() => {
         fetchLibrary();
     }, []);
 
+    // Tải danh sách trường cho navbar
+    useEffect(() => {
+        if (!currentUser?.accessToken) return;
+        let isActive = true;
+        axios.get('http://localhost:5000/api/schools/mine', {
+            headers: { token: currentUser.accessToken }
+        }).then((res) => {
+            if (isActive) setSchoolMemberships(res.data);
+        }).catch(() => {});
+        return () => { isActive = false; };
+    }, [currentUser]);
+
     const fetchLibrary = async () => {
+        setIsLoading(true);
         try {
             const res = await axios.get('http://localhost:5000/api/sets/library');
             setQuestionSets(res.data);
         } catch (err) {
             console.error("Lỗi lấy dữ liệu thư viện:", err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -73,6 +98,7 @@ export const LibraryPageLogic = () => {
             setSavedSets(newSavedSets);
 
             const updatedUser = { ...currentUser, savedSets: newSavedSets };
+            setCurrentUser(updatedUser);
             localStorage.setItem('user', JSON.stringify(updatedUser));
         } catch (err) {
             const errorMsg = err.response?.data?.message || err.response?.data || err.message;
@@ -117,32 +143,49 @@ export const LibraryPageLogic = () => {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        setCurrentUser(null);
+        setSchoolMemberships([]);
+        navigate('/');
+    };
+
     const filteredSets = questionSets.filter(set => {
         const searchLower = searchTerm.toLowerCase();
         
         const matchesSearch = 
-        set.title.toLowerCase().includes(searchLower) || 
-        (set.topic && set.topic.toLowerCase().includes(searchLower));
+            !searchTerm ||
+            set.title.toLowerCase().includes(searchLower) || 
+            (set.topic && set.topic.toLowerCase().includes(searchLower)) ||
+            (set.description && set.description.toLowerCase().includes(searchLower));
         
-    const matchesCategory = 
+        const matchesCategory = 
             activeCategory === "Tất cả" || 
             activeCategory === "Phổ biến" || 
-            (set.topic && set.topic === activeCategory);
+            (set.topic && set.topic.toLowerCase().includes(activeCategory.toLowerCase())) ||
+            (activeCategory === "Khác" && (!set.topic || !['toán', 'tiếng anh', 'lịch sử', 'hoá học', 'vật lý', 'tin học'].some(k => set.topic.toLowerCase().includes(k))));
             
         return matchesSearch && matchesCategory;
     });
+
+    const schoolActionLabel = schoolMemberships.length > 0 ? 'Trường của tôi' : 'Tham gia trường';
 
     return {
         navigate,
         currentUser,
         searchTerm,
         setSearchTerm,
+        activeCategory,
+        setActiveCategory,
         savedSets,
         filteredSets,
+        isLoading,
+        schoolActionLabel,
         canDelete,
         handleLike,
         handleToggleLikeSet,
         handleDelete,
-        handleExport
+        handleExport,
+        handleLogout
     };
 };

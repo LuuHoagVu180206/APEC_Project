@@ -1,105 +1,344 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { LibraryPageLogic } from '../pages_logic/LibraryPageLogic';
+import { useDarkMode } from '../pages_logic/useDarkMode';
+import '../pages_styling/LibraryPageStyling.css';
+import { 
+    Sparkles, 
+    Search, 
+    X, 
+    Heart, 
+    Bookmark, 
+    FileSpreadsheet, 
+    FileText, 
+    Trash2, 
+    FolderPlus, 
+    Sun, 
+    Moon, 
+    LogOut, 
+    Play, 
+    BookOpen,
+    Layers
+} from 'lucide-react';
 
 const LibraryPage = () => {
     const {
-        navigate, currentUser, searchTerm, setSearchTerm, 
-        savedSets, filteredSets, canDelete, handleLike, 
-        handleToggleLikeSet, handleDelete, handleExport
+        navigate,
+        currentUser,
+        searchTerm,
+        setSearchTerm,
+        activeCategory,
+        setActiveCategory,
+        savedSets,
+        filteredSets,
+        isLoading,
+        schoolActionLabel,
+        canDelete,
+        handleLike,
+        handleToggleLikeSet,
+        handleDelete,
+        handleExport,
+        handleLogout
     } = LibraryPageLogic();
 
+    const { isDark, toggleTheme } = useDarkMode();
+
+    const categories = [
+        'Tất cả',
+        'Toán học',
+        'Tiếng Anh',
+        'Hoá học',
+        'Vật lý',
+        'Lịch sử',
+        'Tin học',
+        'Khác'
+    ];
+
+    const getTopicBadgeClass = (topic) => {
+        if (!topic) return 'badge-other';
+        const t = topic.toLowerCase();
+        if (t.includes('toán')) return 'badge-math';
+        if (t.includes('tiếng anh') || t.includes('anh')) return 'badge-english';
+        if (t.includes('lịch sử') || t.includes('sử')) return 'badge-history';
+        if (t.includes('hoá') || t.includes('vật lý') || t.includes('sinh')) return 'badge-science';
+        return 'badge-other';
+    };
+
     return (
-        <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto', fontFamily: 'Arial' }}>
-            
-            {/* HEADER */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <button onClick={() => navigate(-1)} style={{ padding: '8px 15px', cursor: 'pointer' }}>⬅ Quay lại</button>
-                <h1 style={{ color: '#2c3e50', margin: 0 }}>📚 Thư Viện Cộng Đồng</h1>
-                
-                {currentUser ? (
-                    <button onClick={() => navigate('/studio')} style={{ padding: '8px 15px', background: '#2ecc71', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Quản lý câu hỏi</button>
-                ) : (
-                    <button onClick={() => navigate('/login')} style={{ padding: '8px 15px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Đăng nhập</button>
-                )}
-            </div>
-
-            {/* THANH TÌM KIẾM */}
-            <div style={{ marginBottom: '30px' }}>
-                <input 
-                    type="text" 
-                    placeholder="Tìm kiếm tên bộ câu hỏi..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box', fontSize: '16px' }}
-                />
-            </div>
-
-            {/* DANH SÁCH BỘ CÂU HỎI */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                {filteredSets.length === 0 ? (
-                    <p style={{ textAlign: 'center', color: '#7f8c8d' }}>Không tìm thấy bộ câu hỏi nào.</p>
-                ) : (
-                    filteredSets.map((qSet) => (
-                        <div key={qSet._id} style={{ background: '#fff', border: '1px solid #e0e0e0', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
-                            
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div>
-                                    <h3 style={{ margin: '0 0 10px 0', color: '#34495e' }}>{qSet.title}</h3>
-                                    <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#3498db', textTransform: 'uppercase', marginBottom: '5px', display: 'inline-block' }}>
-                                        🏷️ CHỦ ĐỀ: {qSet.topic || 'KHÁC'}
-                                    </span>
-                                    <p style={{ margin: '0 0 10px 0', color: '#7f8c8d', fontSize: '14px' }}>{qSet.description || "Không có mô tả"}</p>
-                                    <p style={{ margin: 0, fontSize: '12px', color: '#95a5a6' }}>Tác giả: {qSet.owner?.username || "Ẩn danh"}</p>
-                                </div>
-                                
-                                {canDelete(qSet.owner?._id || qSet.owner) && (
-                                    <button onClick={() => handleDelete(qSet._id)} style={{ background: '#e74c3c', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '5px', cursor: 'pointer', fontSize: '12px' }}>
-                                        🗑 Xóa
-                                    </button>
-                                )}
+        <div className="library-wrapper">
+            {/* 1. NAVBAR - ĐỒNG BỘ HOÀN TOÀN */}
+            <header className="navbar">
+                <div className="nav-container">
+                    <div className="nav-left">
+                        <div className="brand-logo" onClick={() => navigate('/')}>
+                            <div className="brand-coin">
+                                <Sparkles size={18} />
                             </div>
-
-                            <hr style={{ border: '0.5px solid #f1f2f6', margin: '15px 0' }} />
-
-                            {/* THANH TƯƠNG TÁC (Like & Export) */}
-                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                                <button 
-                                    onClick={() => handleLike(qSet._id)} 
-                                    style={{ background: 'none', border: '1px solid #ff4757', color: '#ff4757', padding: '6px 15px', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold' }}
-                                >
-                                    ❤️ {qSet.likesCount} Thích
-                                </button>
-                                
-                                <button 
-                                    onClick={() => handleToggleLikeSet(qSet._id)} 
-                                    style={{ 
-                                        background: savedSets.includes(qSet._id) ? '#3498db' : 'none', 
-                                        border: '1px solid #3498db', 
-                                        color: savedSets.includes(qSet._id) ? 'white' : '#3498db', 
-                                        padding: '6px 15px', 
-                                        borderRadius: '20px', 
-                                        cursor: 'pointer', 
-                                        fontWeight: 'bold' 
-                                    }}
-                                >
-                                    {savedSets.includes(qSet._id) ? '🏷️ Đã lưu' : '🔖 Lưu bộ'}
-                                </button>
-                                
-                                <span style={{ color: '#ccc' }}>|</span>
-
-                                <button onClick={() => handleExport(qSet._id, 'excel')} style={{ background: '#2ed573', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '5px', cursor: 'pointer', fontSize: '13px' }}>
-                                    📥 Excel
-                                </button>
-                                <button onClick={() => handleExport(qSet._id, 'pdf')} style={{ background: '#ff6348', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '5px', cursor: 'pointer', fontSize: '13px' }}>
-                                    📥 PDF
-                                </button>
-                            </div>
-
+                            <span className="brand-name">EasyLearn</span>
                         </div>
-                    ))
-                )}
-            </div>
 
+                        <nav className="nav-links">
+                            <Link to="/" className="nav-link">Trang chủ</Link>
+                            <Link to="/library" className="nav-link active">Thư viện</Link>
+                            <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
+                            <Link to="/schools" className="nav-link">Trường học</Link>
+                            <Link to="/studio" className="nav-link">Studio</Link>
+                        </nav>
+                    </div>
+
+                    <div className="nav-right">
+                        <button 
+                            className="theme-toggle-btn"
+                            onClick={toggleTheme} 
+                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
+                            aria-label="Toggle Theme"
+                        >
+                            {isDark ? <Sun size={19} /> : <Moon size={19} />}
+                        </button>
+
+                        {currentUser?.role === 'teacher' ? (
+                            <div className="teacher-account-menu">
+                                <Link className="nav-username" to="/profile">
+                                    <span className="user-avatar-badge">{currentUser.username.charAt(0).toUpperCase()}</span>
+                                    <span>{currentUser.username}</span>
+                                </Link>
+                                <div className="teacher-account-dropdown">
+                                    <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
+                                    <Link to="/schools">{schoolActionLabel}</Link>
+                                    <Link to="/studio">Studio tạo bộ đề</Link>
+                                    <Link to="/profile">Hồ sơ cá nhân</Link>
+                                    <button type="button" onClick={handleLogout} className="logout-btn">
+                                        <LogOut size={16} /> Đăng xuất
+                                    </button>
+                                </div>
+                            </div>
+                        ) : currentUser?.role === 'user' || currentUser?.role === 'admin' ? (
+                            <div className="teacher-account-menu">
+                                <Link className="nav-username" to="/profile">
+                                    <span className="user-avatar-badge">{currentUser.username.charAt(0).toUpperCase()}</span>
+                                    <span>{currentUser.username}</span>
+                                </Link>
+                                <div className="teacher-account-dropdown">
+                                    {currentUser.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
+                                    <Link to="/schools">{schoolActionLabel}</Link>
+                                    <Link to="/student/classes">Lớp học của tôi</Link>
+                                    <Link to="/game">Chơi Game Quiz</Link>
+                                    <Link to="/profile">Hồ sơ cá nhân</Link>
+                                    <button type="button" onClick={handleLogout} className="logout-btn">
+                                        <LogOut size={16} /> Đăng xuất
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="auth-buttons">
+                                <button className="btn-secondary-nav" onClick={() => navigate('/login')}>
+                                    Đăng nhập
+                                </button>
+                                <button className="btn-primary-nav" onClick={() => navigate('/login?mode=register')}>
+                                    Bắt đầu ngay
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </header>
+
+            {/* 2. HERO SECTION & TÌM KIẾM */}
+            <section className="library-hero">
+                <div className="library-backdrop-glow"></div>
+                <div className="library-header-content">
+                    <div className="library-pill-badge">
+                        <BookOpen size={14} />
+                        <span>Kho Tàng Đề Thi & Tri Thức</span>
+                    </div>
+
+                    <h1 className="library-title">Thư Viện Câu Hỏi Cộng Đồng</h1>
+                    <p className="library-subtitle">
+                        Nơi giáo viên và người học trên cả nước chia sẻ các bộ câu hỏi chọn lọc. Ôn luyện, lưu bộ đề yêu thích hoặc xuất tài liệu ôn thi.
+                    </p>
+
+                    {/* Thanh tìm kiếm & Nút Tạo đề */}
+                    <div className="library-search-container">
+                        <div className="library-search-wrapper">
+                            <Search size={18} className="library-search-icon" />
+                            <input 
+                                type="text"
+                                className="library-search-input"
+                                placeholder="Tìm kiếm bộ câu hỏi theo tên, chủ đề hoặc mô tả..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            {searchTerm && (
+                                <button 
+                                    className="btn-clear-search"
+                                    onClick={() => setSearchTerm('')}
+                                    title="Xóa tìm kiếm"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
+                        </div>
+
+                        <button 
+                            className="btn-studio-cta"
+                            onClick={() => navigate(currentUser ? '/studio' : '/login')}
+                        >
+                            <FolderPlus size={17} />
+                            <span>Tạo bộ đề mới</span>
+                        </button>
+                    </div>
+
+                    {/* Bộ lọc danh mục */}
+                    <div className="library-categories">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                type="button"
+                                className={`category-tab-btn ${activeCategory === cat ? 'active' : ''}`}
+                                onClick={() => setActiveCategory(cat)}
+                            >
+                                <span>{cat}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* 3. LƯỚI BỘ CÂU HỎI */}
+            <main className="library-main-content">
+                <div className="library-meta-bar">
+                    <span className="library-count-text">
+                        Hiển thị <strong>{filteredSets.length}</strong> bộ câu hỏi công khai
+                    </span>
+                </div>
+
+                {isLoading ? (
+                    <div className="library-empty-state">
+                        <div className="empty-icon-wrap">
+                            <Layers size={28} />
+                        </div>
+                        <h3>Đang tải dữ liệu thư viện...</h3>
+                    </div>
+                ) : filteredSets.length === 0 ? (
+                    <div className="library-empty-state">
+                        <div className="empty-icon-wrap">
+                            <BookOpen size={28} />
+                        </div>
+                        <h3>Không tìm thấy bộ câu hỏi nào</h3>
+                        <p>
+                            Thử tìm kiếm với từ khóa khác hoặc chuyển sang danh mục "Tất cả" để khám phá thêm nhiều nội dung nhé.
+                        </p>
+                        <button 
+                            className="btn-studio-cta" 
+                            onClick={() => { setSearchTerm(''); setActiveCategory('Tất cả'); }}
+                        >
+                            Xem tất cả bộ đề
+                        </button>
+                    </div>
+                ) : (
+                    <div className="library-grid">
+                        {filteredSets.map((qSet) => {
+                            const isSaved = savedSets.includes(qSet._id);
+                            const topicClass = getTopicBadgeClass(qSet.topic);
+
+                            return (
+                                <div key={qSet._id} className="set-card">
+                                    <div>
+                                        <div className="set-card-header">
+                                            <span className={`set-topic-badge ${topicClass}`}>
+                                                {qSet.topic || 'Khác'}
+                                            </span>
+
+                                            {canDelete(qSet.owner?._id || qSet.owner) && (
+                                                <button 
+                                                    className="btn-delete-card"
+                                                    onClick={() => handleDelete(qSet._id)}
+                                                    title="Xóa bộ câu hỏi khỏi hệ thống"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <h3 
+                                            className="set-card-title"
+                                            onClick={() => navigate(`/set/${qSet._id}`)}
+                                            title="Bấm để xem chi tiết các câu hỏi trong bộ này"
+                                        >
+                                            {qSet.title}
+                                        </h3>
+
+                                        <p className="set-card-desc">
+                                            {qSet.description || "Bộ câu hỏi trắc nghiệm chất lượng cao phục vụ rèn luyện và kiểm tra kiến thức."}
+                                        </p>
+
+                                        <div className="set-card-author">
+                                            <div className="author-avatar">
+                                                {(qSet.owner?.username || 'A').charAt(0).toUpperCase()}
+                                            </div>
+                                            <span className="author-name">
+                                                Tác giả: <strong>{qSet.owner?.username || "Ẩn danh"}</strong>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Action buttons */}
+                                    <div className="set-card-actions">
+                                        <div className="action-group-left">
+                                            <button 
+                                                className="btn-card-icon liked"
+                                                onClick={() => handleLike(qSet._id)}
+                                                title="Thả tim cho bộ đề này"
+                                            >
+                                                <Heart size={14} fill="#ef4444" />
+                                                <span>{qSet.likesCount || 0}</span>
+                                            </button>
+
+                                            <button 
+                                                className={`btn-card-icon ${isSaved ? 'saved' : ''}`}
+                                                onClick={() => handleToggleLikeSet(qSet._id)}
+                                                title={isSaved ? "Đã lưu vào bộ sưu tập cá nhân" : "Lưu vào bộ sưu tập cá nhân"}
+                                            >
+                                                <Bookmark size={14} fill={isSaved ? "var(--accent-blue)" : "none"} />
+                                                <span>{isSaved ? "Đã lưu" : "Lưu bộ"}</span>
+                                            </button>
+
+                                            <button 
+                                                className="btn-card-icon"
+                                                onClick={() => navigate(`/set/${qSet._id}`)}
+                                                title="Xem danh sách câu hỏi"
+                                            >
+                                                <Play size={13} fill="currentColor" />
+                                                <span>Xem bộ</span>
+                                            </button>
+                                        </div>
+
+                                        <div className="action-group-right">
+                                            <button 
+                                                className="btn-export-mini"
+                                                onClick={() => handleExport(qSet._id, 'excel')}
+                                                title="Tải về file Excel"
+                                            >
+                                                <FileSpreadsheet size={13} style={{ marginRight: '4px' }} />
+                                                Excel
+                                            </button>
+
+                                            <button 
+                                                className="btn-export-mini"
+                                                onClick={() => handleExport(qSet._id, 'pdf')}
+                                                title="Tải về file PDF"
+                                            >
+                                                <FileText size={13} style={{ marginRight: '4px' }} />
+                                                PDF
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </main>
         </div>
     );
 };

@@ -4,11 +4,18 @@ import { useNavigate } from 'react-router-dom';
 
 export const StudioPageLogic = () => {
     const navigate = useNavigate();
-    const currentUser = JSON.parse(localStorage.getItem('user'));
+    const [currentUser, setCurrentUser] = useState(() => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('user'));
+            return saved?.username ? saved : null;
+        } catch {
+            return null;
+        }
+    });
 
     const [questions, setQuestions] = useState([]);
     const [formData, setFormData] = useState({
-        questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', topic:'Toán', setId: ''
+        questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', topic: 'Toán', setId: ''
     });
   
     const [mySets, setMySets] = useState([]);
@@ -17,6 +24,8 @@ export const StudioPageLogic = () => {
     });
     const [teacherClasses, setTeacherClasses] = useState([]);
     const [savedSetsData, setSavedSetsData] = useState([]);
+    const [schoolMemberships, setSchoolMemberships] = useState([]);
+    const [activeTab, setActiveTab] = useState('sets'); // 'sets' | 'questions' | 'saved'
 
     useEffect(() => {
         if (!currentUser) {
@@ -30,6 +39,18 @@ export const StudioPageLogic = () => {
         if (currentUser.role === 'teacher') fetchTeacherClasses();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [navigate]);
+
+    // Lấy thông tin trường học
+    useEffect(() => {
+        if (!currentUser?.accessToken) return;
+        let isActive = true;
+        axios.get('http://localhost:5000/api/schools/mine', {
+            headers: { token: currentUser.accessToken }
+        }).then((res) => {
+            if (isActive) setSchoolMemberships(res.data);
+        }).catch(() => {});
+        return () => { isActive = false; };
+    }, [currentUser]);
 
     const fetchQuestions = async () => {
         try {
@@ -87,14 +108,14 @@ export const StudioPageLogic = () => {
                         : 'Không thể thêm bộ câu hỏi vào lớp đã chọn.';
                     alert(`Đã tạo bộ câu hỏi nhưng chưa thêm được vào lớp: ${errorMessage}`);
                     fetchMySets();
-                    setQuestionSetFormData({ title: '', description: '', isPublic: false, classId: '' });
+                    setQuestionSetFormData({ title: '', description: '', topic: 'Toán', isPublic: false, classId: '' });
                     return;
                 }
             }
 
             alert(classId ? 'Đã tạo bộ câu hỏi và thêm vào lớp!' : 'Tạo Bộ Câu Hỏi thành công!');
             fetchMySets();
-            setQuestionSetFormData({ title: '', description: '', isPublic: false, classId: '' });
+            setQuestionSetFormData({ title: '', description: '', topic: 'Toán', isPublic: false, classId: '' });
         } catch (err) {
             alert("Lỗi tạo bộ câu hỏi!");
             console.error(err);
@@ -128,10 +149,10 @@ export const StudioPageLogic = () => {
           
             alert("Đã lưu câu hỏi thành công!");
             fetchQuestions(); 
-            setFormData({ questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', setId: '' });
+            setFormData({ questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', topic: 'Toán', setId: '' });
         } catch (err) {
             const errorMsg = err.response?.data?.message || err.response?.data || err.message;
-            alert("🛑 Server từ chối với lý do: " + (typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg));
+            alert("🛑 Server từ chối: " + (typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg));
             console.error("Chi tiết lỗi:", err.response || err);
         }
     };
@@ -140,7 +161,7 @@ export const StudioPageLogic = () => {
         if (!setId) return; 
         try {
             await axios.put(`http://localhost:5000/api/sets/${setId}/add-question`, { questionId: questionId }, { headers: { token: currentUser.accessToken }});
-            alert("Đã nhét câu hỏi vào bộ thành công!");
+            alert("Đã thêm câu hỏi vào bộ thành công!");
         } catch (err) {
             alert(err.response?.data || "Lỗi khi thêm vào bộ!");
         }
@@ -197,10 +218,36 @@ export const StudioPageLogic = () => {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        setCurrentUser(null);
+        setSchoolMemberships([]);
+        navigate('/');
+    };
+
+    const schoolActionLabel = schoolMemberships.length > 0 ? 'Trường của tôi' : 'Tham gia trường';
+
     return {
-        navigate, currentUser, questions, formData, setFormData,
-        mySets, questionSetFormData, setQuestionSetFormData, teacherClasses, savedSetsData,
-        handleCreateSet, handleCreateQuestion, handleAddToSet, handleDeleteSet,
-        handleDeleteQuestion, handleRemoveSavedSet, handleExport
+        navigate, 
+        currentUser, 
+        questions, 
+        formData, 
+        setFormData,
+        mySets, 
+        questionSetFormData, 
+        setQuestionSetFormData, 
+        teacherClasses, 
+        savedSetsData,
+        schoolActionLabel,
+        activeTab,
+        setActiveTab,
+        handleCreateSet, 
+        handleCreateQuestion, 
+        handleAddToSet, 
+        handleDeleteSet,
+        handleDeleteQuestion, 
+        handleRemoveSavedSet, 
+        handleExport,
+        handleLogout
     };
 };

@@ -6,14 +6,16 @@ export const LandingPageLogic = () => {
     const navigate = useNavigate();
     const { isDark, toggleTheme } = useDarkMode(); 
 
-    // Các state quản lý từ khóa tìm kiếm
+    // Các state quản lý từ khóa tìm kiếm và danh mục đang chọn
     const [searchDev, setSearchDev] = useState("");
     const [searchCommunity, setSearchCommunity] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("Tất cả");
 
     // Hàm điều hướng sang Library Page kèm tham số URL
-    const handleSearch = (e, query, category = "Tất cả") => {
-        if (e.key === 'Enter' || e.type === 'click') {
-            navigate(`/library?search=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}`);
+    const handleSearch = (e, query, category = selectedCategory) => {
+        if (!e || e.key === 'Enter' || e.type === 'click') {
+            const catParam = category === "Tất cả" ? "" : category;
+            navigate(`/library?search=${encodeURIComponent(query || "")}${catParam ? `&category=${encodeURIComponent(catParam)}` : ""}`);
         }
     };
 
@@ -26,6 +28,8 @@ export const LandingPageLogic = () => {
         setSearchDev,
         searchCommunity,
         setSearchCommunity,
+        selectedCategory,
+        setSelectedCategory,
         handleSearch
     };
 };
