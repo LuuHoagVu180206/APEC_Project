@@ -1,5 +1,6 @@
 # 1. Thư viện (Rất nặng, không cần lưu vì có thể cài lại bằng npm install)
 node_modules/
+/AImodels/**/*.gguf
 
 # 2. Các file bảo mật (QUAN TRỌNG: Chứa mật khẩu DB, tuyệt đối không đưa lên Git)
 .env
