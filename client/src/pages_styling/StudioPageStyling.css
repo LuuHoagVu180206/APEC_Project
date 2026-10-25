@@ -840,3 +840,90 @@
         position: static;
     }
 }
+
+/* --- AI EXPLANATION BUTTON & HEADER --- */
+.explanation-field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 2px;
+}
+
+.btn-ai-generate {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+    color: #a78bfa;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: 0 2px 6px rgba(139, 92, 246, 0.12);
+}
+
+.btn-ai-generate:hover:not(:disabled) {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: #ffffff;
+    border-color: #8b5cf6;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-ai-generate:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: var(--bg-surface-elevated);
+    border-color: var(--border-subtle);
+    color: var(--text-muted);
+    box-shadow: none;
+    transform: none;
+}
+
+.btn-ai-generate.loading {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%);
+    color: #a78bfa;
+    cursor: wait;
+}
+
+[data-theme='light'] .btn-ai-generate {
+    background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%);
+    border-color: #c4b5fd;
+    color: #7c3aed;
+}
+
+[data-theme='light'] .btn-ai-generate:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    color: #ffffff;
+    border-color: #7c3aed;
+}
+
+[data-theme='light'] .btn-ai-generate:disabled {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+}
+
+.ai-hint-msg {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    display: block;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+@keyframes spin-anim {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin-animation {
+    animation: spin-anim 1s linear infinite;
+}

@@ -19,7 +19,8 @@ import {
     Plus, 
     Globe, 
     Lock,
-    Lightbulb
+    Lightbulb,
+    Loader2
 } from 'lucide-react';
 
 const StudioPage = () => {
@@ -44,7 +45,10 @@ const StudioPage = () => {
         handleDeleteQuestion, 
         handleRemoveSavedSet, 
         handleExport,
-        handleLogout
+        handleLogout,
+        isGeneratingAi,
+        canGenerateAiExplanation,
+        handleGenerateAiExplanation
     } = StudioPageLogic();
 
     const { isDark, toggleTheme } = useDarkMode();
@@ -487,18 +491,47 @@ const StudioPage = () => {
                                 </div>
 
                                 <div className="form-group-field">
-                                    <label htmlFor="q-explanation" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <Lightbulb size={14} color="var(--accent-gold)" />
-                                        <span>Giải thích đáp án (Tùy chọn)</span>
-                                    </label>
+                                    <div className="explanation-field-header">
+                                        <label htmlFor="q-explanation" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <Lightbulb size={14} color="var(--accent-gold)" />
+                                            <span>Giải thích đáp án (Tùy chọn)</span>
+                                        </label>
+
+                                        <button
+                                            type="button"
+                                            className={`btn-ai-generate ${!canGenerateAiExplanation ? 'disabled' : ''} ${isGeneratingAi ? 'loading' : ''}`}
+                                            onClick={handleGenerateAiExplanation}
+                                            disabled={!canGenerateAiExplanation || isGeneratingAi}
+                                            title={canGenerateAiExplanation ? "Sử dụng AI Qwen 2.5 để tự động tạo lời giải thích" : "Vui lòng nhập đề bài và đủ 4 đáp án để mở khóa nút AI"}
+                                        >
+                                            {isGeneratingAi ? (
+                                                <>
+                                                    <Loader2 size={13} className="spin-animation" />
+                                                    <span>AI đang suy nghĩ...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Sparkles size={13} />
+                                                    <span>Tạo giải thích bằng AI (Qwen 2.5)</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+
                                     <textarea 
                                         id="q-explanation"
                                         className="studio-textarea"
-                                        placeholder="Nhập lời giải hoặc giải thích chi tiết vì sao đáp án này đúng (hiển thị khi người học xem lại)..." 
+                                        placeholder={canGenerateAiExplanation ? "Nhập lời giải hoặc bấm nút 'Tạo giải thích bằng AI' ở trên để tự động tạo..." : "Nhập lời giải chi tiết vì sao đáp án này đúng..."} 
                                         value={formData.explanation || ''} 
                                         onChange={(e) => setFormData({...formData, explanation: e.target.value})} 
                                         style={{ minHeight: '75px' }}
                                     />
+
+                                    {!canGenerateAiExplanation && (
+                                        <small className="ai-hint-msg">
+                                            💡 Mẹo: Nhập đề bài và đủ 4 lựa chọn (A, B, C, D) để mở khóa tạo lời giải bằng AI Qwen 2.5.
+                                        </small>
+                                    )}
                                 </div>
 
                                 {mySets.length > 0 && (

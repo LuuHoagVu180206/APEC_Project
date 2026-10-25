@@ -26,6 +26,42 @@ export const StudioPageLogic = () => {
     const [savedSetsData, setSavedSetsData] = useState([]);
     const [schoolMemberships, setSchoolMemberships] = useState([]);
     const [activeTab, setActiveTab] = useState('sets'); // 'sets' | 'questions' | 'saved'
+    const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+
+    const canGenerateAiExplanation = Boolean(
+        formData.questionText && formData.questionText.trim() &&
+        formData.optionA && formData.optionA.trim() &&
+        formData.optionB && formData.optionB.trim() &&
+        formData.optionC && formData.optionC.trim() &&
+        formData.optionD && formData.optionD.trim()
+    );
+
+    const handleGenerateAiExplanation = async () => {
+        if (!canGenerateAiExplanation || isGeneratingAi) return;
+        setIsGeneratingAi(true);
+        try {
+            const res = await axios.post('http://localhost:5000/api/questions/generate-explanation', {
+                questionText: formData.questionText,
+                options: [formData.optionA, formData.optionB, formData.optionC, formData.optionD],
+                correctAnswer: formData.correctAnswer,
+                topic: formData.topic
+            }, {
+                headers: { token: currentUser.accessToken }
+            });
+
+            if (res.data?.explanation) {
+                setFormData(prev => ({
+                    ...prev,
+                    explanation: res.data.explanation
+                }));
+            }
+        } catch (err) {
+            const errorMsg = err.response?.data?.message || err.response?.data || "Không thể tạo lời giải thích bằng AI. Vui lòng kiểm tra lại dịch vụ Ollama!";
+            alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+        } finally {
+            setIsGeneratingAi(false);
+        }
+    };
 
     useEffect(() => {
         if (!currentUser) {
@@ -256,6 +292,9 @@ export const StudioPageLogic = () => {
         handleDeleteQuestion, 
         handleRemoveSavedSet, 
         handleExport,
-        handleLogout
+        handleLogout,
+        isGeneratingAi,
+        canGenerateAiExplanation,
+        handleGenerateAiExplanation
     };
 };
