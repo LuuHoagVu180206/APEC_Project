@@ -9,13 +9,17 @@ import {
     Sparkles, 
     AlertCircle, 
     GraduationCap, 
-    Info 
+    Info,
+    Sun,
+    Moon
 } from 'lucide-react';
 import { CreateClassPageLogic } from '../pages_logic/CreateClassPageLogic';
+import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/CreateClassStyling.css';
 
 const CreateClassPage = () => {
     const { formData, setFormData, error, isSaving, handleSubmit, navigate } = CreateClassPageLogic();
+    const { isDark, toggleTheme } = useDarkMode();
 
     return (
         <main className="create-class-root">
@@ -29,9 +33,20 @@ const CreateClassPage = () => {
                     >
                         <ArrowLeft size={16} /> Dashboard giáo viên
                     </button>
-                    <div className="create-class-badge">
-                        <Sparkles size={14} />
-                        <span>Khu vực Giáo viên</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <button 
+                            type="button" 
+                            className="create-class-theme-btn" 
+                            onClick={toggleTheme} 
+                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"} 
+                            aria-label="Toggle Theme"
+                        >
+                            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                        </button>
+                        <div className="create-class-badge">
+                            <Sparkles size={14} />
+                            <span>Khu vực Giáo viên</span>
+                        </div>
                     </div>
                 </div>
 

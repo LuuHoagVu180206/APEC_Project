@@ -71,6 +71,9 @@ const Navbar = ({ activePage }) => {
                         <Link to="/schools" className={`nav-link ${isPathActive('schools', '/schools') ? 'active' : ''}`}>
                             Trường học
                         </Link>
+                        <Link to="/student/classes" className={`nav-link ${isPathActive('classes', '/student/classes') ? 'active' : ''}`}>
+                            Lớp học
+                        </Link>
                         <Link to="/studio" className={`nav-link ${isPathActive('studio', '/studio') ? 'active' : ''}`}>
                             Studio
                         </Link>

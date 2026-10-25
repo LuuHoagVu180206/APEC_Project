@@ -13,14 +13,18 @@ import {
     ExternalLink, 
     Clock, 
     AlertCircle, 
-    Loader2 
+    Loader2,
+    Sun,
+    Moon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AdminSchoolDetailPageLogic } from '../pages_logic/AdminSchoolDetailPageLogic';
+import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/AdminSchoolDetailStyling.css';
 
 const AdminSchoolDetailPage = () => {
     const { dashboard, isLoading, error, navigate } = AdminSchoolDetailPageLogic();
+    const { isDark, toggleTheme } = useDarkMode();
 
     const formatDate = (dateString, includeTime = false) => {
         if (!dateString) return '';
@@ -54,7 +58,7 @@ const AdminSchoolDetailPage = () => {
                 <div className="admin-school-detail-inner">
                     <div className="admin-sd-loading-box">
                         <Loader2 size={38} className="admin-sd-spinner" color="var(--asd-cyan)" />
-                        <h3 style={{ color: '#ffffff', margin: 0, fontSize: '18px', fontWeight: 800 }}>
+                        <h3 style={{ color: 'var(--asd-text)', margin: 0, fontSize: '18px', fontWeight: 800 }}>
                             Đang tải thông tin School Community...
                         </h3>
                         <p style={{ color: 'var(--asd-text-muted)', margin: 0, fontSize: '13.5px' }}>
@@ -106,6 +110,15 @@ const AdminSchoolDetailPage = () => {
                             <span>Bảng điều khiển Quản trị viên</span>
                         </div>
                     </div>
+                    <button 
+                        type="button" 
+                        className="admin-sd-theme-btn" 
+                        onClick={toggleTheme} 
+                        title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"} 
+                        aria-label="Toggle Theme"
+                    >
+                        {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                    </button>
                 </div>
 
                 {/* HERO HEADER */}

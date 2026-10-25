@@ -12,13 +12,17 @@ import {
     Send, 
     AlertCircle, 
     Sparkles, 
-    ShieldCheck 
+    ShieldCheck,
+    Sun,
+    Moon 
 } from 'lucide-react';
 import { SchoolRequestPageLogic } from '../pages_logic/SchoolRequestPageLogic';
+import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/SchoolRequestStyling.css';
 
 const SchoolRequestPage = () => {
     const { formData, setFormData, error, isSubmitting, handleSubmit, navigate } = SchoolRequestPageLogic();
+    const { isDark, toggleTheme } = useDarkMode();
     const updateField = (field, value) => setFormData((current) => ({ ...current, [field]: value }));
 
     return (
@@ -33,9 +37,20 @@ const SchoolRequestPage = () => {
                     >
                         <ArrowLeft size={16} /> Danh sách Trường
                     </button>
-                    <div className="school-req-badge">
-                        <Sparkles size={14} />
-                        <span>School Community</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <button 
+                            type="button" 
+                            className="school-req-theme-btn" 
+                            onClick={toggleTheme} 
+                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"} 
+                            aria-label="Toggle Theme"
+                        >
+                            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                        </button>
+                        <div className="school-req-badge">
+                            <Sparkles size={14} />
+                            <span>School Community</span>
+                        </div>
                     </div>
                 </div>
 

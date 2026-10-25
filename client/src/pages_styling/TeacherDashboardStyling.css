@@ -659,3 +659,267 @@
         width: 100%;
     }
 }
+
+/* ================= THEME TOGGLE BUTTON ================= */
+.teacher-dash-theme-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--td-surface);
+    color: var(--td-text-muted);
+    border: 1.5px solid var(--td-border-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.6);
+    transition: all 0.15s ease;
+}
+
+.teacher-dash-theme-btn:hover {
+    color: var(--td-gold-hover);
+    border-color: var(--td-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+.teacher-dash-theme-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+/* ================= LIGHT MODE OVERRIDES ================= */
+[data-theme='light'] .teacher-dash-root {
+    --td-bg: #f8fafc;
+    --td-surface: #ffffff;
+    --td-surface-hover: #f1f5f9;
+    --td-surface-card: #ffffff;
+    --td-surface-card-hover: #f8fafc;
+    --td-border: #e2e8f0;
+    --td-border-light: #cbd5e1;
+    --td-text: #0f172a;
+    --td-text-muted: #334155;
+    --td-text-subtle: #64748b;
+    --td-gold: #d97706;
+    --td-gold-hover: #b45309;
+    --td-gold-shadow: #b45309;
+    --td-cyan: #0284c7;
+    --td-cyan-hover: #0369a1;
+    --td-cyan-shadow: #0369a1;
+    --td-purple: #7c3aed;
+    --td-purple-hover: #6d28d9;
+    --td-purple-shadow: #6d28d9;
+
+    background-color: var(--td-bg);
+    background-image: 
+        radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(245, 158, 11, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.03) 0%, transparent 60%);
+    color: var(--td-text);
+}
+
+[data-theme='light'] .teacher-dash-back-btn,
+[data-theme='light'] .teacher-dash-theme-btn {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 0 0 #cbd5e1;
+    color: #334155;
+}
+
+[data-theme='light'] .teacher-dash-back-btn:hover,
+[data-theme='light'] .teacher-dash-theme-btn:hover {
+    color: #0284c7;
+    border-color: #0284c7;
+    background: #f8fafc;
+    box-shadow: 0 5px 0 0 #94a3b8;
+}
+
+[data-theme='light'] .teacher-dash-badge-role {
+    background: rgba(217, 119, 6, 0.12);
+    border-color: rgba(217, 119, 6, 0.35);
+    color: #b45309;
+}
+
+[data-theme='light'] .teacher-dash-hero {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .teacher-dash-hero-info h1 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .teacher-dash-hero-sub {
+    color: #475569;
+}
+
+[data-theme='light'] .teacher-dash-hero-sub strong {
+    color: #b45309;
+}
+
+[data-theme='light'] .teacher-dash-hero-tag {
+    color: #0284c7;
+}
+
+[data-theme='light'] .teacher-dash-hud-pill {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .teacher-dash-hud-num {
+    color: #0f172a;
+}
+
+[data-theme='light'] .teacher-dash-hud-lbl {
+    color: #475569;
+}
+
+[data-theme='light'] .teacher-dash-section-header h2 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .teacher-dash-section-tag {
+    color: #d97706;
+}
+
+[data-theme='light'] .teacher-dash-badge-count {
+    background: rgba(217, 119, 6, 0.12);
+    border-color: rgba(217, 119, 6, 0.35);
+    color: #b45309;
+}
+
+/* Quick Action Cards */
+[data-theme='light'] .teacher-dash-action-card {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 4px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .teacher-dash-action-card:hover {
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1), 0 6px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .teacher-dash-action-text h3 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .teacher-dash-action-text p {
+    color: #475569;
+}
+
+[data-theme='light'] .teacher-dash-card-gold {
+    border-color: rgba(217, 119, 6, 0.3);
+}
+
+[data-theme='light'] .teacher-dash-card-gold:hover {
+    border-color: #d97706;
+    box-shadow: 0 8px 22px rgba(217, 119, 6, 0.12), 0 6px 0 0 var(--td-gold-shadow);
+}
+
+[data-theme='light'] .teacher-dash-card-cyan {
+    border-color: rgba(2, 132, 199, 0.3);
+}
+
+[data-theme='light'] .teacher-dash-card-cyan:hover {
+    border-color: #0284c7;
+    box-shadow: 0 8px 22px rgba(2, 132, 199, 0.12), 0 6px 0 0 var(--td-cyan-shadow);
+}
+
+[data-theme='light'] .teacher-dash-card-purple {
+    border-color: rgba(124, 58, 237, 0.3);
+}
+
+[data-theme='light'] .teacher-dash-card-purple:hover {
+    border-color: #7c3aed;
+    box-shadow: 0 8px 22px rgba(124, 58, 237, 0.12), 0 6px 0 0 var(--td-purple-shadow);
+}
+
+/* Search Box */
+[data-theme='light'] .teacher-dash-search-box {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 0 0 #e2e8f0;
+}
+
+[data-theme='light'] .teacher-dash-search-box input {
+    background: transparent;
+    color: #0f172a;
+}
+
+[data-theme='light'] .teacher-dash-search-box input::placeholder {
+    color: #64748b;
+}
+
+/* Class Cards */
+[data-theme='light'] .teacher-dash-class-card {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 4px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .teacher-dash-class-card:hover {
+    border-color: #0284c7;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1), 0 6px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .teacher-dash-class-title {
+    color: #0f172a;
+}
+
+[data-theme='light'] .teacher-dash-class-desc {
+    color: #475569;
+}
+
+[data-theme='light'] .teacher-dash-class-avatar {
+    background: rgba(2, 132, 199, 0.1);
+    border-color: rgba(2, 132, 199, 0.3);
+    color: #0284c7;
+}
+
+[data-theme='light'] .teacher-dash-semester-pill {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+[data-theme='light'] .teacher-dash-card-footer {
+    background: #f8fafc;
+    border-top-color: #e2e8f0;
+    color: #475569;
+}
+
+[data-theme='light'] .teacher-dash-code-badge {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #b45309;
+}
+
+[data-theme='light'] .teacher-dash-code-badge:hover {
+    background: #ffffff;
+    border-color: #d97706;
+}
+
+[data-theme='light'] .teacher-dash-enter-link {
+    color: #0284c7;
+}
+
+[data-theme='light'] .teacher-dash-class-card:hover .teacher-dash-enter-link {
+    color: #0369a1;
+}
+
+/* Empty State */
+[data-theme='light'] .teacher-dash-empty {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+[data-theme='light'] .teacher-dash-empty h3 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .teacher-dash-empty p {
+    color: #475569;
+}

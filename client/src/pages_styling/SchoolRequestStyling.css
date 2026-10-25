@@ -92,6 +92,34 @@
     box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
 }
 
+.school-req-theme-btn {
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--sr-surface);
+    border: 1.5px solid var(--sr-border-light);
+    color: var(--sr-gold);
+    cursor: pointer;
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.6);
+    transition: all 0.15s ease;
+}
+
+.school-req-theme-btn:hover {
+    background: var(--sr-surface-hover);
+    border-color: var(--sr-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+.school-req-theme-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
+}
+
 .school-req-badge {
     display: inline-flex;
     align-items: center;
@@ -354,5 +382,128 @@
     .school-req-card {
         padding: 24px 20px;
     }
+}
+
+/* ==========================================================================
+   LIGHT MODE OVERRIDES FOR SCHOOL REQUEST PAGE
+   ========================================================================== */
+[data-theme='light'] .school-req-root {
+    --sr-bg: #f8fafc;
+    --sr-surface: #ffffff;
+    --sr-surface-hover: #f1f5f9;
+    --sr-surface-card: #ffffff;
+    --sr-border: #e2e8f0;
+    --sr-border-light: #cbd5e1;
+    --sr-text: #0f172a;
+    --sr-text-muted: #334155;
+    --sr-text-subtle: #64748b;
+    --sr-cyan: #0284c7;
+    --sr-cyan-hover: #0369a1;
+
+    background-color: #f8fafc;
+    background-image: 
+        radial-gradient(circle at 12% 15%, rgba(14, 165, 233, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 88% 85%, rgba(245, 158, 11, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.03) 0%, transparent 60%);
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-req-back-btn,
+[data-theme='light'] .school-req-theme-btn {
+    background: #ffffff;
+    color: #334155;
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-req-back-btn:hover,
+[data-theme='light'] .school-req-theme-btn:hover {
+    color: #0284c7;
+    border-color: #0284c7;
+    background: #f8fafc;
+    box-shadow: 0 5px 0 0 #94a3b8;
+}
+
+[data-theme='light'] .school-req-badge {
+    background: rgba(2, 132, 199, 0.12);
+    border-color: rgba(2, 132, 199, 0.35);
+    color: #0284c7;
+}
+
+[data-theme='light'] .school-req-hero {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-req-hero h1 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-req-hero-sub {
+    color: #475569;
+}
+
+[data-theme='light'] .school-req-hero-tag {
+    color: #0284c7;
+}
+
+[data-theme='light'] .school-req-card {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-req-label {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-req-label small {
+    color: #64748b;
+}
+
+[data-theme='light'] .school-req-input-box {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 0 0 #e2e8f0;
+}
+
+[data-theme='light'] .school-req-input-box input,
+[data-theme='light'] .school-req-input-box textarea {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-req-input-box input::placeholder,
+[data-theme='light'] .school-req-input-box textarea::placeholder {
+    color: #64748b;
+}
+
+[data-theme='light'] .school-req-input-box:focus-within {
+    background: #ffffff;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+[data-theme='light'] .school-req-btn-cancel {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #334155;
+    box-shadow: 0 3px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-req-btn-cancel:hover {
+    background: #ffffff;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+[data-theme='light'] .school-req-tip {
+    background: rgba(2, 132, 199, 0.08);
+    border-color: rgba(2, 132, 199, 0.25);
+    color: #475569;
+}
+
+[data-theme='light'] .school-req-tip strong {
+    color: #0284c7;
 }
 

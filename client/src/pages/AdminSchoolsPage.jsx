@@ -15,16 +15,20 @@ import {
     AlertCircle, 
     Loader2, 
     MapPin, 
-    Clock 
+    Clock,
+    Sun,
+    Moon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AdminSchoolsPageLogic } from '../pages_logic/AdminSchoolsPageLogic';
+import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/AdminSchoolsStyling.css';
 
 const AdminSchoolsPage = () => {
     const {
         schools, search, page, pagination, isLoading, error, setPage, handleSearchChange, navigate
     } = AdminSchoolsPageLogic();
+    const { isDark, toggleTheme } = useDarkMode();
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -60,6 +64,15 @@ const AdminSchoolsPage = () => {
                     </div>
 
                     <div className="admin-schools-nav-right">
+                        <button 
+                            type="button" 
+                            className="admin-schools-theme-btn" 
+                            onClick={toggleTheme} 
+                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"} 
+                            aria-label="Toggle Theme"
+                        >
+                            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                        </button>
                         <button 
                             type="button"
                             className="admin-schools-req-link"

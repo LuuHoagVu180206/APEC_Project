@@ -18,13 +18,17 @@ import {
     SearchX, 
     AlertCircle, 
     Loader2, 
-    ExternalLink 
+    ExternalLink,
+    Sun,
+    Moon
 } from 'lucide-react';
 import { SchoolAdminRequestsLogic } from '../pages_logic/SchoolAdminRequestsLogic';
+import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/SchoolAdminRequestsStyling.css';
 
 const SchoolAdminRequestsPage = () => {
     const { requests, error, reviewRequest, navigate } = SchoolAdminRequestsLogic();
+    const { isDark, toggleTheme } = useDarkMode();
     const [searchTerm, setSearchTerm] = useState('');
     const [processingId, setProcessingId] = useState(null);
 
@@ -89,6 +93,15 @@ const SchoolAdminRequestsPage = () => {
                             <span>Kiểm duyệt Quản trị viên</span>
                         </div>
                     </div>
+                    <button 
+                        type="button" 
+                        className="school-admin-req-theme-btn" 
+                        onClick={toggleTheme} 
+                        title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"} 
+                        aria-label="Toggle Theme"
+                    >
+                        {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                    </button>
                 </div>
 
                 {/* HERO HEADER */}

@@ -9,6 +9,7 @@ import {
     Check, 
     ChevronRight, 
     ChevronLeft, 
+    ChevronDown,
     ShieldCheck, 
     FileText, 
     AlertCircle, 
@@ -17,12 +18,16 @@ import {
     Plus, 
     Sparkles,
     Calendar,
-    User
+    User,
+    Sun,
+    Moon
 } from 'lucide-react';
+import { useDarkMode } from '../pages_logic/useDarkMode';
 import { TeacherClassPageLogic } from '../pages_logic/TeacherClassPageLogic';
 import '../pages_styling/TeacherClassStyling.css';
 
 const TeacherClassPage = () => {
+    const { isDark, toggleTheme } = useDarkMode();
     const {
         classInfo,
         isTeacherAccount,
@@ -97,16 +102,27 @@ const TeacherClassPage = () => {
             <div className="teacher-class-inner">
                 {/* TOP NAVIGATION / HUD */}
                 <div className="teacher-class-top-nav">
-                    <button 
-                        className="teacher-class-back-btn" 
-                        onClick={() => navigate(isTeacherAccount ? '/teacher/dashboard' : '/student/classes')}
-                    >
-                        <ArrowLeft size={16} /> {isTeacherAccount ? 'Dashboard giáo viên' : 'Lớp đã tham gia'}
-                    </button>
-                    <div className="teacher-class-role-badge">
-                        <ShieldCheck size={15} />
-                        <span>{classInfo.isPrimaryTeacher ? 'Giáo viên quản lý chính' : 'Trợ giảng lớp học'}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                        <button 
+                            className="teacher-class-back-btn" 
+                            onClick={() => navigate(isTeacherAccount ? '/teacher/dashboard' : '/student/classes')}
+                        >
+                            <ArrowLeft size={16} /> {isTeacherAccount ? 'Dashboard giáo viên' : 'Lớp đã tham gia'}
+                        </button>
+                        <div className="teacher-class-role-badge">
+                            <ShieldCheck size={15} />
+                            <span>{classInfo.isPrimaryTeacher ? 'Giáo viên quản lý chính' : 'Trợ giảng lớp học'}</span>
+                        </div>
                     </div>
+                    <button 
+                        type="button"
+                        className="teacher-class-theme-btn"
+                        onClick={toggleTheme}
+                        title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
+                        aria-label="Toggle Theme"
+                    >
+                        {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                    </button>
                 </div>
 
                 {/* HERO HEADER BANNER */}
@@ -206,7 +222,11 @@ const TeacherClassPage = () => {
                             <div className="teacher-class-metric-num">{classInfo.assignmentCount ?? 0}</div>
                             <div className="teacher-class-metric-label">Bài tập (Assignments)</div>
                             <span className="teacher-class-metric-toggle-hint">
-                                {showAssignments ? 'Đang mở danh sách ▼' : 'Bấm để xem danh sách ▶'}
+                                {showAssignments ? (
+                                    <>Đang mở danh sách <ChevronDown size={14} /></>
+                                ) : (
+                                    <>Bấm để xem danh sách <ChevronRight size={14} /></>
+                                )}
                             </span>
                         </div>
                     </button>
@@ -227,7 +247,11 @@ const TeacherClassPage = () => {
                             </div>
                             <div className="teacher-class-metric-label">Bộ đề câu hỏi</div>
                             <span className="teacher-class-metric-toggle-hint">
-                                {showQuestionSets ? 'Đang mở danh sách ▼' : 'Bấm để quản lý bộ đề ▶'}
+                                {showQuestionSets ? (
+                                    <>Đang mở danh sách <ChevronDown size={14} /></>
+                                ) : (
+                                    <>Bấm để quản lý bộ đề <ChevronRight size={14} /></>
+                                )}
                             </span>
                         </div>
                     </button>
@@ -248,7 +272,7 @@ const TeacherClassPage = () => {
                         {/* SUB-SECTION 1: HỌC SINH */}
                         <div className="teacher-class-members-block">
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-                                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: 'var(--tc-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Users size={18} color="var(--tc-cyan)" /> Danh sách học sinh
                                     <span className="teacher-class-count-badge">{studentList.pagination.totalItems}</span>
                                 </h3>
@@ -329,7 +353,7 @@ const TeacherClassPage = () => {
                         {/* SUB-SECTION 2: TRỢ GIẢNG */}
                         <div className="teacher-class-members-block" style={{ marginTop: '36px', paddingTop: '28px', borderTop: '1px solid var(--tc-border)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-                                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: 'var(--tc-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <GraduationCap size={18} color="var(--tc-gold)" /> Danh sách trợ giảng
                                     <span className="teacher-class-count-badge" style={{ borderColor: 'rgba(245, 158, 11, 0.4)', color: 'var(--tc-gold-hover)', background: 'rgba(245, 158, 11, 0.15)' }}>
                                         {assistantList.pagination.totalItems}

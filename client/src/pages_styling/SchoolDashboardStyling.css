@@ -98,6 +98,34 @@
     box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
 }
 
+.school-dash-theme-btn {
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--sh-surface);
+    border: 1.5px solid var(--sh-border-light);
+    color: var(--sh-gold);
+    cursor: pointer;
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.6);
+    transition: all 0.15s ease;
+}
+
+.school-dash-theme-btn:hover {
+    background: var(--sh-surface-hover);
+    border-color: var(--sh-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+.school-dash-theme-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
+}
+
 .school-dash-manager-badge {
     display: inline-flex;
     align-items: center;
@@ -672,5 +700,192 @@
     .school-dash-create-class-form {
         grid-template-columns: 1fr;
     }
+}
+
+/* ==========================================================================
+   LIGHT MODE OVERRIDES FOR SCHOOL DASHBOARD PAGE
+   ========================================================================== */
+[data-theme='light'] .school-dash-root {
+    --sh-bg: #f8fafc;
+    --sh-surface: #ffffff;
+    --sh-surface-hover: #f1f5f9;
+    --sh-surface-card: #ffffff;
+    --sh-border: #e2e8f0;
+    --sh-border-light: #cbd5e1;
+    --sh-text: #0f172a;
+    --sh-text-muted: #334155;
+    --sh-text-subtle: #64748b;
+    --sh-gold: #d97706;
+    --sh-gold-hover: #b45309;
+    --sh-cyan: #0284c7;
+    --sh-cyan-hover: #0369a1;
+    --sh-purple: #7c3aed;
+    --sh-purple-hover: #6d28d9;
+    --sh-emerald: #059669;
+
+    background-color: #f8fafc;
+    background-image: 
+        radial-gradient(circle at 10% 12%, rgba(14, 165, 233, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 90% 88%, rgba(245, 158, 11, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.03) 0%, transparent 60%);
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-dash-back-btn,
+[data-theme='light'] .school-dash-theme-btn {
+    background: #ffffff;
+    color: #334155;
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-back-btn:hover,
+[data-theme='light'] .school-dash-theme-btn:hover {
+    color: #0284c7;
+    border-color: #0284c7;
+    background: #f8fafc;
+    box-shadow: 0 5px 0 0 #94a3b8;
+}
+
+[data-theme='light'] .school-dash-hero {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-hero h1 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-dash-hero-desc {
+    color: #475569;
+}
+
+[data-theme='light'] .school-dash-hero-tag {
+    color: #0284c7;
+}
+
+[data-theme='light'] .school-dash-stat-card {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 3px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-stat-info strong {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-dash-stat-info span {
+    color: #475569;
+}
+
+[data-theme='light'] .school-dash-section {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-section-header {
+    border-bottom-color: #e2e8f0;
+}
+
+[data-theme='light'] .school-dash-section-header h2 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-dash-announcement-form {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-announcement-form textarea {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-dash-announcement-form textarea::placeholder {
+    color: #64748b;
+}
+
+[data-theme='light'] .school-dash-post-card {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-post-meta strong {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-dash-post-content {
+    color: #334155;
+}
+
+[data-theme='light'] .school-dash-select {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    box-shadow: 0 2px 0 0 #e2e8f0;
+}
+
+[data-theme='light'] .school-dash-create-class-form {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-create-class-form input {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-dash-create-class-form input::placeholder {
+    color: #64748b;
+}
+
+[data-theme='light'] .school-dash-item-row {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-item-text strong {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-dash-item-text small {
+    color: #475569;
+}
+
+[data-theme='light'] .school-dash-class-detail-card {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-member-card {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-recent-pill {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-dash-btn-ghost {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #334155;
+    box-shadow: 0 3px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-dash-btn-ghost:hover {
+    background: #ffffff;
+    color: #0284c7;
+    border-color: #0284c7;
+}
+
+[data-theme='light'] .school-dash-empty {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #475569;
 }
 

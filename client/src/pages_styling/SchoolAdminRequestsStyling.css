@@ -123,6 +123,34 @@
     box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
 }
 
+.school-admin-req-theme-btn {
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--sar-surface);
+    border: 1.5px solid var(--sar-border-light);
+    color: var(--sar-gold);
+    cursor: pointer;
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.6);
+    transition: all 0.15s ease;
+}
+
+.school-admin-req-theme-btn:hover {
+    background: var(--sar-surface-hover);
+    border-color: var(--sar-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+.school-admin-req-theme-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
+}
+
 .school-admin-req-admin-badge {
     display: inline-flex;
     align-items: center;
@@ -659,5 +687,168 @@
 
 .school-admin-req-spinner {
     animation: sar-spin 0.8s linear infinite;
+}
+
+/* ==========================================================================
+   LIGHT MODE OVERRIDES FOR SCHOOL ADMIN REQUESTS PAGE
+   ========================================================================== */
+[data-theme='light'] .school-admin-req-root {
+    --sar-bg: #f8fafc;
+    --sar-surface: #ffffff;
+    --sar-surface-hover: #f1f5f9;
+    --sar-surface-card: #ffffff;
+    --sar-surface-card-hover: #f8fafc;
+    --sar-surface-alt: #f1f5f9;
+    --sar-border: #e2e8f0;
+    --sar-border-light: #cbd5e1;
+    --sar-text: #0f172a;
+    --sar-text-muted: #334155;
+    --sar-text-subtle: #64748b;
+    --sar-cyan: #0284c7;
+    --sar-cyan-hover: #0369a1;
+    --sar-gold: #d97706;
+    --sar-gold-hover: #b45309;
+    --sar-purple: #7c3aed;
+    --sar-purple-hover: #6d28d9;
+
+    background-color: #f8fafc;
+    background-image: 
+        radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(245, 158, 11, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.03) 0%, transparent 60%);
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-admin-req-back-btn,
+[data-theme='light'] .school-admin-req-theme-btn,
+[data-theme='light'] .school-admin-req-btn-ghost {
+    background: #ffffff;
+    color: #334155;
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-admin-req-back-btn:hover,
+[data-theme='light'] .school-admin-req-theme-btn:hover,
+[data-theme='light'] .school-admin-req-btn-ghost:hover {
+    color: #0284c7;
+    border-color: #0284c7;
+    background: #f8fafc;
+    box-shadow: 0 5px 0 0 #94a3b8;
+}
+
+[data-theme='light'] .school-admin-req-hero {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-admin-req-hero-info h1 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-admin-req-hero-desc {
+    color: #475569;
+}
+
+[data-theme='light'] .school-admin-req-hud-pill {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-admin-req-hud-num {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-admin-req-hud-lbl {
+    color: #475569;
+}
+
+[data-theme='light'] .school-admin-req-search-box {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 0 0 #e2e8f0;
+}
+
+[data-theme='light'] .school-admin-req-search-box input {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-admin-req-search-box input::placeholder {
+    color: #64748b;
+}
+
+[data-theme='light'] .school-admin-req-card {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+}
+
+[data-theme='light'] .school-admin-req-card-header {
+    background: #f8fafc;
+    border-bottom-color: #e2e8f0;
+}
+
+[data-theme='light'] .school-admin-req-abbr-badge {
+    background: rgba(217, 119, 6, 0.12);
+    border-color: rgba(217, 119, 6, 0.35);
+    color: #b45309;
+}
+
+[data-theme='light'] .school-admin-req-card-titles h2 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-admin-req-card-location {
+    color: #475569;
+}
+
+[data-theme='light'] .school-admin-req-info-panel {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme='light'] .school-admin-req-info-label {
+    color: #64748b;
+}
+
+[data-theme='light'] .school-admin-req-info-value {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-admin-req-info-link {
+    color: #0284c7;
+}
+
+[data-theme='light'] .school-admin-req-info-link:hover {
+    color: #0369a1;
+}
+
+[data-theme='light'] .school-admin-req-text-box {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-left-color: #0284c7;
+}
+
+[data-theme='light'] .school-admin-req-text-box.purpose-box {
+    border-left-color: #7c3aed;
+}
+
+[data-theme='light'] .school-admin-req-card-footer {
+    background: #f8fafc;
+    border-top-color: #e2e8f0;
+}
+
+[data-theme='light'] .school-admin-req-review-note {
+    color: #475569;
+}
+
+[data-theme='light'] .school-admin-req-empty h3 {
+    color: #0f172a;
+}
+
+[data-theme='light'] .school-admin-req-empty p {
+    color: #475569;
 }
 

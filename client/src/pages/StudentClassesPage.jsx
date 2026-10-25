@@ -213,11 +213,11 @@ const StudentClassesPage = () => {
                             </button>
                         </div>
 
-                        <p style={{ margin: '0 0 10px', color: '#ffffff', fontSize: '14.5px' }}>
+                        <p style={{ margin: '0 0 10px', color: 'var(--sc-text)', fontSize: '14.5px' }}>
                             {selectedClass.description || 'Chưa có mô tả lớp học.'}
                         </p>
                         <p style={{ margin: '0 0 20px', color: 'var(--sc-text-muted)', fontSize: '13.5px' }}>
-                            Giáo viên giảng dạy: <strong style={{ color: '#ffffff' }}>{selectedClass.teacher?.fullName || selectedClass.teacher?.username || selectedClass.teacherName}</strong>
+                            Giáo viên giảng dạy: <strong style={{ color: 'var(--sc-text)' }}>{selectedClass.teacher?.fullName || selectedClass.teacher?.username || selectedClass.teacherName}</strong>
                         </p>
 
                         <div className="student-classes-stats-grid">
@@ -260,7 +260,7 @@ const StudentClassesPage = () => {
                         </div>
 
                         <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--sc-border)' }}>
-                            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 12px', color: '#ffffff' }}>
+                            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 12px', color: 'var(--sc-text)' }}>
                                 Assignments ({selectedClass.assignmentCount})
                             </h3>
                             <div className="student-classes-empty" style={{ padding: '24px 16px' }}>
@@ -270,7 +270,7 @@ const StudentClassesPage = () => {
                         </div>
 
                         <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--sc-border)' }}>
-                            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 12px', color: '#ffffff' }}>
+                            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 12px', color: 'var(--sc-text)' }}>
                                 Question sets ({selectedClass.questionSetCount})
                             </h3>
                             <div className="student-classes-empty" style={{ padding: '24px 16px' }}>
