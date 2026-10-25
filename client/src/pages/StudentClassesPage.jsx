@@ -15,6 +15,7 @@ import {
     FileText
 } from 'lucide-react';
 import { StudentClassesPageLogic } from '../pages_logic/StudentClassesPageLogic';
+import Navbar from '../components/Navbar';
 import '../pages_styling/StudentClassesStyling.css';
 
 const StudentClassesPage = () => {
@@ -25,7 +26,9 @@ const StudentClassesPage = () => {
     } = StudentClassesPageLogic();
 
     return (
-        <main className="student-classes-root">
+        <div className="student-classes-page-wrapper">
+            <Navbar activePage="classes" />
+            <main className="student-classes-root">
             <div className="student-classes-inner">
                 {/* TOP NAVIGATION / HUD */}
                 <div className="student-classes-top-nav">
@@ -279,6 +282,7 @@ const StudentClassesPage = () => {
                 )}
             </div>
         </main>
+        </div>
     );
 };
 

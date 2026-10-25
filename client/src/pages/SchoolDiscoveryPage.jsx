@@ -15,6 +15,7 @@ import {
     ShieldCheck 
 } from 'lucide-react';
 import { SchoolDiscoveryPageLogic } from '../pages_logic/SchoolDiscoveryPageLogic';
+import Navbar from '../components/Navbar';
 import '../pages_styling/SchoolDiscoveryStyling.css';
 
 const SchoolDiscoveryPage = () => {
@@ -27,7 +28,9 @@ const SchoolDiscoveryPage = () => {
     const roleLabel = currentUser?.role === 'user' ? 'Student' : currentUser?.role === 'teacher' ? 'Teacher' : 'Admin';
 
     return (
-        <main className="school-disc-root">
+        <div className="school-discovery-page-wrapper">
+            <Navbar activePage="schools" />
+            <main className="school-disc-root">
             <div className="school-disc-inner">
                 {/* TOP NAVIGATION / HUD */}
                 <div className="school-disc-top-nav">
@@ -353,6 +356,7 @@ const SchoolDiscoveryPage = () => {
                 </div>
             )}
         </main>
+        </div>
     );
 };
 
