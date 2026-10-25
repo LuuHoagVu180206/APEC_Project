@@ -18,7 +18,8 @@ import {
     ExternalLink, 
     Plus, 
     Globe, 
-    Lock
+    Lock,
+    Lightbulb
 } from 'lucide-react';
 
 const StudioPage = () => {
@@ -485,6 +486,21 @@ const StudioPage = () => {
                                     </select>
                                 </div>
 
+                                <div className="form-group-field">
+                                    <label htmlFor="q-explanation" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <Lightbulb size={14} color="var(--accent-gold)" />
+                                        <span>Giải thích đáp án (Tùy chọn)</span>
+                                    </label>
+                                    <textarea 
+                                        id="q-explanation"
+                                        className="studio-textarea"
+                                        placeholder="Nhập lời giải hoặc giải thích chi tiết vì sao đáp án này đúng (hiển thị khi người học xem lại)..." 
+                                        value={formData.explanation || ''} 
+                                        onChange={(e) => setFormData({...formData, explanation: e.target.value})} 
+                                        style={{ minHeight: '75px' }}
+                                    />
+                                </div>
+
                                 {mySets.length > 0 && (
                                     <div className="form-group-field">
                                         <label htmlFor="q-set">Gán ngay vào bộ (Tùy chọn)</label>
@@ -555,6 +571,17 @@ const StudioPage = () => {
                                                             </div>
                                                         );
                                                     })}
+                                                </div>
+                                            )}
+
+                                            {/* Box giải thích đáp án */}
+                                            {q.explanation && (
+                                                <div className="item-explanation-preview">
+                                                    <div className="explanation-preview-title">
+                                                        <Lightbulb size={14} />
+                                                        <span>Giải thích đáp án:</span>
+                                                    </div>
+                                                    <p className="explanation-preview-content">{q.explanation}</p>
                                                 </div>
                                             )}
 

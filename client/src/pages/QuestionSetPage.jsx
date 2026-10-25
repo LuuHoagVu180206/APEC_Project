@@ -13,6 +13,7 @@ import {
     LogOut, 
     CheckCircle2, 
     Layers,
+    Lightbulb,
     FileSpreadsheet,
     FileText
 } from 'lucide-react';
@@ -298,6 +299,24 @@ const QuestionSetPage = () => {
                                     );
                                 })}
                             </div>
+                            {q.explanation && (
+                                <div style={{
+                                    marginBottom: '14px',
+                                    padding: '10px 14px',
+                                    background: 'var(--accent-gold-subtle)',
+                                    borderRadius: '8px',
+                                    borderLeft: '3px solid var(--accent-gold)',
+                                    fontSize: '13px',
+                                    color: 'var(--text-secondary)',
+                                    lineHeight: '1.5'
+                                }}>
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: '700', color: 'var(--accent-gold)', marginBottom: '4px' }}>
+                                        <Lightbulb size={14} />
+                                        <span>Giải thích đáp án:</span>
+                                    </div>
+                                    <p style={{ margin: 0, whiteSpace: 'pre-line' }}>{q.explanation}</p>
+                                </div>
+                            )}
 
                             <div style={{ 
                                 borderTop: '1px solid var(--border-subtle)', 

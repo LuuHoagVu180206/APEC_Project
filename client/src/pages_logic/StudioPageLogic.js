@@ -15,7 +15,7 @@ export const StudioPageLogic = () => {
 
     const [questions, setQuestions] = useState([]);
     const [formData, setFormData] = useState({
-        questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', topic: 'Toán', setId: ''
+        questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', topic: 'Toán', explanation: '', setId: ''
     });
   
     const [mySets, setMySets] = useState([]);
@@ -136,6 +136,7 @@ export const StudioPageLogic = () => {
                 questionText: formData.questionText,
                 options: [formData.optionA, formData.optionB, formData.optionC, formData.optionD],
                 correctAnswer: getCorrectText(formData.correctAnswer), 
+                explanation: formData.explanation ? formData.explanation.trim() : '',
                 difficulty: formData.difficulty,
                 topic: formData.topic || 'Khác',
                 owner: currentUser._id
@@ -149,7 +150,7 @@ export const StudioPageLogic = () => {
           
             alert("Đã lưu câu hỏi thành công!");
             fetchQuestions(); 
-            setFormData({ questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', topic: 'Toán', setId: '' });
+            setFormData({ questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', difficulty: 'easy', topic: 'Toán', explanation: '', setId: '' });
         } catch (err) {
             const errorMsg = err.response?.data?.message || err.response?.data || err.message;
             alert("🛑 Server từ chối: " + (typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg));
@@ -172,7 +173,10 @@ export const StudioPageLogic = () => {
             try {
                 await axios.delete(`http://localhost:5000/api/sets/${id}`, { headers: { token: currentUser.accessToken } });
                 fetchMySets();
-            } catch (err) { alert("Lỗi khi xóa!"); }
+            } catch (err) {
+                const errorMsg = err.response?.data?.message || err.response?.data || "Lỗi khi xóa BỘ CÂU HỎI!";
+                alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+            }
         }
     };
 
@@ -180,8 +184,12 @@ export const StudioPageLogic = () => {
         if (window.confirm("Bạn chắc chắn muốn xóa CÂU HỎI này?")) {
             try {
                 await axios.delete(`http://localhost:5000/api/questions/${id}`, { headers: { token: currentUser.accessToken } });
+                alert("Đã xóa câu hỏi thành công!");
                 fetchQuestions();
-            } catch (err) { alert("Lỗi khi xóa!"); }
+            } catch (err) {
+                const errorMsg = err.response?.data?.message || err.response?.data || "Lỗi khi xóa câu hỏi!";
+                alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+            }
         }
     };
 

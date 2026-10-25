@@ -5,6 +5,7 @@ const QuestionSchema = new mongoose.Schema({
     topic: { type: String, default: 'Khác' },
     options: [{ type: String, required: true }],  
     correctAnswer: { type: String, required: true },
+    explanation: { type: String, default: '' },
     difficulty: { type: String, default: 'easy' },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 });

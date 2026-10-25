@@ -3,11 +3,11 @@
    (Góc sáng tạo, quản lý bộ đề & ngân hàng câu hỏi, Dark/Light Theme)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 /* --- 1. THEME TOKENS --- */
 :root {
-    --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-main: 'Be Vietnam Pro', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
     /* Light Theme */
     --bg-page: #f8fafc;
@@ -709,6 +709,47 @@
 .answer-pill-snippet.is-correct {
     font-weight: 800;
     color: var(--accent-emerald);
+}
+.item-explanation-preview {
+    background: var(--accent-gold-subtle);
+    border: 1px dashed var(--accent-gold);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+[data-theme='light'] .item-explanation-preview {
+    background: #fffbeb;
+    border-color: #f59e0b;
+}
+
+.explanation-preview-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+[data-theme='light'] .explanation-preview-title {
+    color: #b45309;
+}
+
+.explanation-preview-content {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    white-space: pre-line;
+}
+
+[data-theme='light'] .explanation-preview-content {
+    color: #334155;
 }
 
 .item-card-actions {

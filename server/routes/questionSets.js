@@ -147,7 +147,8 @@ router.get('/:id/export', async (req, res) => {
                 { header: 'Đáp án C', key: 'C', width: 20 },
                 { header: 'Đáp án D', key: 'D', width: 20 },
                 { header: 'Đáp án đúng', key: 'correct', width: 15 },
-                { header: 'Độ khó', key: 'difficulty', width: 10 }
+                { header: 'Độ khó', key: 'difficulty', width: 10 },
+                { header: 'Giải thích', key: 'explanation', width: 35 }
             ];
 
             // Đổ dữ liệu vòng lặp vào Excel
@@ -160,7 +161,8 @@ router.get('/:id/export', async (req, res) => {
                     C: q.options[2],
                     D: q.options[3],
                     correct: q.correctAnswer,
-                    difficulty: q.difficulty
+                    difficulty: q.difficulty,
+                    explanation: q.explanation || ''
                 });
             });
 
@@ -219,6 +221,10 @@ router.get('/:id/export', async (req, res) => {
                 
                 doc.moveDown(0.5);
                 doc.text(`=> Đáp án đúng: ${q.correctAnswer}  |  Độ khó: ${q.difficulty === 'easy' ? 'Dễ' : q.difficulty === 'medium' ? 'Trung bình' : 'Khó'}`);
+                if (q.explanation) {
+                    doc.moveDown(0.3);
+                    doc.text(`* Giải thích: ${q.explanation}`);
+                }
                 
                 // Vẽ một đường kẻ ngang ngăn cách giữa các câu
                 doc.moveDown(1);
