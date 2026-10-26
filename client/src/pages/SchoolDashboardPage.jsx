@@ -16,10 +16,13 @@ import {
     GraduationCap, 
     Clock, 
     Calendar, 
-    ExternalLink 
+    ExternalLink,
+    Sun,
+    Moon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SchoolDashboardLogic } from '../pages_logic/SchoolDashboardLogic';
+import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/SchoolDashboardStyling.css';
 
 const SchoolDashboardPage = () => {
@@ -31,6 +34,7 @@ const SchoolDashboardPage = () => {
         deleteAnnouncement, removeMember, shareQuestionSet, unshareQuestionSet,
         createClass, deleteClass, openClass, joinClass, navigate
     } = SchoolDashboardLogic();
+    const { isDark, toggleTheme } = useDarkMode();
 
     if (isLoading) {
         return (
@@ -80,12 +84,23 @@ const SchoolDashboardPage = () => {
                     >
                         <ArrowLeft size={16} /> Danh sách trường
                     </button>
-                    {isManager && (
-                        <div className="school-dash-manager-badge">
-                            <ShieldCheck size={15} />
-                            <span>Quản trị viên Cộng đồng</span>
-                        </div>
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <button 
+                            type="button" 
+                            className="school-dash-theme-btn" 
+                            onClick={toggleTheme} 
+                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"} 
+                            aria-label="Toggle Theme"
+                        >
+                            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                        </button>
+                        {isManager && (
+                            <div className="school-dash-manager-badge">
+                                <ShieldCheck size={15} />
+                                <span>Quản trị viên Cộng đồng</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* HERO HEADER */}
@@ -436,7 +451,7 @@ const SchoolDashboardPage = () => {
                                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: 'var(--sh-cyan)' }}>
                                         <Calendar size={13} /> {selectedClass.semester || 'Lớp học'}
                                     </div>
-                                    <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '4px 0 0', color: '#ffffff' }}>
+                                    <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '4px 0 0', color: 'var(--sh-text)' }}>
                                         {selectedClass.className}
                                     </h3>
                                 </div>
@@ -450,11 +465,11 @@ const SchoolDashboardPage = () => {
                                 </button>
                             </div>
 
-                            <p style={{ margin: '0 0 10px', color: '#e2e8f0', fontSize: '14px' }}>
+                            <p style={{ margin: '0 0 10px', color: 'var(--sh-text)', fontSize: '14px' }}>
                                 {selectedClass.description || 'Chưa có mô tả lớp học.'}
                             </p>
                             <p style={{ margin: '0 0 6px', color: 'var(--sh-text-muted)', fontSize: '13px' }}>
-                                Giáo viên giảng dạy: <strong style={{ color: '#ffffff' }}>{selectedClass.teacher?.fullName || selectedClass.teacher?.username || selectedClass.teacherName}</strong>
+                                Giáo viên giảng dạy: <strong style={{ color: 'var(--sh-text)' }}>{selectedClass.teacher?.fullName || selectedClass.teacher?.username || selectedClass.teacherName}</strong>
                             </p>
                             <p style={{ margin: '0 0 16px', color: 'var(--sh-text-muted)', fontSize: '13px' }}>
                                 {canViewClassCode && selectedClass.classCode ? (
@@ -475,13 +490,13 @@ const SchoolDashboardPage = () => {
                             )}
 
                             <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--sh-border)' }}>
-                                <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 10px', color: '#ffffff' }}>
+                                <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 10px', color: 'var(--sh-text)' }}>
                                     Assignments ({selectedClass.assignmentCount ?? 0})
                                 </h4>
                                 {selectedClass.assignments?.length ? (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         {selectedClass.assignments.map((assignment) => (
-                                            <div key={assignment._id} style={{ padding: '8px 12px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', fontSize: '13.5px', color: '#ffffff' }}>
+                                            <div key={assignment._id} style={{ padding: '8px 12px', background: 'var(--sh-surface)', border: '1px solid var(--sh-border-light)', borderRadius: '8px', fontSize: '13.5px', color: 'var(--sh-text)' }}>
                                                 {assignment.title}
                                             </div>
                                         ))}
@@ -494,7 +509,7 @@ const SchoolDashboardPage = () => {
                             </div>
 
                             <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--sh-border)' }}>
-                                <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 10px', color: '#ffffff' }}>
+                                <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 10px', color: 'var(--sh-text)' }}>
                                     Question sets ({selectedClass.questionSetCount ?? selectedClass.questionSets?.length ?? 0})
                                 </h4>
                                 {['user', 'admin'].includes(currentUser?.role) ? (
@@ -544,7 +559,7 @@ const SchoolDashboardPage = () => {
                                         {(member.fullName || member.username || '?').charAt(0).toUpperCase()}
                                     </span>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
-                                        <strong style={{ fontSize: '14px', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        <strong style={{ fontSize: '14px', color: 'var(--sh-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                             {member.fullName || member.username}
                                         </strong>
                                         <small style={{ fontSize: '12px', color: 'var(--sh-text-muted)' }}>
@@ -569,7 +584,7 @@ const SchoolDashboardPage = () => {
 
                     {recentMembers && recentMembers.length > 0 && (
                         <div className="school-dash-recent-members-wrap">
-                            <span style={{ fontWeight: 700, color: '#ffffff' }}>Thành viên mới gia nhập:</span>
+                            <span style={{ fontWeight: 700, color: 'var(--sh-text)' }}>Thành viên mới gia nhập:</span>
                             {recentMembers.slice(0, 5).map((member) => (
                                 <span className="school-dash-recent-pill" key={`recent-${member._id}`}>
                                     {member.fullName || member.username}

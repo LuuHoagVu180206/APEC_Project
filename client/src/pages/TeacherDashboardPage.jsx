@@ -11,8 +11,11 @@ import {
     GraduationCap, 
     ArrowRight,
     LayoutDashboard,
-    Zap
+    Zap,
+    Sun,
+    Moon
 } from 'lucide-react';
+import { useDarkMode } from '../pages_logic/useDarkMode';
 import { TeacherDashboardLogic } from '../pages_logic/TeacherDashboardLogic';
 import '../pages_styling/TeacherDashboardStyling.css';
 
@@ -20,6 +23,7 @@ const stripeColors = ['stripe-cyan', 'stripe-gold', 'stripe-purple', 'stripe-eme
 
 const TeacherDashboardPage = () => {
     const { currentUser, classes, isLoading, error, navigate } = TeacherDashboardLogic();
+    const { isDark, toggleTheme } = useDarkMode();
     const [searchQuery, setSearchQuery] = useState('');
     const [copiedCode, setCopiedCode] = useState(null);
 
@@ -48,12 +52,23 @@ const TeacherDashboardPage = () => {
             <div className="teacher-dash-inner">
                 {/* TOP NAVIGATION / HUD */}
                 <div className="teacher-dash-top-nav">
-                    <button className="teacher-dash-back-btn" onClick={() => navigate('/game')}>
-                        <ArrowLeft size={16} /> Quay lại game
-                    </button>
-                    <div className="teacher-dash-badge-role">
-                        <Sparkles size={14} /> Khu vực Giáo viên
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <button className="teacher-dash-back-btn" onClick={() => navigate('/game')}>
+                            <ArrowLeft size={16} /> Quay lại game
+                        </button>
+                        <div className="teacher-dash-badge-role">
+                            <Sparkles size={14} /> Khu vực Giáo viên
+                        </div>
                     </div>
+                    <button 
+                        type="button"
+                        className="teacher-dash-theme-btn"
+                        onClick={toggleTheme}
+                        title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
+                        aria-label="Toggle Theme"
+                    >
+                        {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                    </button>
                 </div>
 
                 {/* HERO BANNER - MODERN EDTECH STYLE */}

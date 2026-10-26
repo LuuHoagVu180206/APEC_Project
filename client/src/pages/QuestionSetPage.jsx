@@ -102,6 +102,7 @@ const QuestionSetPage = () => {
                             <Link to="/library" className="nav-link active">Thư viện</Link>
                             <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
                             <Link to="/schools" className="nav-link">Trường học</Link>
+                            <Link to="/student/classes" className="nav-link">Lớp học</Link>
                             <Link to="/studio" className="nav-link">Studio</Link>
                         </nav>
                     </div>
