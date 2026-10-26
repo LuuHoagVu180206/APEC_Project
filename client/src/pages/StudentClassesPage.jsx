@@ -12,7 +12,10 @@ import {
     ChevronRight, 
     Sparkles, 
     Calendar,
-    FileText
+    FileText,
+    Clock,
+    Eye,
+    HelpCircle
 } from 'lucide-react';
 import { StudentClassesPageLogic } from '../pages_logic/StudentClassesPageLogic';
 import Navbar from '../components/Navbar';
@@ -22,7 +25,8 @@ const StudentClassesPage = () => {
     const {
         classCode, setClassCode, joinAsTeacher, setJoinAsTeacher, isTeacher,
         classes, selectedClass, error, notice,
-        isLoading, isJoining, handleJoinByCode, openClass, closeClass, navigate
+        isLoading, isJoining, handleJoinByCode, openClass, closeClass,
+        viewingAssignment, setViewingAssignment, navigate
     } = StudentClassesPageLogic();
 
     return (
@@ -178,6 +182,9 @@ const StudentClassesPage = () => {
                                             <span className="student-classes-count-item" title="Số học sinh">
                                                 <Users size={14} color="var(--sc-cyan)" /> {classItem.studentCount}
                                             </span>
+                                            <span className="student-classes-count-item" title="Số bài tập">
+                                                <FileText size={14} color="var(--sc-purple, #a855f7)" /> {classItem.assignmentCount ?? (classItem.assignments?.length || 0)} bài tập
+                                            </span>
                                             <span className="student-classes-count-item" title="Số bộ đề">
                                                 <BookOpen size={14} color="var(--sc-gold)" /> {classItem.questionSetCount} sets
                                             </span>
@@ -260,13 +267,71 @@ const StudentClassesPage = () => {
                         </div>
 
                         <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--sc-border)' }}>
-                            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 12px', color: 'var(--sc-text)' }}>
-                                Assignments ({selectedClass.assignmentCount})
-                            </h3>
-                            <div className="student-classes-empty" style={{ padding: '24px 16px' }}>
-                                <FileText size={24} color="var(--sc-text-subtle)" />
-                                <span>Chưa có assignment nào được giao trong lớp.</span>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: 'var(--sc-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <FileText size={18} color="var(--sc-purple, #a855f7)" />
+                                    Assignments trong lớp
+                                    <span className="student-classes-count-badge" style={{ borderColor: 'rgba(168, 85, 247, 0.4)', color: 'var(--sc-purple-hover, #c084fc)', background: 'rgba(168, 85, 247, 0.15)' }}>
+                                        {selectedClass.assignmentCount ?? (selectedClass.assignments?.length || 0)}
+                                    </span>
+                                </h3>
                             </div>
+
+                            {selectedClass.assignments && selectedClass.assignments.length > 0 ? (
+                                <div className="student-classes-assignment-list">
+                                    {selectedClass.assignments.map((assignment) => (
+                                        <div className="student-classes-assignment-card" key={assignment._id}>
+                                            <div className="student-classes-assignment-header">
+                                                <div className="student-classes-assignment-icon">
+                                                    <FileText size={22} />
+                                                </div>
+                                                <div className="student-classes-assignment-title-col">
+                                                    <h4>{assignment.title}</h4>
+                                                    {assignment.description && (
+                                                        <p className="student-classes-assignment-desc">{assignment.description}</p>
+                                                    )}
+                                                    <div className="student-classes-assignment-badges">
+                                                        <span className="assignment-badge-questions">
+                                                            <HelpCircle size={13} /> {assignment.questions?.length || 0} câu hỏi
+                                                        </span>
+                                                        {assignment.dueDate ? (
+                                                            <span className={`assignment-badge-due ${new Date(assignment.dueDate) < new Date() ? 'expired' : 'active'}`}>
+                                                                <Calendar size={13} />
+                                                                {new Date(assignment.dueDate) < new Date() ? 'Đã hết hạn: ' : 'Hạn chót: '}
+                                                                {new Date(assignment.dueDate).toLocaleString('vi-VN', {
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit',
+                                                                    day: '2-digit',
+                                                                    month: '2-digit',
+                                                                    year: 'numeric'
+                                                                })}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="assignment-badge-due perpetual">
+                                                                <Clock size={13} /> Vô thời hạn
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="student-classes-assignment-actions">
+                                                <button
+                                                    type="button"
+                                                    className="btn-student-view-assignment"
+                                                    onClick={() => setViewingAssignment(assignment)}
+                                                >
+                                                    <Eye size={14} /> Chi tiết đề bài
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="student-classes-empty" style={{ padding: '24px 16px' }}>
+                                    <FileText size={24} color="var(--sc-text-subtle)" />
+                                    <span>Lớp học chưa có bài tập (assignment) nào được giao.</span>
+                                </div>
+                            )}
                         </div>
 
                         <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--sc-border)' }}>
@@ -279,6 +344,100 @@ const StudentClassesPage = () => {
                             </div>
                         </div>
                     </section>
+                )}
+
+                {/* MODAL XEM CHI TIẾT ASSIGNMENT (DÀNH CHO HỌC SINH) */}
+                {viewingAssignment && (
+                    <div className="sc-modal-backdrop" onClick={() => setViewingAssignment(null)}>
+                        <div className="sc-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="sc-modal-header">
+                                <div className="sc-modal-title-wrap">
+                                    <FileText size={20} color="var(--sc-cyan)" />
+                                    <h3>Chi Tiết Bài Tập: {viewingAssignment.title}</h3>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="sc-modal-close-btn"
+                                    onClick={() => setViewingAssignment(null)}
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="sc-modal-body">
+                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                    <span className="assignment-badge-questions">
+                                        <HelpCircle size={13} /> {viewingAssignment.questions?.length || 0} câu hỏi
+                                    </span>
+                                    {viewingAssignment.dueDate ? (
+                                        <span className={`assignment-badge-due ${new Date(viewingAssignment.dueDate) < new Date() ? 'expired' : 'active'}`}>
+                                            <Calendar size={13} />
+                                            {new Date(viewingAssignment.dueDate) < new Date() ? 'Đã hết hạn: ' : 'Hạn chót: '}
+                                            {new Date(viewingAssignment.dueDate).toLocaleString('vi-VN')}
+                                        </span>
+                                    ) : (
+                                        <span className="assignment-badge-due perpetual">
+                                            <Clock size={13} /> Vô thời hạn
+                                        </span>
+                                    )}
+                                </div>
+
+                                {viewingAssignment.description && (
+                                    <p style={{ margin: 0, fontSize: '14px', color: 'var(--sc-text)' }}>
+                                        <strong>Mô tả:</strong> {viewingAssignment.description}
+                                    </p>
+                                )}
+
+                                <h4 style={{ margin: '8px 0 0', fontSize: '15px', color: 'var(--sc-text)' }}>
+                                    Danh sách câu hỏi trong bài tập ({viewingAssignment.questions?.length || 0} câu):
+                                </h4>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {viewingAssignment.questions?.map((q, idx) => (
+                                        <div
+                                            key={q._id || idx}
+                                            className="sc-assignment-question-item"
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
+                                                <strong style={{ fontSize: '14px', color: 'var(--sc-text)' }}>
+                                                    Câu {idx + 1}: {q.questionText}
+                                                </strong>
+                                                <span className={`sc-difficulty-pill ${q.difficulty || 'medium'}`}>
+                                                    {q.difficulty === 'easy' ? 'Dễ' : q.difficulty === 'hard' ? 'Khó' : 'Trung bình'}
+                                                </span>
+                                            </div>
+
+                                            {q.options?.length > 0 && (
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', marginTop: '6px' }}>
+                                                    {q.options.map((opt, oIdx) => (
+                                                        <div
+                                                            key={oIdx}
+                                                            className="sc-assignment-option-pill"
+                                                        >
+                                                            <strong>{String.fromCharCode(65 + oIdx)}.</strong> {opt}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="sc-modal-footer">
+                                <span style={{ fontSize: '13px', color: 'var(--sc-text-muted)' }}>
+                                    Tổng số: <strong>{viewingAssignment.questions?.length || 0}</strong> câu hỏi
+                                </span>
+                                <button
+                                    type="button"
+                                    className="sc-btn-modal-close"
+                                    onClick={() => setViewingAssignment(null)}
+                                >
+                                    Đóng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </div>
         </main>

@@ -34,12 +34,13 @@ const serializeStudentClass = (classDoc) => {
     delete classData.students;
     delete classData.teachers;
     delete classData.questionSets;
+    const assignments = classDoc.assignments || [];
     return {
         ...classData,
         teacherCount: getTeacherCount(classDoc),
-        questionSetCount: classDoc.questionSets.length,
-        assignmentCount: 0,
-        assignments: []
+        questionSetCount: classDoc.questionSets ? classDoc.questionSets.length : 0,
+        assignmentCount: assignments.length,
+        assignments: assignments
     };
 };
 
@@ -84,7 +85,16 @@ router.get('/student/mine', verifyToken, requireStudent, async (req, res) => {
         const [classes, memberships] = await Promise.all([
             TeacherClass.find({
                 $or: [{ students: req.user.id }, { teachers: req.user.id }]
-            }).populate('teacher', 'username fullName'),
+            })
+                .populate('teacher', 'username fullName')
+                .populate({
+                    path: 'assignments',
+                    options: { sort: { createdAt: -1 } },
+                    populate: {
+                        path: 'questions',
+                        select: 'questionText options correctAnswer difficulty topic explanation'
+                    }
+                }),
             SchoolMember.find({ user: req.user.id }).select('school')
         ]);
         const memberSchoolIds = new Set(memberships.map((membership) => membership.school.toString()));
@@ -162,7 +172,15 @@ router.get('/student/:id', verifyToken, requireStudent, async (req, res) => {
             _id: req.params.id,
             $or: [{ students: req.user.id }, { teachers: req.user.id }]
         })
-            .populate('teacher', 'username fullName');
+            .populate('teacher', 'username fullName')
+            .populate({
+                path: 'assignments',
+                options: { sort: { createdAt: -1 } },
+                populate: {
+                    path: 'questions',
+                    select: 'questionText options correctAnswer difficulty topic explanation'
+                }
+            });
         if (!classDoc) return res.status(404).json('Không tìm thấy lớp bạn đã tham gia!');
         if (classDoc.school) {
             const membership = await SchoolMember.exists({ school: classDoc.school, user: req.user.id });

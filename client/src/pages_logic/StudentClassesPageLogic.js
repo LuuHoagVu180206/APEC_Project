@@ -21,6 +21,7 @@ export const StudentClassesPageLogic = () => {
     const [notice, setNotice] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isJoining, setIsJoining] = useState(false);
+    const [viewingAssignment, setViewingAssignment] = useState(null);
 
     const loadClasses = useCallback(async () => {
         const response = await axios.get('http://localhost:5000/api/classes/student/mine', {
@@ -52,7 +53,10 @@ export const StudentClassesPageLogic = () => {
         }
     };
 
-    const closeClass = () => setSelectedClass(null);
+    const closeClass = () => {
+        setSelectedClass(null);
+        setViewingAssignment(null);
+    };
 
     const handleJoinByCode = async (event) => {
         event.preventDefault();
@@ -96,6 +100,8 @@ export const StudentClassesPageLogic = () => {
         handleJoinByCode,
         openClass,
         closeClass,
+        viewingAssignment,
+        setViewingAssignment,
         navigate
     };
 };
