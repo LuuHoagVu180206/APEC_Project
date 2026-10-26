@@ -264,6 +264,352 @@ router.put('/:setId/add-question', verifyToken, async (req, res) => {
     }
 });
 
+// =========================================================================
+// AI SMART ASSIGNMENT DISCOVERY & AUTO SAVE TO STUDIO
+// 1. SLM (qwen2.5:7b) phân tích yêu cầu (môn học, chủ đề, từ khóa)
+// 2. Database truy xuất các bộ đề công khai liên quan (tối ưu qua Index, không brute force)
+// 3. SLM đánh giá tên gọi và nội dung bộ đề để xác nhận mức độ phù hợp
+// 4. Backend tự động lưu các bộ đề đạt tiêu chí vào Studio (user.savedSets)
+// 5. Chat AI trả lời đã tìm thấy và lưu bao nhiêu bộ đề, kèm danh sách kết quả
+// =========================================================================
+router.post('/ai-discovery', verifyToken, async (req, res) => {
+    try {
+        const { query } = req.body;
+        if (!query || !query.trim()) {
+            return res.status(400).json({ message: "Vui lòng nhập yêu cầu tìm kiếm bằng ngôn ngữ tự nhiên!" });
+        }
+
+        const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+        const ollamaModel = process.env.OLLAMA_MODEL || 'qwen2.5:7b';
+
+        // -------------------------------------------------------------
+        // BƯỚC 1: SLM (qwen2.5:7b) PHÂN TÍCH YÊU CẦU
+        // -------------------------------------------------------------
+        const analysisPrompt = `Bạn là hệ thống AI phân tích truy vấn học tập và đề thi.
+Người dùng nhập: "${query.trim()}"
+Nhiệm vụ: Trích xuất môn học chính (subject), chủ đề cụ thể (topic), khối lớp nếu có (grade), và danh sách từ khóa tìm kiếm (keywords).
+Chỉ trả về DUY NHẤT một đối tượng JSON thuần túy có cấu trúc:
+{
+  "subject": "Tên môn học (ví dụ: Vật lý, Toán học, Tiếng Anh, Hoá học, Lịch sử, Tin học, Khác)",
+  "topic": "Chủ đề cụ thể cốt lõi (ví dụ: Dao động điều hòa)",
+  "grade": "Khối lớp nếu có (ví dụ: 12) hoặc null",
+  "keywords": ["từ khóa 1", "từ khóa 2", "từ khóa 3"]
+}`;
+
+        let queryAnalysis = {
+            subject: 'Khác',
+            topic: query.trim(),
+            grade: null,
+            keywords: [query.trim()]
+        };
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+            const ollamaRes = await fetch(`${ollamaBaseUrl}/api/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: ollamaModel,
+                    prompt: analysisPrompt,
+                    stream: false,
+                    format: 'json',
+                    options: { temperature: 0.1, num_ctx: 4096 }
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (ollamaRes.ok) {
+                const data = await ollamaRes.json();
+                try {
+                    const parsed = JSON.parse(data.response);
+                    if (parsed && (parsed.subject || parsed.topic)) {
+                        queryAnalysis = {
+                            subject: parsed.subject || 'Khác',
+                            topic: parsed.topic || query.trim(),
+                            grade: parsed.grade || null,
+                            keywords: Array.isArray(parsed.keywords) && parsed.keywords.length > 0 
+                                ? parsed.keywords 
+                                : [parsed.topic || query.trim()]
+                        };
+                    }
+                } catch (pe) {
+                    console.error("Lỗi parse JSON phân tích truy vấn:", pe);
+                }
+            }
+        } catch (fetchErr) {
+            console.warn("Cảnh báo: Không thể gọi SLM ở Bước 1, fallback sang trích xuất mặc định:", fetchErr.message);
+        }
+
+        // -------------------------------------------------------------
+        // BƯỚC 2: DATABASE TRUY XUẤT CÁC BỘ ĐỀ CÔNG KHAI LIÊN QUAN
+        // Tối ưu truy vấn: Sử dụng index QuestionSetSearchIndex và isPublic_1_topic_1 (Không Brute Force)
+        // -------------------------------------------------------------
+        const searchTerms = [
+            queryAnalysis.subject !== 'Khác' ? queryAnalysis.subject : '',
+            queryAnalysis.topic,
+            ...(queryAnalysis.keywords || [])
+        ].filter(k => k && k.trim()).map(k => k.trim());
+
+        const textSearchString = searchTerms.join(' ');
+        const candidateMap = new Map();
+
+        // 2.1: Truy vấn qua Text Index (Tận dụng QuestionSetSearchIndex)
+        if (textSearchString) {
+            try {
+                const textResults = await QuestionSet.find(
+                    {
+                        isPublic: true,
+                        $text: { $search: textSearchString }
+                    },
+                    { score: { $meta: "textScore" } }
+                )
+                .sort({ score: { $meta: "textScore" } })
+                .limit(15)
+                .populate('owner', 'username');
+
+                textResults.forEach(item => {
+                    candidateMap.set(item._id.toString(), item);
+                });
+            } catch (textErr) {
+                console.warn("Lỗi text index query, chuyển sang index topic filter:", textErr.message);
+            }
+        }
+
+        // 2.2: Truy vấn bổ trợ qua Index isPublic_1_topic_1 nếu số lượng ứng viên < 10
+        if (candidateMap.size < 10 && queryAnalysis.subject && queryAnalysis.subject !== 'Khác') {
+            const topicResults = await QuestionSet.find({
+                isPublic: true,
+                topic: new RegExp(queryAnalysis.subject, 'i')
+            })
+            .sort({ likesCount: -1 })
+            .limit(15)
+            .populate('owner', 'username');
+
+            topicResults.forEach(item => {
+                if (!candidateMap.has(item._id.toString())) {
+                    candidateMap.set(item._id.toString(), item);
+                }
+            });
+        }
+
+        // 2.3: Nếu vẫn ít hơn 5 ứng viên và có từ khóa chủ đề cụ thể
+        if (candidateMap.size < 5 && queryAnalysis.topic) {
+            const regexResults = await QuestionSet.find({
+                isPublic: true,
+                $or: [
+                    { title: new RegExp(queryAnalysis.topic, 'i') },
+                    { description: new RegExp(queryAnalysis.topic, 'i') }
+                ]
+            })
+            .limit(10)
+            .populate('owner', 'username');
+
+            regexResults.forEach(item => {
+                if (!candidateMap.has(item._id.toString())) {
+                    candidateMap.set(item._id.toString(), item);
+                }
+            });
+        }
+
+        const candidates = Array.from(candidateMap.values()).slice(0, 15);
+
+        // Trường hợp không tìm thấy bất kỳ ứng viên nào trong DB
+        if (candidates.length === 0) {
+            return res.status(200).json({
+                message: `AI chưa tìm thấy bộ đề công khai nào phù hợp với yêu cầu: "${query}". Bạn có thể thử tìm với từ khóa tổng quát hơn hoặc vào Studio để tự tạo bộ đề mới nhé!`,
+                queryAnalysis,
+                stats: { totalFound: 0, newlySaved: 0, alreadySaved: 0 },
+                matchedSets: [],
+                savedSets: (await User.findById(req.user.id).select('savedSets'))?.savedSets || []
+            });
+        }
+
+        // -------------------------------------------------------------
+        // BƯỚC 3: SLM ĐÁNH GIÁ TÊN GỌI & CHỦ ĐỀ ĐỂ XÁC NHẬN MỨC ĐỘ PHÙ HỢP
+        // -------------------------------------------------------------
+        const candidatesForEvaluation = candidates.map((c, idx) => ({
+            index: idx,
+            id: c._id.toString(),
+            title: c.title,
+            topic: c.topic || 'Khác',
+            description: c.description || ''
+        }));
+
+        const evalPrompt = `Bạn là chuyên gia thẩm định nội dung giáo dục.
+Người dùng yêu cầu tìm kiếm: "${query.trim()}".
+Môn học nhận diện: "${queryAnalysis.subject}", Chủ đề: "${queryAnalysis.topic}".
+Dưới đây là danh sách ${candidatesForEvaluation.length} bộ đề ứng viên từ thư viện:
+${JSON.stringify(candidatesForEvaluation, null, 2)}
+
+Hãy thẩm định từng bộ đề dựa trên tên gọi, môn học và mô tả xem có phù hợp với yêu cầu của người dùng không.
+Chỉ trả về DUY NHẤT một JSON hợp lệ có định dạng:
+{
+  "summary": "Tóm tắt ngắn gọn nhận xét (ví dụ: Đã tìm thấy các bộ đề phù hợp với yêu cầu ôn tập)",
+  "results": [
+    {
+      "id": "mã_id_bộ_đề",
+      "isRelevant": true,
+      "confidence": 90,
+      "reason": "Giải thích ngắn gọn 1 câu vì sao bộ đề này phù hợp hoặc không phù hợp"
+    }
+  ]
+}`;
+
+        let evaluationMap = new Map();
+        let aiSummary = '';
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+            const evalRes = await fetch(`${ollamaBaseUrl}/api/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: ollamaModel,
+                    prompt: evalPrompt,
+                    stream: false,
+                    format: 'json',
+                    options: { temperature: 0.1, num_ctx: 4096 }
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (evalRes.ok) {
+                const evalData = await evalRes.json();
+                try {
+                    const parsedEval = JSON.parse(evalData.response);
+                    aiSummary = parsedEval.summary || '';
+                    if (Array.isArray(parsedEval.results)) {
+                        parsedEval.results.forEach(r => {
+                            if (r.id) {
+                                evaluationMap.set(r.id.toString(), r);
+                            }
+                        });
+                    }
+                } catch (pe) {
+                    console.error("Lỗi parse JSON thẩm định SLM:", pe);
+                }
+            }
+        } catch (evalErr) {
+            console.warn("Cảnh báo: Không thể gọi SLM thẩm định ở Bước 3, fallback sang matching quy tắc:", evalErr.message);
+        }
+
+        // Lọc các bộ đề đạt tiêu chí (SLM xác nhận isRelevant === true hoặc fallback khớp từ khóa)
+        const qualifiedSets = [];
+        for (const c of candidates) {
+            const cId = c._id.toString();
+            const evalResult = evaluationMap.get(cId);
+
+            let isQualified = false;
+            let reason = '';
+            let confidence = 80;
+
+            if (evalResult) {
+                isQualified = Boolean(evalResult.isRelevant);
+                reason = evalResult.reason || '';
+                confidence = evalResult.confidence || 80;
+            } else {
+                // Heuristic Fallback nếu SLM không trả về kết quả cho id này
+                const tLower = (c.title + ' ' + (c.topic || '')).toLowerCase();
+                const subjLower = (queryAnalysis.subject || '').toLowerCase();
+                const topicLower = (queryAnalysis.topic || '').toLowerCase();
+                if ((topicLower && tLower.includes(topicLower)) || (subjLower && subjLower !== 'khác' && tLower.includes(subjLower))) {
+                    isQualified = true;
+                    reason = `Phù hợp theo chủ đề ${c.topic || queryAnalysis.subject}`;
+                    confidence = 75;
+                }
+            }
+
+            if (isQualified) {
+                qualifiedSets.push({
+                    _id: c._id,
+                    title: c.title,
+                    topic: c.topic,
+                    description: c.description,
+                    questionsCount: c.questions ? c.questions.length : 0,
+                    owner: c.owner ? { _id: c.owner._id, username: c.owner.username } : null,
+                    likesCount: c.likesCount || 0,
+                    confidence,
+                    matchReason: reason
+                });
+            }
+        }
+
+        if (qualifiedSets.length === 0) {
+            return res.status(200).json({
+                message: `AI đã tìm thấy một số bộ đề trong thư viện nhưng sau khi thẩm định kỹ nội dung, chưa có bộ đề nào thực sự phù hợp với yêu cầu: "${query}". Bạn có thể thử mô tả chi tiết hơn nhé!`,
+                queryAnalysis,
+                stats: { totalFound: 0, newlySaved: 0, alreadySaved: 0 },
+                matchedSets: [],
+                savedSets: (await User.findById(req.user.id).select('savedSets'))?.savedSets || []
+            });
+        }
+
+        // -------------------------------------------------------------
+        // BƯỚC 4: BACKEND TỰ ĐỘNG LƯU CÁC BỘ ĐỀ ĐẠT TIÊU CHÍ VÀO STUDIO CỦA HỌC SINH
+        // -------------------------------------------------------------
+        const user = await User.findById(req.user.id);
+        const currentSaved = (user.savedSets || []).map(id => id.toString());
+        let newlySavedCount = 0;
+        let alreadySavedCount = 0;
+
+        const matchedSetsWithStatus = qualifiedSets.map(set => {
+            const setIdStr = set._id.toString();
+            const isAlready = currentSaved.includes(setIdStr);
+            if (isAlready) {
+                alreadySavedCount++;
+            } else {
+                currentSaved.push(setIdStr);
+                newlySavedCount++;
+            }
+            return {
+                ...set,
+                isNewlySaved: !isAlready,
+                isAlreadySaved: isAlready
+            };
+        });
+
+        if (newlySavedCount > 0) {
+            user.savedSets = currentSaved;
+            await user.save();
+        }
+
+        // -------------------------------------------------------------
+        // BƯỚC 5: CHAT AI TRẢ LỜI ĐÃ TÌM THẤY VÀ LƯU BAO NHIÊU BỘ ĐỀ, KÈM DANH SÁCH KẾT QUẢ
+        // -------------------------------------------------------------
+        let aiMessage = '';
+        if (newlySavedCount > 0 && alreadySavedCount > 0) {
+            aiMessage = `AI đã tìm thấy ${qualifiedSets.length} bộ đề công khai phù hợp với yêu cầu "${queryAnalysis.topic || queryAnalysis.subject}". Hệ thống đã tự động lưu mới ${newlySavedCount} bộ đề vào Studio của bạn (${alreadySavedCount} bộ đề đã có sẵn từ trước).`;
+        } else if (newlySavedCount > 0) {
+            aiMessage = `AI đã tìm thấy ${qualifiedSets.length} bộ đề công khai phù hợp với yêu cầu "${queryAnalysis.topic || queryAnalysis.subject}" và đã tự động lưu toàn bộ vào Studio của bạn!`;
+        } else {
+            aiMessage = `AI đã tìm thấy ${qualifiedSets.length} bộ đề công khai phù hợp với yêu cầu "${queryAnalysis.topic || queryAnalysis.subject}". Tất cả các bộ đề này đã nằm sẵn trong Studio của bạn.`;
+        }
+
+        return res.status(200).json({
+            message: aiMessage,
+            summary: aiSummary,
+            queryAnalysis,
+            stats: {
+                totalFound: qualifiedSets.length,
+                newlySaved: newlySavedCount,
+                alreadySaved: alreadySavedCount
+            },
+            matchedSets: matchedSetsWithStatus,
+            savedSets: currentSaved
+        });
+
+    } catch (err) {
+        console.error("LỖI AI SMART ASSIGNMENT DISCOVERY:", err);
+        return res.status(500).json({ message: "Lỗi máy chủ khi thực hiện AI Smart Discovery", error: err.message });
+    }
+});
+
 // API: XEM CHI TIẾT 1 BỘ CÂU HỎI KÈM DANH SÁCH CÂU HỎI
 router.get('/:id', async (req, res) => {
     try {

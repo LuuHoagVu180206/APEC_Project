@@ -18,7 +18,13 @@ import {
     LogOut, 
     Play, 
     BookOpen,
-    Layers
+    Layers,
+    Bot,
+    Loader2,
+    CheckCircle2,
+    ArrowRight,
+    BookmarkCheck,
+    Zap
 } from 'lucide-react';
 
 const LibraryPage = () => {
@@ -38,7 +44,16 @@ const LibraryPage = () => {
         handleToggleLikeSet,
         handleDelete,
         handleExport,
-        handleLogout
+        handleLogout,
+        // AI Discovery hooks
+        aiQuery,
+        setAiQuery,
+        isAiSearching,
+        aiDiscoveryResult,
+        aiError,
+        handleAiDiscovery,
+        handleClearAiDiscovery,
+        handleQuickPrompt
     } = LibraryPageLogic();
 
     const { isDark, toggleTheme } = useDarkMode();
@@ -158,7 +173,248 @@ const LibraryPage = () => {
                         Nơi giáo viên và người học trên cả nước chia sẻ các bộ câu hỏi chọn lọc. Ôn luyện, lưu bộ đề yêu thích hoặc xuất tài liệu ôn thi.
                     </p>
 
-                    {/* Thanh tìm kiếm & Nút Tạo đề */}
+                    {/* AI SMART ASSIGNMENT DISCOVERY & AUTO SAVE TO STUDIO */}
+                    <div className="ai-discovery-card">
+                        <div className="ai-discovery-header">
+                            <div className="ai-pill-badge">
+                                <Bot size={16} />
+                                <span>AI Smart Assignment Discovery & Auto save to studio</span>
+                                <span className="ai-model-tag">SLM Qwen2.5:7b</span>
+                            </div>
+                            <p className="ai-helper-desc">
+                                Nhập yêu cầu bằng ngôn ngữ tự nhiên. SLM phân tích môn & chủ đề, truy xuất DB qua Index tối ưu, thẩm định mức độ phù hợp và tự động lưu vào Studio.
+                            </p>
+                        </div>
+
+                        <form className="ai-discovery-form" onSubmit={(e) => { e.preventDefault(); handleAiDiscovery(); }}>
+                            <div className="ai-discovery-input-box">
+                                <Sparkles size={18} className="ai-input-sparkle" />
+                                <input
+                                    type="text"
+                                    className="ai-discovery-input"
+                                    placeholder="Nhập yêu cầu (Ví dụ: Tìm cho tôi các bộ đề Vật lý 12 về Dao động điều hòa)..."
+                                    value={aiQuery}
+                                    onChange={(e) => setAiQuery(e.target.value)}
+                                    disabled={isAiSearching}
+                                />
+                                {aiQuery && !isAiSearching && (
+                                    <button 
+                                        type="button" 
+                                        className="btn-ai-clear" 
+                                        onClick={() => setAiQuery('')}
+                                        title="Xóa nội dung"
+                                    >
+                                        <X size={15} />
+                                    </button>
+                                )}
+                                <button
+                                    type="submit"
+                                    className={`btn-ai-submit ${isAiSearching ? 'loading' : ''}`}
+                                    disabled={isAiSearching || !aiQuery.trim()}
+                                >
+                                    {isAiSearching ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            <span>AI Đang Phân Tích & Lưu...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles size={16} />
+                                            <span>Khám phá & Lưu Studio</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+
+                        {/* Gợi ý truy vấn nhanh */}
+                        <div className="ai-prompt-suggestions">
+                            <span className="suggestion-label">Gợi ý thử nhanh:</span>
+                            <button
+                                type="button"
+                                className="suggestion-chip"
+                                onClick={() => handleQuickPrompt("Tìm cho tôi các bộ đề Vật lý 12 về Dao động điều hòa")}
+                                disabled={isAiSearching}
+                            >
+                                <Zap size={12} /> Vật lý 12: Dao động điều hòa
+                            </button>
+                            <button
+                                type="button"
+                                className="suggestion-chip"
+                                onClick={() => handleQuickPrompt("Bộ đề trắc nghiệm Toán học 12 khảo sát hàm số và cực trị")}
+                                disabled={isAiSearching}
+                            >
+                                <Zap size={12} /> Toán 12: Đạo hàm & Khảo sát hàm số
+                            </button>
+                            <button
+                                type="button"
+                                className="suggestion-chip"
+                                onClick={() => handleQuickPrompt("Bộ câu hỏi trắc nghiệm Lịch sử Đảng Cộng sản Việt Nam")}
+                                disabled={isAiSearching}
+                            >
+                                <Zap size={12} /> Lịch sử Đảng Cộng sản
+                            </button>
+                        </div>
+
+                        {/* Loading Pipeline State */}
+                        {isAiSearching && (
+                            <div className="ai-searching-state">
+                                <div className="ai-searching-indicator">
+                                    <Loader2 size={22} className="animate-spin text-purple" />
+                                    <div className="ai-searching-text">
+                                        <strong>Hệ thống AI SLM (Qwen2.5:7b) đang xử lý yêu cầu...</strong>
+                                        <div className="ai-pipeline-steps">
+                                            <span className="pipeline-step active">1. Phân tích ngữ nghĩa</span>
+                                            <span className="pipeline-arrow">→</span>
+                                            <span className="pipeline-step active">2. Truy xuất DB qua Index</span>
+                                            <span className="pipeline-arrow">→</span>
+                                            <span className="pipeline-step active">3. SLM thẩm định</span>
+                                            <span className="pipeline-arrow">→</span>
+                                            <span className="pipeline-step active">4. Tự động lưu Studio</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Error message */}
+                        {aiError && (
+                            <div className="ai-error-box">
+                                <span>⚠️ {aiError}</span>
+                                <button type="button" onClick={handleClearAiDiscovery} className="btn-close-error">✕</button>
+                            </div>
+                        )}
+
+                        {/* Chat AI Response Card */}
+                        {aiDiscoveryResult && (
+                            <div className="ai-chat-response-card">
+                                <div className="ai-chat-response-header">
+                                    <div className="ai-chat-sender">
+                                        <div className="ai-avatar-circle">
+                                            <Bot size={18} />
+                                        </div>
+                                        <div>
+                                            <div className="ai-sender-title">
+                                                <strong>Trợ lý AI EasyLearn (Qwen2.5:7b)</strong>
+                                                <span className="ai-badge-verified">
+                                                    <CheckCircle2 size={12} /> Đã thẩm định & Tự động lưu
+                                                </span>
+                                            </div>
+                                            <div className="ai-analysis-tags">
+                                                <span className="analysis-tag">Môn: <strong>{aiDiscoveryResult.queryAnalysis?.subject || 'Đa môn'}</strong></span>
+                                                {aiDiscoveryResult.queryAnalysis?.topic && (
+                                                    <span className="analysis-tag">Chủ đề: <strong>{aiDiscoveryResult.queryAnalysis.topic}</strong></span>
+                                                )}
+                                                {aiDiscoveryResult.queryAnalysis?.grade && (
+                                                    <span className="analysis-tag">Khối: <strong>Lớp {aiDiscoveryResult.queryAnalysis.grade}</strong></span>
+                                                )}
+                                                <span className="analysis-tag-success">
+                                                    <BookmarkCheck size={13} /> Đã lưu vào Studio: <strong>{aiDiscoveryResult.stats?.newlySaved || 0} mới</strong> ({aiDiscoveryResult.stats?.alreadySaved || 0} có sẵn)
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="ai-response-actions">
+                                        <button
+                                            type="button"
+                                            className="btn-go-studio"
+                                            onClick={() => navigate('/studio?tab=saved')}
+                                            title="Đi đến Studio để xem các bộ đề đã lưu"
+                                        >
+                                            <span>Mở Studio của tôi</span>
+                                            <ArrowRight size={14} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn-dismiss-ai"
+                                            onClick={handleClearAiDiscovery}
+                                            title="Đóng kết quả AI"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* AI Message Bubble */}
+                                <div className="ai-message-bubble">
+                                    <p className="ai-message-text">{aiDiscoveryResult.message}</p>
+                                    {aiDiscoveryResult.summary && (
+                                        <p className="ai-summary-note">💡 <em>{aiDiscoveryResult.summary}</em></p>
+                                    )}
+                                </div>
+
+                                {/* Matched Sets Grid */}
+                                {aiDiscoveryResult.matchedSets && aiDiscoveryResult.matchedSets.length > 0 && (
+                                    <div className="ai-matched-sets-section">
+                                        <div className="ai-matched-header">
+                                            <h4>Danh sách {aiDiscoveryResult.matchedSets.length} bộ đề được chọn lọc & lưu vào Studio:</h4>
+                                        </div>
+                                        <div className="ai-matched-grid">
+                                            {aiDiscoveryResult.matchedSets.map((set) => (
+                                                <div key={set._id} className="ai-matched-card">
+                                                    <div className="ai-matched-card-top">
+                                                        <span className={`set-topic-badge ${getTopicBadgeClass(set.topic)}`}>
+                                                            {set.topic || 'Khác'}
+                                                        </span>
+                                                        <span className="ai-confidence-pill">
+                                                            {set.confidence || 85}% phù hợp
+                                                        </span>
+                                                    </div>
+
+                                                    <h4
+                                                        className="ai-matched-title"
+                                                        onClick={() => navigate(`/set/${set._id}`)}
+                                                        title="Xem chi tiết bộ câu hỏi"
+                                                    >
+                                                        {set.title}
+                                                    </h4>
+
+                                                    <p className="ai-matched-desc">
+                                                        {set.description || "Bộ đề trắc nghiệm chuẩn kiến thức."}
+                                                    </p>
+
+                                                    {set.matchReason && (
+                                                        <div className="ai-match-reason">
+                                                            <strong>Lý do AI chọn:</strong> {set.matchReason}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="ai-matched-footer">
+                                                        <div className="ai-saved-indicator">
+                                                            <BookmarkCheck size={14} />
+                                                            <span>
+                                                                {set.isNewlySaved ? 'Vừa lưu vào Studio' : 'Đã có trong Studio'}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="ai-matched-btns">
+                                                            <button
+                                                                type="button"
+                                                                className="btn-view-set-mini"
+                                                                onClick={() => navigate(`/set/${set._id}`)}
+                                                            >
+                                                                <Play size={12} fill="currentColor" /> Xem bộ
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="btn-studio-mini"
+                                                                onClick={() => navigate('/studio?tab=saved')}
+                                                            >
+                                                                Studio
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Thanh tìm kiếm truyền thống & Nút Tạo đề */}
                     <div className="library-search-container">
                         <div className="library-search-wrapper">
                             <Search size={18} className="library-search-icon" />

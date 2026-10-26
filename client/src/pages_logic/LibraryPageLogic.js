@@ -26,6 +26,12 @@ export const LibraryPageLogic = () => {
     const [schoolMemberships, setSchoolMemberships] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    // AI Smart Assignment Discovery State
+    const [aiQuery, setAiQuery] = useState('');
+    const [isAiSearching, setIsAiSearching] = useState(false);
+    const [aiDiscoveryResult, setAiDiscoveryResult] = useState(null);
+    const [aiError, setAiError] = useState(null);
+
     useEffect(() => {
         fetchLibrary();
     }, []);
@@ -150,6 +156,60 @@ export const LibraryPageLogic = () => {
         navigate('/');
     };
 
+    // AI Smart Assignment Discovery & Auto save to studio
+    const handleAiDiscovery = async (overrideQuery) => {
+        if (!currentUser) {
+            alert("Vui lòng đăng nhập để sử dụng tính năng AI Smart Assignment Discovery & Auto save to studio!");
+            navigate('/login');
+            return;
+        }
+
+        const queryToSend = typeof overrideQuery === 'string' ? overrideQuery.trim() : aiQuery.trim();
+        if (!queryToSend) {
+            alert("Vui lòng nhập yêu cầu tìm kiếm bằng ngôn ngữ tự nhiên!");
+            return;
+        }
+
+        setIsAiSearching(true);
+        setAiError(null);
+
+        try {
+            const res = await axios.post('http://localhost:5000/api/sets/ai-discovery', {
+                query: queryToSend
+            }, {
+                headers: { token: currentUser.accessToken }
+            });
+
+            setAiDiscoveryResult(res.data);
+
+            if (res.data.savedSets && Array.isArray(res.data.savedSets)) {
+                setSavedSets(res.data.savedSets);
+                const updatedUser = { ...currentUser, savedSets: res.data.savedSets };
+                setCurrentUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+            }
+
+            // Đồng bộ lại danh sách thư viện
+            fetchLibrary();
+        } catch (err) {
+            console.error("Lỗi AI Discovery:", err);
+            const msg = err.response?.data?.message || err.response?.data || "Đã xảy ra lỗi khi AI xử lý yêu cầu. Vui lòng thử lại!";
+            setAiError(typeof msg === 'object' ? JSON.stringify(msg) : msg);
+        } finally {
+            setIsAiSearching(false);
+        }
+    };
+
+    const handleClearAiDiscovery = () => {
+        setAiDiscoveryResult(null);
+        setAiError(null);
+    };
+
+    const handleQuickPrompt = (promptText) => {
+        setAiQuery(promptText);
+        handleAiDiscovery(promptText);
+    };
+
     const filteredSets = questionSets.filter(set => {
         const searchLower = searchTerm.toLowerCase();
         
@@ -186,6 +246,15 @@ export const LibraryPageLogic = () => {
         handleToggleLikeSet,
         handleDelete,
         handleExport,
-        handleLogout
+        handleLogout,
+        // AI Discovery additions
+        aiQuery,
+        setAiQuery,
+        isAiSearching,
+        aiDiscoveryResult,
+        aiError,
+        handleAiDiscovery,
+        handleClearAiDiscovery,
+        handleQuickPrompt
     };
 };

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export const StudioPageLogic = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const initialTab = new URLSearchParams(location.search).get('tab') || 'sets';
     const [currentUser, setCurrentUser] = useState(() => {
         try {
             const saved = JSON.parse(localStorage.getItem('user'));
@@ -25,7 +27,14 @@ export const StudioPageLogic = () => {
     const [teacherClasses, setTeacherClasses] = useState([]);
     const [savedSetsData, setSavedSetsData] = useState([]);
     const [schoolMemberships, setSchoolMemberships] = useState([]);
-    const [activeTab, setActiveTab] = useState('sets'); // 'sets' | 'questions' | 'saved'
+    const [activeTab, setActiveTab] = useState(initialTab); // 'sets' | 'questions' | 'saved'
+
+    useEffect(() => {
+        const tabParam = new URLSearchParams(location.search).get('tab');
+        if (tabParam && ['sets', 'questions', 'saved'].includes(tabParam)) {
+            setActiveTab(tabParam);
+        }
+    }, [location.search]);
     const [creationMode, setCreationMode] = useState('manual'); // 'manual' | 'ai'
     const [isGeneratingAi, setIsGeneratingAi] = useState(false);
     const [isGeneratingBatch, setIsGeneratingBatch] = useState(false);
