@@ -370,8 +370,9 @@ router.delete('/:id', verifyToken, async (req, res) => {
         // Cần ép kiểu sang String (.toString()) để so sánh chính xác
         const isOwner = question.owner && question.owner.toString() === req.user.id;
         const isAdmin = req.user.role === 'admin';
+        const isTeacher = req.user.role === 'teacher';
 
-        if (!isOwner && !isAdmin) {
+        if (!isTeacher && !isAdmin && !isOwner ) {
             return res.status(403).json("Bạn không có quyền xóa câu hỏi này!");
         }
 
