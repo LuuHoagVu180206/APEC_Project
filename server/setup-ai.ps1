@@ -90,6 +90,19 @@ if ($LASTEXITCODE -ne 0) {
     throw "Failed to create model."
 }
 
+
+# === Download Vision-Language model ===
+Write-Host "Downloading Qwen2-VL 7B Vision-Language..." -ForegroundColor Yellow
+
+& $ollama pull qwen2-vl:7b
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to download Qwen2-VL 7B. Verify the model tag exists in the Ollama registry."
+}
+
+Write-Host "Qwen2-VL 7B downloaded successfully!" -ForegroundColor Green
+
+
 Write-Host "AI setup completed successfully!" -ForegroundColor Green
 & $ollama list
 ```

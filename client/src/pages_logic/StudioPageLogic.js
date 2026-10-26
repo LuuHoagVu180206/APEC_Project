@@ -31,6 +31,12 @@ export const StudioPageLogic = () => {
     const [isGeneratingBatch, setIsGeneratingBatch] = useState(false);
     const [isSavingBatch, setIsSavingBatch] = useState(false);
     const [generatedQuestions, setGeneratedQuestions] = useState([]);
+        const [aiSourceType, setAiSourceType] = useState('text'); // 'text' | 'image'
+    const [aiImagePreview, setAiImagePreview] = useState('');
+    const [aiImageName, setAiImageName] = useState('');
+    const [aiImagePrompt, setAiImagePrompt] = useState('');
+    const [isGeneratingImageBatch, setIsGeneratingImageBatch] = useState(false);
+
     const [aiInputData, setAiInputData] = useState({
         context: '',
         numQuestions: 3,
@@ -114,6 +120,130 @@ export const StudioPageLogic = () => {
             alert(typeof msg === 'object' ? JSON.stringify(msg) : msg);
         } finally {
             setIsGeneratingBatch(false);
+        }
+    };
+
+    
+    // Tự động tối ưu hóa và co giãn kích thước ảnh (tối đa 1200px)
+    // Giúp số lượng token hình ảnh vừa vặn với context size của model và tăng tốc độ xử lý AI
+    const optimizeImageForAI = (dataUrl, maxDim = 1200, quality = 0.85) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.onerror = () => resolve(dataUrl);
+            img.src = dataUrl;
+        });
+    };
+
+    const handleImageSelect = (file) => {
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            alert("Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, JPEG, WEBP)!");
+            return;
+        }
+        if (file.size > 20 * 1024 * 1024) {
+            alert("Dung lượng ảnh tối đa là 20MB. Vui lòng chọn ảnh nhẹ hơn!");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const optimized = await optimizeImageForAI(e.target.result);
+                setAiImagePreview(optimized);
+                setAiImageName(file.name);
+            } catch {
+                setAiImagePreview(e.target.result);
+                setAiImageName(file.name);
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemoveImage = () => {
+        setAiImagePreview('');
+        setAiImageName('');
+    };
+
+    const handlePasteImage = (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const blob = items[i].getAsFile();
+                if (blob) {
+                    handleImageSelect(blob);
+                    e.preventDefault();
+                    break;
+                }
+            }
+        }
+    };
+
+    const handleGenerateQuestionsFromImage = async (e) => {
+        if (e) e.preventDefault();
+        if (!aiImagePreview) {
+            alert("Vui lòng tải lên hoặc dán hình ảnh trước khi tạo câu hỏi!");
+            return;
+        }
+        setIsGeneratingImageBatch(true);
+        try {
+            const res = await axios.post('http://localhost:5000/api/questions/generate-from-image', {
+                image: aiImagePreview,
+                prompt: aiImagePrompt,
+                numQuestions: aiInputData.numQuestions,
+                topic: aiInputData.topic,
+                difficulty: aiInputData.difficulty
+            }, {
+                headers: { token: currentUser.accessToken }
+            });
+
+            if (res.data?.questions && res.data.questions.length > 0) {
+                setGeneratedQuestions(res.data.questions);
+                if (res.data.questions.length === 1) {
+                    const singleQ = res.data.questions[0];
+                    setFormData({
+                        questionText: singleQ.questionText,
+                        optionA: singleQ.options[0] || '',
+                        optionB: singleQ.options[1] || '',
+                        optionC: singleQ.options[2] || '',
+                        optionD: singleQ.options[3] || '',
+                        correctAnswer: singleQ.correctAnswer === singleQ.options[1] ? 'B' : singleQ.correctAnswer === singleQ.options[2] ? 'C' : singleQ.correctAnswer === singleQ.options[3] ? 'D' : 'A',
+                        difficulty: singleQ.difficulty || 'medium',
+                        topic: singleQ.topic || aiInputData.topic || 'Khác',
+                        explanation: singleQ.explanation || '',
+                        setId: aiInputData.setId || ''
+                    });
+                }
+            }
+        } catch (err) {
+            let msg = err.response?.data?.message || err.response?.data || "Không thể tạo câu hỏi từ hình ảnh bằng AI Qwen2-VL. Vui lòng kiểm tra lại dịch vụ Ollama!";
+            if (typeof msg === 'string' && msg.includes('exceeds the available context size')) {
+                msg = "Hình ảnh có kích thước/chi tiết quá lớn vượt quá giới hạn token của AI. Hệ thống đã tối ưu ảnh, vui lòng thử lại hoặc chụp/cắt gọn riêng phần câu hỏi!";
+            }
+            alert(typeof msg === 'object' ? JSON.stringify(msg) : msg);
+        } finally {
+            setIsGeneratingImageBatch(false);
         }
     };
 
@@ -432,6 +562,18 @@ export const StudioPageLogic = () => {
         isSavingBatch,
         generatedQuestions,
         handleGenerateQuestionsFromContext,
+        aiSourceType,
+        setAiSourceType,
+        aiImagePreview,
+        setAiImagePreview,
+        aiImageName,
+        aiImagePrompt,
+        setAiImagePrompt,
+        isGeneratingImageBatch,
+        handleImageSelect,
+        handleRemoveImage,
+        handlePasteImage,
+        handleGenerateQuestionsFromImage,
         handleLoadIntoForm,
         handleSaveSingleGeneratedQuestion,
         handleSaveAllGeneratedQuestions,

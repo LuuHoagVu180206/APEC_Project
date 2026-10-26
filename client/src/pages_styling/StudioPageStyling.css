@@ -1249,3 +1249,195 @@
     background: var(--accent-emerald);
     color: #ffffff;
 }
+
+
+/* --- 12. AI VISION & SOURCE SELECTION STYLES --- */
+.ai-source-toggle-tabs {
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface-elevated);
+    padding: 3px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.ai-source-tab-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.ai-source-tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.ai-source-tab-btn.active {
+    background: var(--bg-surface);
+    color: var(--accent-purple);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .ai-source-tab-btn.active {
+    background: #ffffff;
+    color: #7c3aed;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image-upload-dropzone {
+    border: 2px dashed rgba(139, 92, 246, 0.4);
+    border-radius: 12px;
+    padding: 24px 16px;
+    background: rgba(139, 92, 246, 0.04);
+    cursor: pointer;
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.image-upload-dropzone:hover {
+    border-color: var(--accent-purple);
+    background: rgba(139, 92, 246, 0.08);
+    transform: translateY(-1px);
+}
+
+[data-theme='light'] .image-upload-dropzone {
+    background: #fdfaff;
+    border-color: #c4b5fd;
+}
+
+[data-theme='light'] .image-upload-dropzone:hover {
+    background: #f5f3ff;
+    border-color: #8b5cf6;
+}
+
+.dropzone-inner-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.dropzone-icon-circle {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+[data-theme='light'] .dropzone-icon-circle {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.dropzone-text-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dropzone-main-text {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--text-primary);
+}
+
+.dropzone-main-text span {
+    color: var(--accent-purple);
+    text-decoration: underline;
+    font-weight: 700;
+}
+
+.dropzone-sub-text {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.image-preview-card {
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: var(--bg-surface-elevated);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+[data-theme='light'] .image-preview-card {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.image-preview-thumb-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+}
+
+.image-preview-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.image-preview-filename {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-remove-image {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error-red);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-remove-image:hover {
+    background: var(--error-red);
+    color: #ffffff;
+}

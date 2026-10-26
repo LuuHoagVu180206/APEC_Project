@@ -26,7 +26,9 @@ import {
     CheckCircle2,
     PencilLine,
     BookmarkCheck,
-    RotateCcw
+    RotateCcw,
+    UploadCloud,
+    Image as ImageIcon
 } from 'lucide-react';
 
 const StudioPage = () => {
@@ -62,6 +64,17 @@ const StudioPage = () => {
         isGeneratingBatch,
         isSavingBatch,
         generatedQuestions,
+                aiSourceType,
+        setAiSourceType,
+        aiImagePreview,
+        aiImageName,
+        aiImagePrompt,
+        setAiImagePrompt,
+        isGeneratingImageBatch,
+        handleImageSelect,
+        handleRemoveImage,
+        handlePasteImage,
+        handleGenerateQuestionsFromImage,
         handleGenerateQuestionsFromContext,
         handleLoadIntoForm,
         handleSaveSingleGeneratedQuestion,
@@ -600,14 +613,39 @@ const StudioPage = () => {
                                 <div className="studio-ai-generator-panel">
                                     <div className="ai-banner-card">
                                         <div className="ai-banner-icon">
-                                            <Bot size={22} />
+                                            {aiSourceType === 'image' ? <ImageIcon size={22} /> : <Bot size={22} />}
                                         </div>
                                         <div className="ai-banner-text">
-                                            <h4>Trợ lý AI Qwen 2.5 Soạn Câu Hỏi</h4>
-                                            <p>Dán đoạn tài liệu, bài giảng hoặc khái niệm (Vật lý, Toán, Lịch sử...). AI sẽ đọc dữ liệu và tự động tạo số câu hỏi trắc nghiệm mong muốn kèm lời giải thích!</p>
+                                            <h4>{aiSourceType === 'image' ? 'Trợ lý AI Qwen2-VL Soạn Câu Hỏi Từ Hình Ảnh' : 'Trợ lý AI Qwen 2.5 Soạn Câu Hỏi Từ Tài Liệu'}</h4>
+                                            <p>
+                                                {aiSourceType === 'image' 
+                                                    ? 'Tải lên hoặc dán ảnh bài tập, sơ đồ mạch, đồ thị hoặc hình vẽ thí nghiệm. Model Qwen2-VL-7B-Instruct sẽ quan sát hình ảnh và tự động tạo câu hỏi trắc nghiệm kèm giải thích chuẩn sư phạm!' 
+                                                    : 'Dán đoạn tài liệu, bài giảng hoặc khái niệm (Vật lý, Toán, Lịch sử...). AI sẽ đọc dữ liệu và tự động tạo số câu hỏi trắc nghiệm mong muốn kèm lời giải thích!'}
+                                            </p>
                                         </div>
                                     </div>
 
+                                    {/* Nút chuyển đổi nguồn: Văn bản hoặc Hình ảnh */}
+                                    <div className="ai-source-toggle-tabs">
+                                        <button
+                                            type="button"
+                                            className={`ai-source-tab-btn ${aiSourceType === 'text' ? 'active' : ''}`}
+                                            onClick={() => setAiSourceType('text')}
+                                        >
+                                            <FileText size={14} />
+                                            <span>Từ văn bản / tài liệu</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`ai-source-tab-btn ${aiSourceType === 'image' ? 'active' : ''}`}
+                                            onClick={() => setAiSourceType('image')}
+                                        >
+                                            <ImageIcon size={14} />
+                                            <span>Từ hình ảnh (Qwen2-VL)</span>
+                                        </button>
+                                    </div>
+
+                                    {aiSourceType === 'text' ? (
                                     <form onSubmit={handleGenerateQuestionsFromContext} className="studio-form-stack">
                                         <div className="form-group-field">
                                             <label htmlFor="ai-context" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -644,8 +682,8 @@ const StudioPage = () => {
                                                 <label htmlFor="ai-topic">Chủ đề môn học</label>
                                                 <select 
                                                     id="ai-topic"
-                                                    className="studio-select"
-                                                    value={aiInputData.topic}
+                                                    className="studio-select" 
+                                                    value={aiInputData.topic} 
                                                     onChange={(e) => setAiInputData({...aiInputData, topic: e.target.value})}
                                                 >
                                                     <option value="Vật lý">Vật lý</option>
@@ -666,8 +704,8 @@ const StudioPage = () => {
                                                 <label htmlFor="ai-diff">Độ khó mong muốn</label>
                                                 <select 
                                                     id="ai-diff"
-                                                    className="studio-select"
-                                                    value={aiInputData.difficulty}
+                                                    className="studio-select" 
+                                                    value={aiInputData.difficulty} 
                                                     onChange={(e) => setAiInputData({...aiInputData, difficulty: e.target.value})}
                                                 >
                                                     <option value="mixed">Đa dạng (Hỗn hợp)</option>
@@ -682,8 +720,8 @@ const StudioPage = () => {
                                                     <label htmlFor="ai-set">Gán vào bộ đề</label>
                                                     <select 
                                                         id="ai-set"
-                                                        className="studio-select"
-                                                        value={aiInputData.setId}
+                                                        className="studio-select" 
+                                                        value={aiInputData.setId} 
                                                         onChange={(e) => setAiInputData({...aiInputData, setId: e.target.value})}
                                                     >
                                                         <option value="">Lưu ngân hàng chung</option>
@@ -713,7 +751,176 @@ const StudioPage = () => {
                                             )}
                                         </button>
                                     </form>
+                                    ) : (
+                                    <form onSubmit={handleGenerateQuestionsFromImage} className="studio-form-stack" onPaste={handlePasteImage}>
+                                        <div className="form-group-field">
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <ImageIcon size={14} color="var(--accent-purple)" />
+                                                <span>Hình ảnh đầu vào (Bài tập, sơ đồ, đồ thị...)</span>
+                                                <span style={{ color: 'var(--error-red)' }}>*</span>
+                                            </label>
 
+                                            {!aiImagePreview ? (
+                                                <div 
+                                                    className="image-upload-dropzone"
+                                                    onClick={() => document.getElementById('ai-image-file-input').click()}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                    onDrop={(e) => {
+                                                        e.preventDefault();
+                                                        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                                                            handleImageSelect(e.dataTransfer.files[0]);
+                                                        }
+                                                    }}
+                                                >
+                                                    <input 
+                                                        id="ai-image-file-input"
+                                                        type="file"
+                                                        accept="image/*"
+                                                        style={{ display: 'none' }}
+                                                        onChange={(e) => {
+                                                            if (e.target.files && e.target.files[0]) {
+                                                                handleImageSelect(e.target.files[0]);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <div className="dropzone-inner-content">
+                                                        <div className="dropzone-icon-circle">
+                                                            <UploadCloud size={24} />
+                                                        </div>
+                                                        <div className="dropzone-text-group">
+                                                            <p className="dropzone-main-text">
+                                                                <strong>Kéo thả ảnh vào đây</strong> hoặc <span>click để chọn ảnh</span>
+                                                            </p>
+                                                            <p className="dropzone-sub-text">
+                                                                PNG, JPG, WEBP • Hỗ trợ <strong>Ctrl + V</strong> dán ảnh chụp màn hình trực tiếp
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="image-preview-card">
+                                                    <div className="image-preview-thumb-wrapper">
+                                                        <img src={aiImagePreview} alt="Xem trước" className="image-preview-thumb" />
+                                                    </div>
+                                                    <div className="image-preview-info">
+                                                        <span className="image-preview-filename">{aiImageName || 'Hình ảnh đã chọn'}</span>
+                                                        <button 
+                                                            type="button" 
+                                                            className="btn-remove-image"
+                                                            onClick={handleRemoveImage}
+                                                            title="Đổi ảnh khác"
+                                                        >
+                                                            <Trash2 size={13} />
+                                                            <span>Đổi ảnh khác</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="form-group-field">
+                                            <label htmlFor="ai-img-prompt" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <Lightbulb size={14} color="var(--accent-gold)" />
+                                                <span>Ghi chú / Định hướng cho AI (Tùy chọn)</span>
+                                            </label>
+                                            <input 
+                                                id="ai-img-prompt"
+                                                className="studio-input"
+                                                placeholder="Ví dụ: Tập trung vào câu hỏi tính chu kỳ dao động, hoặc công thức mạch..."
+                                                value={aiImagePrompt}
+                                                onChange={(e) => setAiImagePrompt(e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                            <div className="form-group-field">
+                                                <label htmlFor="ai-img-num">Số câu hỏi muốn tạo</label>
+                                                <input 
+                                                    id="ai-img-num"
+                                                    type="number"
+                                                    min="1"
+                                                    max="10"
+                                                    className="studio-input"
+                                                    value={aiInputData.numQuestions}
+                                                    onChange={(e) => setAiInputData({...aiInputData, numQuestions: parseInt(e.target.value, 10) || 1})}
+                                                />
+                                            </div>
+
+                                            <div className="form-group-field">
+                                                <label htmlFor="ai-img-topic">Chủ đề môn học</label>
+                                                <select 
+                                                    id="ai-img-topic"
+                                                    className="studio-select" 
+                                                    value={aiInputData.topic} 
+                                                    onChange={(e) => setAiInputData({...aiInputData, topic: e.target.value})}
+                                                >
+                                                    <option value="Vật lý">Vật lý</option>
+                                                    <option value="Toán">Toán học</option>
+                                                    <option value="Hoá học">Hoá học</option>
+                                                    <option value="Sinh học">Sinh học</option>
+                                                    <option value="Tiếng Anh">Tiếng Anh</option>
+                                                    <option value="Lịch sử">Lịch sử</option>
+                                                    <option value="Địa lý">Địa lý</option>
+                                                    <option value="Tin học">Tin học</option>
+                                                    <option value="Khác">Khác</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                            <div className="form-group-field">
+                                                <label htmlFor="ai-img-diff">Độ khó mong muốn</label>
+                                                <select 
+                                                    id="ai-img-diff"
+                                                    className="studio-select" 
+                                                    value={aiInputData.difficulty} 
+                                                    onChange={(e) => setAiInputData({...aiInputData, difficulty: e.target.value})}
+                                                >
+                                                    <option value="mixed">Đa dạng (Hỗn hợp)</option>
+                                                    <option value="easy">Dễ (Nhận biết)</option>
+                                                    <option value="medium">Trung bình (Vận dụng)</option>
+                                                    <option value="hard">Khó (Phân tích)</option>
+                                                </select>
+                                            </div>
+
+                                            {mySets.length > 0 ? (
+                                                <div className="form-group-field">
+                                                    <label htmlFor="ai-img-set">Gán vào bộ đề</label>
+                                                    <select 
+                                                        id="ai-img-set"
+                                                        className="studio-select" 
+                                                        value={aiInputData.setId} 
+                                                        onChange={(e) => setAiInputData({...aiInputData, setId: e.target.value})}
+                                                    >
+                                                        <option value="">Lưu ngân hàng chung</option>
+                                                        {mySets.map(set => (
+                                                            <option key={set._id} value={set._id}>📦 {set.title}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            ) : <div />}
+                                        </div>
+
+                                        <button 
+                                            type="submit" 
+                                            className={`btn-ai-submit-generate ${isGeneratingImageBatch ? 'loading' : ''}`}
+                                            disabled={isGeneratingImageBatch || !aiImagePreview}
+                                        >
+                                            {isGeneratingImageBatch ? (
+                                                <>
+                                                    <Loader2 size={18} className="spin-animation" />
+                                                    <span>Qwen2-VL đang xem ảnh & tạo {aiInputData.numQuestions} câu hỏi...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Wand2 size={18} />
+                                                    <span>Tạo {aiInputData.numQuestions} Câu Hỏi Bằng Qwen2-VL</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </form>
+                                    )}
+                                    
                                     {/* DANH SÁCH CÂU HỎI VỪA TẠO RA BẰNG AI */}
                                     {generatedQuestions.length > 0 && (
                                         <div className="ai-results-container">
