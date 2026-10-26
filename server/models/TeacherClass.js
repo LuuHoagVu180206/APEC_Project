@@ -11,7 +11,8 @@ const TeacherClassSchema = new mongoose.Schema({
     teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     school: { type: mongoose.Schema.Types.ObjectId, ref: 'School', default: null },
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    questionSets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'QuestionSet' }]
+    questionSets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'QuestionSet' }],
+    assignments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Assignment' }]
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

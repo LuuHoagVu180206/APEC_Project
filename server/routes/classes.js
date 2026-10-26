@@ -2,6 +2,8 @@ const router = require('express').Router();
 const mongoose = require('mongoose');
 const TeacherClass = require('../models/TeacherClass');
 const QuestionSet = require('../models/QuestionSet');
+const Question = require('../models/Question');
+const Assignment = require('../models/Assignment');
 const SchoolMember = require('../models/SchoolMember');
 const { verifyToken } = require('../verifyToken');
 
@@ -350,7 +352,22 @@ router.get('/:id', requireClassTeacher, async (req, res) => {
             _id: req.params.id,
             $or: [{ teacher: req.user.id }, { teachers: req.user.id }]
         })
-            .populate('questionSets', 'title description questions');
+            .populate({
+                path: 'questionSets',
+                select: 'title description topic questions',
+                populate: {
+                    path: 'questions',
+                    select: 'questionText options correctAnswer difficulty topic explanation'
+                }
+            })
+            .populate({
+                path: 'assignments',
+                options: { sort: { createdAt: -1 } },
+                populate: {
+                    path: 'questions',
+                    select: 'questionText options correctAnswer difficulty topic explanation'
+                }
+            });
         if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
         if (!classDoc.classCode) await classDoc.save();
 
@@ -362,9 +379,9 @@ router.get('/:id', requireClassTeacher, async (req, res) => {
             isPrimaryTeacher: classDoc.teacher.toString() === req.user.id,
             studentCount: students.length,
             teacherCount: getTeacherCount(classDoc),
-            questionSetCount: classDoc.questionSets.length,
-            assignmentCount: 0,
-            assignments: []
+            questionSetCount: classDoc.questionSets ? classDoc.questionSets.length : 0,
+            assignmentCount: classDoc.assignments ? classDoc.assignments.length : 0,
+            assignments: classDoc.assignments || []
         });
     } catch (err) {
         res.status(500).json('Không thể tải thông tin lớp học!');
@@ -395,6 +412,106 @@ router.post('/:id/question-sets', requireClassTeacher, async (req, res) => {
         res.status(200).json({ message: 'Đã thêm bộ câu hỏi vào lớp!', questionSet });
     } catch (err) {
         res.status(500).json('Không thể thêm bộ câu hỏi vào lớp!');
+    }
+});
+
+
+// TẠO ASSIGNMENT MỚI CHO LỚP
+router.post('/:id/assignments', requireClassTeacher, async (req, res) => {
+    const { title, dueDate, questionIds, description } = req.body;
+
+    if (!title || typeof title !== 'string' || !title.trim()) {
+        return res.status(400).json('Vui lòng nhập tên cho Assignment!');
+    }
+
+    if (!Array.isArray(questionIds) || questionIds.length === 0) {
+        return res.status(400).json('Vui lòng chọn ít nhất 1 câu hỏi từ các bộ câu hỏi của lớp!');
+    }
+
+    const validIds = questionIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+    if (validIds.length === 0) {
+        return res.status(400).json('Danh sách câu hỏi không hợp lệ!');
+    }
+    const uniqueQuestionIds = [...new Set(validIds.map(id => id.toString()))];
+
+    try {
+        const classDoc = await TeacherClass.findOne({
+            _id: req.params.id,
+            $or: [{ teacher: req.user.id }, { teachers: req.user.id }]
+        }).populate('questionSets');
+
+        if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
+
+        // Lấy tất cả Question IDs có trong các QuestionSets của lớp này
+        const classQuestionIdStrings = new Set();
+        for (const qSet of classDoc.questionSets || []) {
+            for (const qId of qSet.questions || []) {
+                const idStr = (qId && (qId._id || qId)).toString();
+                classQuestionIdStrings.add(idStr);
+            }
+        }
+
+        const validClassQuestions = uniqueQuestionIds.filter(id => classQuestionIdStrings.has(id));
+        if (validClassQuestions.length === 0) {
+            return res.status(400).json('Các câu hỏi đã chọn không thuộc các bộ câu hỏi trong lớp học này!');
+        }
+
+        let parsedDueDate = null;
+        if (dueDate) {
+            const d = new Date(dueDate);
+            if (isNaN(d.getTime())) {
+                return res.status(400).json('Thời hạn nộp bài (Due date) không hợp lệ!');
+            }
+            parsedDueDate = d;
+        }
+
+        const createdAssignment = await Assignment.create({
+            title: title.trim(),
+            description: typeof description === 'string' ? description.trim() : '',
+            dueDate: parsedDueDate,
+            classId: classDoc._id,
+            createdBy: req.user.id,
+            questions: validClassQuestions
+        });
+
+        classDoc.assignments.push(createdAssignment._id);
+        await classDoc.save();
+
+        const populated = await Assignment.findById(createdAssignment._id)
+            .populate('questions', 'questionText options correctAnswer difficulty topic explanation');
+
+        res.status(201).json({
+            message: 'Đã tạo Assignment thành công!',
+            assignment: populated
+        });
+    } catch (err) {
+        console.error('Lỗi khi tạo Assignment:', err);
+        res.status(500).json('Không thể tạo Assignment cho lớp: ' + (err.message || ''));
+    }
+});
+
+// XÓA ASSIGNMENT TRONG LỚP
+router.delete('/:id/assignments/:assignmentId', requireClassTeacher, async (req, res) => {
+    const { assignmentId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
+        return res.status(400).json('Mã Assignment không hợp lệ!');
+    }
+
+    try {
+        const classDoc = await TeacherClass.findOne({
+            _id: req.params.id,
+            $or: [{ teacher: req.user.id }, { teachers: req.user.id }]
+        });
+        if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
+
+        await Assignment.deleteOne({ _id: assignmentId, classId: classDoc._id });
+        classDoc.assignments = (classDoc.assignments || []).filter(id => id.toString() !== assignmentId);
+        await classDoc.save();
+
+        res.status(200).json({ message: 'Đã xóa Assignment thành công!' });
+    } catch (err) {
+        console.error('Lỗi khi xóa Assignment:', err);
+        res.status(500).json('Không thể xóa Assignment!');
     }
 });
 

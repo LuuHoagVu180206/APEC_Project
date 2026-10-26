@@ -23,6 +23,15 @@ export const TeacherClassPageLogic = () => {
     const [selectedSetId, setSelectedSetId] = useState('');
     const [showQuestionSets, setShowQuestionSets] = useState(false);
     const [showAssignments, setShowAssignments] = useState(false);
+    const [showCreateAssignmentModal, setShowCreateAssignmentModal] = useState(false);
+    const [assignmentTitle, setAssignmentTitle] = useState('');
+    const [assignmentHasDueDate, setAssignmentHasDueDate] = useState(false);
+    const [assignmentDueDate, setAssignmentDueDate] = useState('');
+    const [assignmentDescription, setAssignmentDescription] = useState('');
+    const [selectedQuestionIds, setSelectedQuestionIds] = useState([]);
+    const [expandedSetIds, setExpandedSetIds] = useState([]);
+    const [isSubmittingAssignment, setIsSubmittingAssignment] = useState(false);
+    const [viewingAssignment, setViewingAssignment] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -135,6 +144,109 @@ export const TeacherClassPageLogic = () => {
         }
     };
 
+
+    const handleToggleSetExpand = (setId) => {
+        setExpandedSetIds(prev => 
+            prev.includes(setId) ? prev.filter(id => id !== setId) : [...prev, setId]
+        );
+    };
+
+    const handleToggleQuestionSelect = (qOrId) => {
+        const qId = typeof qOrId === 'string' ? qOrId : String(qOrId?._id || qOrId?.id || '');
+        if (!qId) return;
+        setSelectedQuestionIds(prev => 
+            prev.includes(qId) ? prev.filter(id => id !== qId) : [...prev, qId]
+        );
+    };
+
+    const handleToggleSelectAllInSet = (set) => {
+        if (!set || !Array.isArray(set.questions) || set.questions.length === 0) return;
+        const setQIds = set.questions
+            .map(q => (typeof q === 'string' ? q : String(q?._id || q?.id || '')))
+            .filter(Boolean);
+        if (setQIds.length === 0) return;
+
+        const allSelected = setQIds.every(id => selectedQuestionIds.includes(id));
+        if (allSelected) {
+            setSelectedQuestionIds(prev => prev.filter(id => !setQIds.includes(id)));
+        } else {
+            setSelectedQuestionIds(prev => Array.from(new Set([...prev, ...setQIds])));
+        }
+    };
+
+    const handleOpenCreateAssignmentModal = () => {
+        setAssignmentTitle('');
+        setAssignmentHasDueDate(false);
+        setAssignmentDueDate('');
+        setAssignmentDescription('');
+        setSelectedQuestionIds([]);
+        if (classInfo?.questionSets?.length) {
+            setExpandedSetIds(classInfo.questionSets.map(s => s._id));
+        }
+        setShowCreateAssignmentModal(true);
+        loadClass().catch(() => {});
+    };
+
+    const handleCloseCreateAssignmentModal = () => {
+        setShowCreateAssignmentModal(false);
+    };
+
+    const handleCreateAssignment = async (e) => {
+        if (e) e.preventDefault();
+        if (!assignmentTitle.trim()) {
+            alert("Vui lòng nhập tên cho Assignment!");
+            return;
+        }
+        const cleanQuestionIds = selectedQuestionIds
+            .map(q => (typeof q === 'string' ? q : String(q?._id || q?.id || '')))
+            .filter(Boolean);
+
+        if (cleanQuestionIds.length === 0) {
+            alert("Vui lòng chọn ít nhất 1 câu hỏi từ các bộ đề trong lớp học!");
+            return;
+        }
+        if (assignmentHasDueDate && !assignmentDueDate) {
+            alert("Vui lòng chọn ngày và giờ hạn nộp bài (Due date) hoặc chọn Vô thời hạn!");
+            return;
+        }
+
+        setIsSubmittingAssignment(true);
+        try {
+            const res = await axios.post(`http://localhost:5000/api/classes/${id}/assignments`, {
+                title: assignmentTitle.trim(),
+                description: assignmentDescription.trim(),
+                dueDate: assignmentHasDueDate ? assignmentDueDate : null,
+                questionIds: cleanQuestionIds
+            }, {
+                headers: { token: currentUser.accessToken }
+            });
+
+            alert(res.data?.message || "Đã tạo Assignment thành công!");
+            setShowCreateAssignmentModal(false);
+            await loadClass();
+            setShowAssignments(true);
+        } catch (err) {
+            const msg = err.response?.data?.message || err.response?.data || "Không thể tạo Assignment!";
+            alert(typeof msg === 'object' ? JSON.stringify(msg) : msg);
+        } finally {
+            setIsSubmittingAssignment(false);
+        }
+    };
+
+    const handleDeleteAssignment = async (assignmentId) => {
+        if (!window.confirm("Bạn có chắc chắn muốn xóa bài tập (assignment) này khỏi lớp học?")) return;
+        try {
+            await axios.delete(`http://localhost:5000/api/classes/${id}/assignments/${assignmentId}`, {
+                headers: { token: currentUser.accessToken }
+            });
+            alert("Đã xóa Assignment thành công!");
+            await loadClass();
+        } catch (err) {
+            const msg = err.response?.data?.message || err.response?.data || "Không thể xóa Assignment!";
+            alert(typeof msg === 'object' ? JSON.stringify(msg) : msg);
+        }
+    };
+
     return {
         classInfo,
         isTeacherAccount: currentUser?.role === 'teacher',
@@ -154,6 +266,30 @@ export const TeacherClassPageLogic = () => {
         setShowQuestionSets,
         showAssignments,
         setShowAssignments,
+        showCreateAssignmentModal,
+        setShowCreateAssignmentModal,
+        assignmentTitle,
+        setAssignmentTitle,
+        assignmentHasDueDate,
+        setAssignmentHasDueDate,
+        assignmentDueDate,
+        setAssignmentDueDate,
+        assignmentDescription,
+        setAssignmentDescription,
+        selectedQuestionIds,
+        setSelectedQuestionIds,
+        expandedSetIds,
+        handleToggleSetExpand,
+        handleToggleQuestionSelect,
+        handleToggleSelectAllInSet,
+        handleOpenCreateAssignmentModal,
+        handleCloseCreateAssignmentModal,
+        handleCreateAssignment,
+        handleDeleteAssignment,
+        isSubmittingAssignment,
+        viewingAssignment,
+        setViewingAssignment,
+        loadClass,
         isLoading,
         error,
         handleAddQuestionSet,
