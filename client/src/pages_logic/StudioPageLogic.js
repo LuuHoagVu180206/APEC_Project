@@ -124,9 +124,9 @@ export const StudioPageLogic = () => {
     };
 
     
-    // Tự động tối ưu hóa và co giãn kích thước ảnh (tối đa 1200px)
+    // Tự động tối ưu hóa và co giãn kích thước ảnh (chuẩn 1024px)
     // Giúp số lượng token hình ảnh vừa vặn với context size của model và tăng tốc độ xử lý AI
-    const optimizeImageForAI = (dataUrl, maxDim = 1200, quality = 0.85) => {
+    const optimizeImageForAI = (dataUrl, maxDim = 1024, quality = 0.85) => {
         return new Promise((resolve) => {
             const img = new Image();
             img.onload = () => {
@@ -147,6 +147,9 @@ export const StudioPageLogic = () => {
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
+                // Đổ nền trắng để ảnh trong suốt (PNG) không bị nền đen khi chuyển sang JPEG
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, width, height);
                 ctx.drawImage(img, 0, 0, width, height);
                 resolve(canvas.toDataURL('image/jpeg', quality));
             };

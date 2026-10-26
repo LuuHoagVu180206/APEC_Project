@@ -1152,3 +1152,314 @@
     border-color: #cbd5e1;
     color: #0f172a;
 }
+
+
+/* ==========================================================================
+   ASSIGNMENT FILTER TABS, TAKING MODAL & RESULT REVIEW (STUDENT)
+   ========================================================================== */
+
+/* Filter Tabs */
+.sc-filter-tabs-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.sc-filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--sc-surface);
+    border: 1.5px solid var(--sc-border);
+    color: var(--sc-text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.sc-filter-tab:hover {
+    color: var(--sc-text);
+    border-color: var(--sc-border-light);
+    background: var(--sc-surface-hover);
+}
+
+.sc-filter-tab.active {
+    background: rgba(14, 165, 233, 0.15);
+    border-color: var(--sc-cyan);
+    color: var(--sc-cyan);
+}
+
+.sc-filter-badge {
+    padding: 1px 7px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Status Badges */
+.sc-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.sc-status-pill.pending {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: var(--sc-gold-hover);
+}
+
+.sc-status-pill.completed {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #34d399;
+}
+
+.sc-status-pill.overdue {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #f87171;
+}
+
+/* Action Buttons */
+.btn-student-take-assignment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border: 1.5px solid #38bdf8;
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 3px 0 0 #0369a1;
+    transition: all 0.15s ease;
+}
+
+.btn-student-take-assignment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 0 #0369a1;
+}
+
+.btn-student-view-result {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 800;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1.5px solid #10b981;
+    color: #34d399;
+    cursor: pointer;
+    box-shadow: 0 3px 0 0 rgba(4, 120, 87, 0.5);
+    transition: all 0.15s ease;
+}
+
+.btn-student-view-result:hover {
+    transform: translateY(-2px);
+    background: rgba(16, 185, 129, 0.25);
+    box-shadow: 0 5px 0 0 rgba(4, 120, 87, 0.5);
+}
+
+/* Taking Assignment UI */
+.sc-take-progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: var(--sc-surface);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+    border: 1px solid var(--sc-border);
+}
+
+.sc-take-progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0ea5e9, #10b981);
+    transition: width 0.25s ease;
+}
+
+.sc-quiz-question-card {
+    padding: 18px;
+    border-radius: 14px;
+    background: var(--sc-surface-card);
+    border: 1.5px solid var(--sc-border);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sc-quiz-question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.sc-quiz-question-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--sc-text);
+    line-height: 1.5;
+}
+
+.sc-quiz-options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+@media (min-width: 640px) {
+    .sc-quiz-options-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.sc-quiz-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--sc-surface);
+    border: 1.5px solid var(--sc-border);
+    color: var(--sc-text);
+    cursor: pointer;
+    font-size: 13.5px;
+    text-align: left;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.sc-quiz-option-btn:hover {
+    border-color: var(--sc-cyan);
+    background: var(--sc-surface-hover);
+}
+
+.sc-quiz-option-btn.selected {
+    background: rgba(14, 165, 233, 0.12);
+    border-color: var(--sc-cyan);
+    color: #38bdf8;
+    font-weight: 700;
+    box-shadow: 0 0 0 1px var(--sc-cyan);
+}
+
+.sc-quiz-option-radio {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--sc-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 800;
+    transition: all 0.15s ease;
+}
+
+.sc-quiz-option-btn.selected .sc-quiz-option-radio {
+    border-color: var(--sc-cyan);
+    background: var(--sc-cyan);
+    color: #ffffff;
+}
+
+/* Result Modal UI (1.3) */
+.sc-result-banner {
+    padding: 20px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(16, 185, 129, 0.12) 100%);
+    border: 1.5px solid rgba(16, 185, 129, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+}
+
+.sc-result-score-big {
+    font-size: 38px;
+    font-weight: 900;
+    color: #34d399;
+    letter-spacing: -1px;
+}
+
+.sc-result-meta-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--sc-text-muted);
+}
+
+.sc-result-option-card {
+    padding: 10px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    border: 1.5px solid var(--sc-border);
+    background: var(--sc-surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Đáp án đúng: Viền xanh, nền xanh nhẹ */
+.sc-result-option-card.correct-answer {
+    background: rgba(16, 185, 129, 0.14) !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+    font-weight: 700;
+}
+
+/* Học sinh chọn sai: Viền đỏ, nền đỏ nhẹ */
+.sc-result-option-card.student-wrong {
+    background: rgba(239, 68, 68, 0.14) !important;
+    border-color: #ef4444 !important;
+    color: #f87171 !important;
+    font-weight: 700;
+}
+
+.sc-result-pill-tag {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sc-result-pill-tag.correct {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+.sc-result-pill-tag.wrong {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+.sc-explanation-box {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.08);
+    border-left: 3px solid var(--sc-gold);
+    font-size: 12.5px;
+    color: var(--sc-text);
+    line-height: 1.5;
+}

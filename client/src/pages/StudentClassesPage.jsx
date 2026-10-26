@@ -15,19 +15,76 @@ import {
     FileText,
     Clock,
     Eye,
-    HelpCircle
+    HelpCircle,
+    Play,
+    Award,
+    Check
 } from 'lucide-react';
 import { StudentClassesPageLogic } from '../pages_logic/StudentClassesPageLogic';
 import Navbar from '../components/Navbar';
 import '../pages_styling/StudentClassesStyling.css';
+
+const formatDuration = (start, end) => {
+    if (!start || !end) return '';
+    const diffMs = new Date(end).getTime() - new Date(start).getTime();
+    if (diffMs <= 0 || isNaN(diffMs)) return 'Dưới 1 phút';
+    const totalSecs = Math.floor(diffMs / 1000);
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    if (mins === 0) return `${secs} giây`;
+    return `${mins} phút ${secs > 0 ? `${secs} giây` : ''}`;
+};
+
+const isAnswerMatch = (opt, target, options = []) => {
+    if (!opt || !target) return false;
+    const o = String(opt).trim().toLowerCase();
+    const t = String(target).trim().toLowerCase();
+    if (o === t) return true;
+
+    const strip = (s) => s.replace(/^[a-d][\.\:\)\-]\s*/i, '').trim().toLowerCase();
+    if (strip(o) === strip(t)) return true;
+
+    const letters = ['a', 'b', 'c', 'd'];
+    const tIdx = letters.indexOf(t);
+    if (tIdx !== -1 && options[tIdx] && strip(options[tIdx]) === strip(o)) return true;
+
+    return false;
+};
+
+const getAssignmentStatus = (assignment) => {
+    if (!assignment) return 'pending';
+    if (assignment.status) return assignment.status;
+    if (assignment.submission) return 'completed';
+    if (assignment.dueDate && new Date(assignment.dueDate) < new Date()) return 'overdue';
+    return 'pending';
+};
 
 const StudentClassesPage = () => {
     const {
         classCode, setClassCode, joinAsTeacher, setJoinAsTeacher, isTeacher,
         classes, selectedClass, error, notice,
         isLoading, isJoining, handleJoinByCode, openClass, closeClass,
-        viewingAssignment, setViewingAssignment, navigate
+        assignmentFilter, setAssignmentFilter,
+        viewingAssignment, setViewingAssignment,
+        takingAssignment, studentAnswers, isSubmitting, submitError,
+        handleStartTakingAssignment, handleSelectOption, handleCancelTaking, handleSubmitAssignment,
+        viewingResult, isLoadingResult, handleViewResult, closeResultModal,
+        navigate
     } = StudentClassesPageLogic();
+
+    const rawAssignments = selectedClass?.assignments || [];
+    const pendingCount = rawAssignments.filter(a => getAssignmentStatus(a) === 'pending').length;
+    const completedCount = rawAssignments.filter(a => getAssignmentStatus(a) === 'completed').length;
+    const overdueCount = rawAssignments.filter(a => getAssignmentStatus(a) === 'overdue').length;
+
+    const filteredAssignments = rawAssignments.filter(a => {
+        const s = getAssignmentStatus(a);
+        if (assignmentFilter === 'all') return true;
+        if (assignmentFilter === 'pending') return s === 'pending';
+        if (assignmentFilter === 'completed') return s === 'completed';
+        if (assignmentFilter === 'overdue') return s === 'overdue';
+        return true;
+    });
 
     return (
         <div className="student-classes-page-wrapper">
@@ -56,7 +113,7 @@ const StudentClassesPage = () => {
                     </div>
                     <h1>{isTeacher ? 'Lớp Đã Tham Gia' : 'Lớp Học Của Tôi'}</h1>
                     <p className="student-classes-hero-sub">
-                        Nhập mã mời 8 chữ cái do giáo viên chia sẻ để gia nhập không gian học tập và khám phá các bài tập, bộ đề câu hỏi.
+                        Nhập mã mời 8 chữ cái do giáo viên chia sẻ để gia nhập không gian học tập và thực hiện các bài tập trắc nghiệm.
                     </p>
                 </header>
 
@@ -180,7 +237,7 @@ const StudentClassesPage = () => {
                                     <div className="student-classes-card-footer">
                                         <div className="student-classes-card-counts">
                                             <span className="student-classes-count-item" title="Số học sinh">
-                                                <Users size={14} color="var(--sc-cyan)" /> {classItem.studentCount}
+                                                <Users size={14} color="var(--sc-cyan)" /> {classItem.studentCount ?? 0} học sinh
                                             </span>
                                             <span className="student-classes-count-item" title="Số bài tập">
                                                 <FileText size={14} color="var(--sc-purple, #a855f7)" /> {classItem.assignmentCount ?? (classItem.assignments?.length || 0)} bài tập
@@ -242,7 +299,7 @@ const StudentClassesPage = () => {
                                     <Users size={20} />
                                 </div>
                                 <div className="student-classes-stat-tile-info">
-                                    <strong>{selectedClass.studentCount}</strong>
+                                    <strong>{selectedClass.studentCount ?? 0}</strong>
                                     <span>Học sinh</span>
                                 </div>
                             </div>
@@ -266,70 +323,160 @@ const StudentClassesPage = () => {
                             </div>
                         </div>
 
+                        {/* SECTION: ASSIGNMENTS FOR STUDENT (1.1) */}
                         <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--sc-border)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                                 <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: 'var(--sc-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <FileText size={18} color="var(--sc-purple, #a855f7)" />
                                     Assignments trong lớp
                                     <span className="student-classes-count-badge" style={{ borderColor: 'rgba(168, 85, 247, 0.4)', color: 'var(--sc-purple-hover, #c084fc)', background: 'rgba(168, 85, 247, 0.15)' }}>
-                                        {selectedClass.assignmentCount ?? (selectedClass.assignments?.length || 0)}
+                                        {rawAssignments.length}
                                     </span>
                                 </h3>
                             </div>
 
-                            {selectedClass.assignments && selectedClass.assignments.length > 0 ? (
+                            {/* 1.1: BỘ LỌC ASSIGNMENT (CHƯA LÀM, ĐÃ LÀM, QUÁ HẠN) */}
+                            {rawAssignments.length > 0 && (
+                                <div className="sc-filter-tabs-row">
+                                    <button
+                                        type="button"
+                                        className={`sc-filter-tab ${assignmentFilter === 'all' ? 'active' : ''}`}
+                                        onClick={() => setAssignmentFilter('all')}
+                                    >
+                                        🌟 Tất cả bài tập <span className="sc-filter-badge">{rawAssignments.length}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`sc-filter-tab ${assignmentFilter === 'pending' ? 'active' : ''}`}
+                                        onClick={() => setAssignmentFilter('pending')}
+                                    >
+                                        ⏳ Chưa làm <span className="sc-filter-badge">{pendingCount}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`sc-filter-tab ${assignmentFilter === 'completed' ? 'active' : ''}`}
+                                        onClick={() => setAssignmentFilter('completed')}
+                                    >
+                                        ✅ Đã làm <span className="sc-filter-badge">{completedCount}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`sc-filter-tab ${assignmentFilter === 'overdue' ? 'active' : ''}`}
+                                        onClick={() => setAssignmentFilter('overdue')}
+                                    >
+                                        ⚠️ Đã quá hạn <span className="sc-filter-badge">{overdueCount}</span>
+                                    </button>
+                                </div>
+                            )}
+
+                            {filteredAssignments.length > 0 ? (
                                 <div className="student-classes-assignment-list">
-                                    {selectedClass.assignments.map((assignment) => (
-                                        <div className="student-classes-assignment-card" key={assignment._id}>
-                                            <div className="student-classes-assignment-header">
-                                                <div className="student-classes-assignment-icon">
-                                                    <FileText size={22} />
-                                                </div>
-                                                <div className="student-classes-assignment-title-col">
-                                                    <h4>{assignment.title}</h4>
-                                                    {assignment.description && (
-                                                        <p className="student-classes-assignment-desc">{assignment.description}</p>
-                                                    )}
-                                                    <div className="student-classes-assignment-badges">
-                                                        <span className="assignment-badge-questions">
-                                                            <HelpCircle size={13} /> {assignment.questions?.length || 0} câu hỏi
-                                                        </span>
-                                                        {assignment.dueDate ? (
-                                                            <span className={`assignment-badge-due ${new Date(assignment.dueDate) < new Date() ? 'expired' : 'active'}`}>
-                                                                <Calendar size={13} />
-                                                                {new Date(assignment.dueDate) < new Date() ? 'Đã hết hạn: ' : 'Hạn chót: '}
-                                                                {new Date(assignment.dueDate).toLocaleString('vi-VN', {
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit',
-                                                                    day: '2-digit',
-                                                                    month: '2-digit',
-                                                                    year: 'numeric'
-                                                                })}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="assignment-badge-due perpetual">
-                                                                <Clock size={13} /> Vô thời hạn
-                                                            </span>
+                                    {filteredAssignments.map((assignment) => {
+                                        const status = getAssignmentStatus(assignment);
+                                        return (
+                                            <div className="student-classes-assignment-card" key={assignment._id}>
+                                                <div className="student-classes-assignment-header">
+                                                    <div className="student-classes-assignment-icon">
+                                                        <FileText size={22} />
+                                                    </div>
+                                                    <div className="student-classes-assignment-title-col">
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                            <h4 style={{ margin: 0 }}>{assignment.title}</h4>
+                                                            {/* Status Pill (1.1) */}
+                                                            {status === 'completed' && (
+                                                                <span className="sc-status-pill completed">
+                                                                    <CheckCircle2 size={12} /> Đã nộp: {assignment.submission?.score ?? '?'}/{assignment.submission?.totalQuestions || assignment.questions?.length || 0} câu đúng
+                                                                </span>
+                                                            )}
+                                                            {status === 'pending' && (
+                                                                <span className="sc-status-pill pending">
+                                                                    <Clock size={12} /> Chưa làm
+                                                                </span>
+                                                            )}
+                                                            {status === 'overdue' && (
+                                                                <span className="sc-status-pill overdue">
+                                                                    <AlertCircle size={12} /> Đã quá hạn
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        {assignment.description && (
+                                                            <p className="student-classes-assignment-desc">{assignment.description}</p>
                                                         )}
+
+                                                        <div className="student-classes-assignment-badges">
+                                                            <span className="assignment-badge-questions">
+                                                                <HelpCircle size={13} /> {assignment.questions?.length || 0} câu hỏi
+                                                            </span>
+                                                            {assignment.dueDate ? (
+                                                                <span className={`assignment-badge-due ${new Date(assignment.dueDate) < new Date() ? 'expired' : 'active'}`}>
+                                                                    <Calendar size={13} />
+                                                                    {new Date(assignment.dueDate) < new Date() ? 'Đã hết hạn: ' : 'Hạn chót: '}
+                                                                    {new Date(assignment.dueDate).toLocaleString('vi-VN', {
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit',
+                                                                        day: '2-digit',
+                                                                        month: '2-digit',
+                                                                        year: 'numeric'
+                                                                    })}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="assignment-badge-due perpetual">
+                                                                    <Clock size={13} /> Vô thời hạn
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
+
+                                                {/* ACTION BUTTONS (1.2 & 1.3) */}
+                                                <div className="student-classes-assignment-actions">
+                                                    {status === 'pending' && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn-student-take-assignment"
+                                                            onClick={() => handleStartTakingAssignment(assignment)}
+                                                        >
+                                                            <Play size={14} /> Làm bài tập
+                                                        </button>
+                                                    )}
+
+                                                    {status === 'completed' && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn-student-view-result"
+                                                            onClick={() => handleViewResult(assignment)}
+                                                        >
+                                                            <Award size={14} /> Xem kết quả ({assignment.submission?.score ?? '?'}/{assignment.submission?.totalQuestions || assignment.questions?.length || 0})
+                                                        </button>
+                                                    )}
+
+                                                    {status === 'overdue' && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn-student-view-assignment"
+                                                            onClick={() => setViewingAssignment(assignment)}
+                                                        >
+                                                            <Eye size={14} /> Chi tiết đề bài
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="student-classes-assignment-actions">
-                                                <button
-                                                    type="button"
-                                                    className="btn-student-view-assignment"
-                                                    onClick={() => setViewingAssignment(assignment)}
-                                                >
-                                                    <Eye size={14} /> Chi tiết đề bài
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <div className="student-classes-empty" style={{ padding: '24px 16px' }}>
                                     <FileText size={24} color="var(--sc-text-subtle)" />
-                                    <span>Lớp học chưa có bài tập (assignment) nào được giao.</span>
+                                    <span>
+                                        {assignmentFilter === 'all' 
+                                            ? 'Lớp học chưa có bài tập nào được giao.' 
+                                            : assignmentFilter === 'pending'
+                                            ? 'Bạn đã hoàn thành tất cả bài tập!'
+                                            : assignmentFilter === 'completed'
+                                            ? 'Bạn chưa hoàn thành bài tập nào.'
+                                            : 'Không có bài tập nào bị quá hạn.'}
+                                    </span>
                                 </div>
                             )}
                         </div>
@@ -346,7 +493,270 @@ const StudentClassesPage = () => {
                     </section>
                 )}
 
-                {/* MODAL XEM CHI TIẾT ASSIGNMENT (DÀNH CHO HỌC SINH) */}
+                {/* =========================================================================
+                    MODAL 1: LÀM BÀI TẬP TRẮC NGHIỆM (1.2)
+                    ========================================================================= */}
+                {takingAssignment && (
+                    <div className="sc-modal-backdrop" onClick={handleCancelTaking}>
+                        <div className="sc-modal" style={{ maxWidth: '820px' }} onClick={(e) => e.stopPropagation()}>
+                            <div className="sc-modal-header">
+                                <div className="sc-modal-title-wrap">
+                                    <FileText size={20} color="var(--sc-cyan)" />
+                                    <div>
+                                        <h3>Làm Bài Tập: {takingAssignment.title}</h3>
+                                        <div style={{ fontSize: '12px', color: 'var(--sc-text-muted)', marginTop: '2px' }}>
+                                            Đã làm: <strong style={{ color: 'var(--sc-cyan)' }}>{Object.keys(studentAnswers).length}</strong> / {takingAssignment.questions?.length || 0} câu
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="sc-modal-close-btn"
+                                    onClick={handleCancelTaking}
+                                    title="Hủy bài làm"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Progress bar */}
+                            <div style={{ padding: '0 24px' }}>
+                                <div className="sc-take-progress-bar-bg">
+                                    <div 
+                                        className="sc-take-progress-bar-fill" 
+                                        style={{ 
+                                            width: `${((Object.keys(studentAnswers).length) / Math.max(1, takingAssignment.questions?.length || 1)) * 100}%` 
+                                        }} 
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="sc-modal-body">
+                                {takingAssignment.description && (
+                                    <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'var(--sc-surface)', border: '1px solid var(--sc-border)', fontSize: '13px', color: 'var(--sc-text-muted)' }}>
+                                        <strong>Mô tả:</strong> {takingAssignment.description}
+                                    </div>
+                                )}
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                    {takingAssignment.questions?.map((q, idx) => (
+                                        <div key={q._id || idx} className="sc-quiz-question-card">
+                                            <div className="sc-quiz-question-header">
+                                                <div className="sc-quiz-question-title">
+                                                    <strong>Câu {idx + 1}:</strong> {q.questionText}
+                                                </div>
+                                                <span className={`sc-difficulty-pill ${q.difficulty || 'medium'}`}>
+                                                    {q.difficulty === 'easy' ? 'Dễ' : q.difficulty === 'hard' ? 'Khó' : 'Trung bình'}
+                                                </span>
+                                            </div>
+
+                                            {/* 1.2: LỰA CHỌN CÂU HỎI TRẮC NGHIỆM */}
+                                            <div className="sc-quiz-options-grid">
+                                                {q.options?.map((opt, oIdx) => {
+                                                    const letter = String.fromCharCode(65 + oIdx);
+                                                    const isSelected = studentAnswers[q._id] === opt;
+                                                    return (
+                                                        <div
+                                                            key={oIdx}
+                                                            className={`sc-quiz-option-btn ${isSelected ? 'selected' : ''}`}
+                                                            onClick={() => handleSelectOption(q._id, opt)}
+                                                            role="button"
+                                                            tabIndex={0}
+                                                        >
+                                                            <div className="sc-quiz-option-radio">
+                                                                {isSelected ? <Check size={13} /> : letter}
+                                                            </div>
+                                                            <span>{opt}</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {submitError && (
+                                    <div className="student-classes-alert-error" role="alert">
+                                        <AlertCircle size={18} />
+                                        <span>{submitError}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="sc-modal-footer">
+                                <span style={{ fontSize: '13px', color: 'var(--sc-text-muted)' }}>
+                                    Đã trả lời: <strong style={{ color: 'var(--sc-cyan)' }}>{Object.keys(studentAnswers).length}</strong>/{takingAssignment.questions?.length || 0} câu
+                                </span>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button
+                                        type="button"
+                                        className="sc-btn-modal-close"
+                                        onClick={handleCancelTaking}
+                                        disabled={isSubmitting}
+                                    >
+                                        Hủy
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn-student-take-assignment"
+                                        onClick={handleSubmitAssignment}
+                                        disabled={isSubmitting}
+                                    >
+                                        {isSubmitting ? 'Đang nộp bài...' : 'Nộp bài tập'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* =========================================================================
+                    MODAL 2: HIỂN THỊ KẾT QUẢ BÀI LÀM & ĐÁP ÁN ĐÚNG/SAI (1.3)
+                    ========================================================================= */}
+                {viewingResult && (
+                    <div className="sc-modal-backdrop" onClick={closeResultModal}>
+                        <div className="sc-modal" style={{ maxWidth: '820px' }} onClick={(e) => e.stopPropagation()}>
+                            <div className="sc-modal-header">
+                                <div className="sc-modal-title-wrap">
+                                    <Award size={20} color="#34d399" />
+                                    <h3>Kết Quả Bài Tập: {viewingResult.assignmentTitle || 'Bài Tập Trắc Nghiệm'}</h3>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="sc-modal-close-btn"
+                                    onClick={closeResultModal}
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="sc-modal-body">
+                                {/* SCORE HERO BANNER (1.3) */}
+                                <div className="sc-result-banner">
+                                    <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--sc-text-muted)', textTransform: 'uppercase' }}>
+                                        Tổng kết điểm số của bạn
+                                    </div>
+                                    <div className="sc-result-score-big">
+                                        {viewingResult.score} / {viewingResult.totalQuestions}
+                                    </div>
+                                    <div style={{ fontSize: '15px', fontWeight: 800, color: viewingResult.score === viewingResult.totalQuestions ? '#34d399' : 'var(--sc-cyan)' }}>
+                                        {viewingResult.score === viewingResult.totalQuestions 
+                                            ? '🎉 Xuất sắc! Bạn đã trả lời đúng tất cả các câu!' 
+                                            : viewingResult.score >= (viewingResult.totalQuestions / 2)
+                                            ? '👏 Làm rất tốt! Hãy tiếp tục phát huy.'
+                                            : '💪 Cần cố gắng hơn trong lần tới!'}
+                                    </div>
+                                    <div className="sc-result-meta-row">
+                                        <span>Đúng: <strong style={{ color: '#34d399' }}>{viewingResult.score}</strong></span>
+                                        <span>Sai: <strong style={{ color: '#f87171' }}>{viewingResult.totalQuestions - viewingResult.score}</strong></span>
+                                        <span>Tỷ lệ: <strong>{Math.round((viewingResult.score / Math.max(1, viewingResult.totalQuestions)) * 100)}%</strong></span>
+                                        {viewingResult.startedAt && viewingResult.submittedAt && (
+                                            <span>Thời gian làm: <strong>{formatDuration(viewingResult.startedAt, viewingResult.submittedAt)}</strong></span>
+                                        )}
+                                        {viewingResult.submittedAt && (
+                                            <span>Nộp lúc: <strong>{new Date(viewingResult.submittedAt).toLocaleTimeString('vi-VN')} {new Date(viewingResult.submittedAt).toLocaleDateString('vi-VN')}</strong></span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <h4 style={{ margin: '8px 0 0', fontSize: '15px', color: 'var(--sc-text)' }}>
+                                    Chi tiết từng câu hỏi & đáp án đối chiếu:
+                                </h4>
+
+                                {/* 1.3: CHI TIẾT TỪNG CÂU HỎI VỚI ĐÁP ÁN ĐÚNG & ĐÁP ÁN HỌC SINH ĐÃ CHỌN */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                    {viewingResult.answers?.map((item, idx) => (
+                                        <div key={item.questionId || idx} className="sc-quiz-question-card">
+                                            <div className="sc-quiz-question-header">
+                                                <div className="sc-quiz-question-title">
+                                                    <strong>Câu {idx + 1}:</strong> {item.questionText}
+                                                </div>
+                                                {item.isCorrect ? (
+                                                    <span className="sc-result-pill-tag correct">
+                                                        <Check size={12} /> Đúng (+1đ)
+                                                    </span>
+                                                ) : item.selectedAnswer ? (
+                                                    <span className="sc-result-pill-tag wrong">
+                                                        <X size={12} /> Sai
+                                                    </span>
+                                                ) : (
+                                                    <span className="sc-result-pill-tag" style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'var(--sc-text-muted)' }}>
+                                                        Chưa chọn
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Danh sách các lựa chọn đối chiếu */}
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                {item.options?.map((opt, oIdx) => {
+                                                    const letter = String.fromCharCode(65 + oIdx);
+                                                    const isSelected = isAnswerMatch(opt, item.selectedAnswer, item.options);
+                                                    const isCorrectAns = isAnswerMatch(opt, item.correctAnswer, item.options);
+
+                                                    let cardClass = 'sc-result-option-card';
+                                                    if (isCorrectAns) cardClass += ' correct-answer';
+                                                    else if (isSelected && !isCorrectAns) cardClass += ' student-wrong';
+
+                                                    return (
+                                                        <div key={oIdx} className={cardClass}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                                <strong>{letter}.</strong>
+                                                                <span>{opt}</span>
+                                                            </div>
+
+                                                            {/* Nhãn hiển thị kết quả lựa chọn */}
+                                                            <div>
+                                                                {isSelected && isCorrectAns && (
+                                                                    <span className="sc-result-pill-tag correct">
+                                                                        <Check size={12} /> Đáp án của bạn (Đúng)
+                                                                    </span>
+                                                                )}
+                                                                {isSelected && !isCorrectAns && (
+                                                                    <span className="sc-result-pill-tag wrong">
+                                                                        <X size={12} /> Đáp án bạn chọn (Sai)
+                                                                    </span>
+                                                                )}
+                                                                {!isSelected && isCorrectAns && (
+                                                                    <span className="sc-result-pill-tag correct">
+                                                                        <Check size={12} /> Đáp án đúng
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {/* Giải thích nếu có */}
+                                            {item.explanation && (
+                                                <div className="sc-explanation-box">
+                                                    <strong>💡 Giải thích:</strong> {item.explanation}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="sc-modal-footer">
+                                <span style={{ fontSize: '13px', color: 'var(--sc-text-muted)' }}>
+                                    Điểm số: <strong style={{ color: '#34d399' }}>{viewingResult.score}/{viewingResult.totalQuestions}</strong> câu đúng
+                                </span>
+                                <button
+                                    type="button"
+                                    className="sc-btn-modal-close"
+                                    onClick={closeResultModal}
+                                >
+                                    Đóng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* =========================================================================
+                    MODAL 3: XEM CHI TIẾT ĐỀ BÀI (CHO BÀI TẬP QUÁ HẠN / THAM KHẢO)
+                    ========================================================================= */}
                 {viewingAssignment && (
                     <div className="sc-modal-backdrop" onClick={() => setViewingAssignment(null)}>
                         <div className="sc-modal" onClick={(e) => e.stopPropagation()}>

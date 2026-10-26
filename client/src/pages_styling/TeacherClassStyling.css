@@ -1721,3 +1721,230 @@
 [data-theme='light'] .tc-question-text {
     color: #1e293b;
 }
+
+
+/* ==========================================================================
+   ASSIGNMENT OVERVIEW STATS & SUBMISSIONS LIST (TEACHER 2.1 & 2.2)
+   ========================================================================== */
+
+/* Overview bar on teacher assignment card (2.1) */
+.teacher-assignment-stats-box {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--tc-surface-card);
+    border: 1px solid var(--tc-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.teacher-assignment-stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.teacher-stat-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--tc-text-muted);
+}
+
+.teacher-stat-item strong {
+    color: var(--tc-text);
+}
+
+.teacher-assignment-progress-bg {
+    width: 100%;
+    height: 7px;
+    background: var(--tc-surface);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--tc-border);
+}
+
+.teacher-assignment-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0ea5e9, #10b981);
+    transition: width 0.3s ease;
+}
+
+.btn-assignment-submissions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1.5px solid #10b981;
+    color: #34d399;
+    cursor: pointer;
+    box-shadow: 0 2px 0 0 rgba(4, 120, 87, 0.4);
+    transition: all 0.15s ease;
+}
+
+.btn-assignment-submissions:hover {
+    transform: translateY(-2px);
+    background: rgba(16, 185, 129, 0.25);
+    box-shadow: 0 4px 0 0 rgba(4, 120, 87, 0.4);
+}
+
+/* Submissions Modal HUD (2.2) */
+.tc-sub-hud-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.tc-sub-hud-card {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--tc-surface-card);
+    border: 1px solid var(--tc-border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tc-sub-hud-card span {
+    font-size: 12px;
+    color: var(--tc-text-muted);
+    font-weight: 600;
+}
+
+.tc-sub-hud-card strong {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--tc-text);
+}
+
+/* Submissions Table / Cards */
+.tc-sub-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--tc-border);
+    background: var(--tc-surface-card);
+}
+
+.tc-sub-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    text-align: left;
+}
+
+.tc-sub-table th {
+    padding: 12px 16px;
+    background: var(--tc-surface);
+    color: var(--tc-text-muted);
+    font-weight: 700;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1.5px solid var(--tc-border);
+    white-space: nowrap;
+}
+
+.tc-sub-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--tc-border);
+    color: var(--tc-text);
+}
+
+.tc-sub-table tr:last-child td {
+    border-bottom: none;
+}
+
+.tc-sub-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.tc-sub-student-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tc-sub-student-name {
+    font-weight: 700;
+    color: var(--tc-text);
+}
+
+.tc-sub-student-user {
+    font-size: 12px;
+    color: var(--tc-cyan);
+}
+
+.tc-sub-score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 13px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.tc-sub-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--tc-border);
+    background: var(--tc-surface);
+    color: var(--tc-text);
+    font-size: 13.5px;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.15s ease;
+}
+
+.tc-sub-search-input:focus {
+    border-color: var(--tc-cyan);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+/* Light theme overrides */
+[data-theme='light'] .teacher-assignment-stats-box {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme='light'] .tc-sub-hud-card {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme='light'] .tc-sub-table-container {
+    background: #ffffff;
+    border-color: #e2e8f0;
+}
+
+[data-theme='light'] .tc-sub-table th {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+
+[data-theme='light'] .tc-sub-table td {
+    border-color: #f1f5f9;
+}
+
+[data-theme='light'] .tc-sub-table tr:hover td {
+    background: #f8fafc;
+}
+
+[data-theme='light'] .tc-sub-search-input {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}

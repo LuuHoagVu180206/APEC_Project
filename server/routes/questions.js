@@ -345,7 +345,7 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
             'qwen2.5vl:7b',
             'qwen2-vl:7b'
         ].filter(Boolean);
-        const ollamaVlNumCtx = parseInt(process.env.OLLAMA_VL_NUM_CTX, 10) || 12288;
+        const ollamaVlNumCtx = parseInt(process.env.OLLAMA_VL_NUM_CTX, 10) || 16384;
 
         let difficultyGuide = 'Đa dạng các mức độ (dễ, trung bình, khó)';
         if (difficulty === 'easy') difficultyGuide = 'Mức độ dễ (nhận biết, thông hiểu)';

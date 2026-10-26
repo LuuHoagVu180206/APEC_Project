@@ -35,6 +35,12 @@ export const TeacherClassPageLogic = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
+    // Xem danh sách học sinh nộp bài tập (2.1 & 2.2)
+    const [viewingSubmissionsAssignment, setViewingSubmissionsAssignment] = useState(null);
+    const [submissionsData, setSubmissionsData] = useState(null);
+    const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
+    const [submissionsSearch, setSubmissionsSearch] = useState('');
+
     const loadClass = useCallback(async () => {
         const response = await axios.get(`http://localhost:5000/api/classes/${id}`, {
             headers: { token: currentUser.accessToken }
@@ -144,7 +150,6 @@ export const TeacherClassPageLogic = () => {
         }
     };
 
-
     const handleToggleSetExpand = (setId) => {
         setExpandedSetIds(prev => 
             prev.includes(setId) ? prev.filter(id => id !== setId) : [...prev, setId]
@@ -247,6 +252,30 @@ export const TeacherClassPageLogic = () => {
         }
     };
 
+    // 2.1 & 2.2: XEM TỔNG QUAN & DANH SÁCH BÀI NỘP CỦA HỌC SINH
+    const handleOpenSubmissions = async (assignment) => {
+        setViewingSubmissionsAssignment(assignment);
+        setIsLoadingSubmissions(true);
+        setSubmissionsSearch('');
+        try {
+            const res = await axios.get(`http://localhost:5000/api/classes/${id}/assignments/${assignment._id}/submissions`, {
+                headers: { token: currentUser.accessToken }
+            });
+            setSubmissionsData(res.data);
+        } catch (err) {
+            const msg = err.response?.data?.message || err.response?.data || "Không thể tải danh sách nộp bài!";
+            alert(typeof msg === 'object' ? JSON.stringify(msg) : msg);
+        } finally {
+            setIsLoadingSubmissions(false);
+        }
+    };
+
+    const handleCloseSubmissions = () => {
+        setViewingSubmissionsAssignment(null);
+        setSubmissionsData(null);
+        setSubmissionsSearch('');
+    };
+
     return {
         classInfo,
         isTeacherAccount: currentUser?.role === 'teacher',
@@ -289,6 +318,13 @@ export const TeacherClassPageLogic = () => {
         isSubmittingAssignment,
         viewingAssignment,
         setViewingAssignment,
+        viewingSubmissionsAssignment,
+        submissionsData,
+        isLoadingSubmissions,
+        submissionsSearch,
+        setSubmissionsSearch,
+        handleOpenSubmissions,
+        handleCloseSubmissions,
         loadClass,
         isLoading,
         error,

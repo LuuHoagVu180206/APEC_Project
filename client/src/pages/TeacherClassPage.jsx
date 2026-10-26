@@ -27,7 +27,8 @@ import {
     X,
     CheckSquare,
     Square,
-    HelpCircle
+    HelpCircle,
+    CheckCircle2
 } from 'lucide-react';
 import { useDarkMode } from '../pages_logic/useDarkMode';
 import { TeacherClassPageLogic } from '../pages_logic/TeacherClassPageLogic';
@@ -75,6 +76,13 @@ const TeacherClassPage = () => {
         isSubmittingAssignment,
         viewingAssignment,
         setViewingAssignment,
+        viewingSubmissionsAssignment,
+        submissionsData,
+        isLoadingSubmissions,
+        submissionsSearch,
+        setSubmissionsSearch,
+        handleOpenSubmissions,
+        handleCloseSubmissions,
         isLoading,
         error,
         handleAddQuestionSet,
@@ -526,7 +534,37 @@ const TeacherClassPage = () => {
                                             </div>
                                         </div>
 
+                                        {/* 2.1: TỔNG QUAN BÀI TẬP (SỐ ĐÃ NỘP DUY NHẤT, CHƯA NỘP, TỶ LỆ HOÀN THÀNH %) */}
+                                        {assignment.stats && (
+                                            <div className="teacher-assignment-stats-box">
+                                                <div className="teacher-assignment-stats-row">
+                                                    <span className="teacher-stat-item">
+                                                        <Users size={14} color="var(--tc-cyan)" />
+                                                        Đã nộp: <strong>{assignment.stats.submittedCount}</strong> / {assignment.stats.totalStudents} ({assignment.stats.completionRate}%)
+                                                    </span>
+                                                    <span className="teacher-stat-item">
+                                                        <Clock size={14} color="var(--tc-gold)" />
+                                                        Chưa nộp: <strong>{assignment.stats.notSubmittedCount}</strong> học sinh
+                                                    </span>
+                                                </div>
+                                                <div className="teacher-assignment-progress-bg" title={`Tỷ lệ hoàn thành: ${assignment.stats.completionRate}%`}>
+                                                    <div 
+                                                        className="teacher-assignment-progress-fill" 
+                                                        style={{ width: `${Math.min(100, assignment.stats.completionRate || 0)}%` }} 
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="teacher-class-assignment-actions">
+                                            <button 
+                                                type="button"
+                                                className="btn-assignment-submissions"
+                                                onClick={() => handleOpenSubmissions(assignment)}
+                                                title="Xem danh sách học sinh đã nộp bài"
+                                            >
+                                                <CheckCircle2 size={14} /> Bài nộp ({assignment.stats?.submittedCount || 0})
+                                            </button>
                                             <button 
                                                 type="button"
                                                 className="btn-assignment-view"
@@ -893,6 +931,167 @@ const TeacherClassPage = () => {
                                     </div>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* MODAL 2.2: DANH SÁCH HỌC SINH ĐÃ NỘP BÀI TẬP */}
+                {viewingSubmissionsAssignment && (
+                    <div className="tc-modal-backdrop" onClick={handleCloseSubmissions}>
+                        <div className="tc-modal" style={{ maxWidth: '900px' }} onClick={(e) => e.stopPropagation()}>
+                            <div className="tc-modal-header">
+                                <div className="tc-modal-title-wrap">
+                                    <CheckCircle2 size={20} color="var(--tc-green, #10b981)" />
+                                    <div>
+                                        <h3 style={{ margin: 0 }}>Danh Sách Nộp Bài: {viewingSubmissionsAssignment.title}</h3>
+                                        <div style={{ fontSize: '12px', color: 'var(--tc-text-muted)', marginTop: '2px' }}>
+                                            Tổng số câu hỏi: {submissionsData?.assignment?.totalQuestions || viewingSubmissionsAssignment.questions?.length || 0} câu
+                                        </div>
+                                    </div>
+                                </div>
+                                <button 
+                                    type="button"
+                                    className="tc-modal-close-btn"
+                                    onClick={handleCloseSubmissions}
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="tc-modal-body">
+                                {/* 2.1: OVERVIEW HUD CARDS */}
+                                <div className="tc-sub-hud-grid">
+                                    <div className="tc-sub-hud-card">
+                                        <span>Sĩ số lớp</span>
+                                        <strong>{submissionsData?.stats?.totalStudents ?? classInfo.studentCount ?? 0}</strong>
+                                    </div>
+                                    <div className="tc-sub-hud-card" style={{ borderColor: 'rgba(16, 185, 129, 0.4)' }}>
+                                        <span style={{ color: '#34d399' }}>Đã nộp (Duy nhất)</span>
+                                        <strong style={{ color: '#34d399' }}>
+                                            {submissionsData?.stats?.submittedCount ?? 0}
+                                        </strong>
+                                    </div>
+                                    <div className="tc-sub-hud-card" style={{ borderColor: 'rgba(245, 158, 11, 0.4)' }}>
+                                        <span style={{ color: 'var(--tc-gold)' }}>Chưa nộp</span>
+                                        <strong style={{ color: 'var(--tc-gold)' }}>
+                                            {submissionsData?.stats?.notSubmittedCount ?? 0}
+                                        </strong>
+                                    </div>
+                                    <div className="tc-sub-hud-card" style={{ borderColor: 'rgba(14, 165, 233, 0.4)' }}>
+                                        <span style={{ color: 'var(--tc-cyan)' }}>Tỷ lệ hoàn thành</span>
+                                        <strong style={{ color: 'var(--tc-cyan)' }}>
+                                            {submissionsData?.stats?.completionRate ?? 0}%
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                {/* SEARCH INPUT */}
+                                <div style={{ position: 'relative' }}>
+                                    <input 
+                                        type="text"
+                                        className="tc-sub-search-input"
+                                        placeholder="Tìm kiếm theo họ tên học sinh hoặc username..."
+                                        value={submissionsSearch}
+                                        onChange={(e) => setSubmissionsSearch(e.target.value)}
+                                    />
+                                </div>
+
+                                {/* 2.2: TABLE DANH SÁCH HỌC SINH ĐÃ NỘP BÀI */}
+                                {isLoadingSubmissions ? (
+                                    <div className="teacher-class-loading" style={{ padding: '30px' }}>
+                                        <div className="teacher-class-spinner" />
+                                        <span>Đang tải danh sách học sinh nộp bài...</span>
+                                    </div>
+                                ) : (
+                                    (() => {
+                                        const allSubmissions = submissionsData?.submissions || [];
+                                        const query = submissionsSearch.trim().toLowerCase();
+                                        const filtered = allSubmissions.filter(s => 
+                                            (s.studentName || '').toLowerCase().includes(query) ||
+                                            (s.studentUsername || '').toLowerCase().includes(query)
+                                        );
+
+                                        if (allSubmissions.length === 0) {
+                                            return (
+                                                <div className="teacher-class-empty" style={{ padding: '36px 16px' }}>
+                                                    <FileText size={32} color="var(--tc-text-muted)" />
+                                                    <span>Chưa có học sinh nào nộp bài tập này.</span>
+                                                </div>
+                                            );
+                                        }
+
+                                        if (filtered.length === 0) {
+                                            return (
+                                                <div className="teacher-class-empty" style={{ padding: '24px 16px' }}>
+                                                    <Search size={28} color="var(--tc-text-muted)" />
+                                                    <span>Không tìm thấy học sinh phù hợp với từ khóa "{submissionsSearch}".</span>
+                                                </div>
+                                            );
+                                        }
+
+                                        return (
+                                            <div className="tc-sub-table-container">
+                                                <table className="tc-sub-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>STT</th>
+                                                            <th>Họ tên học sinh</th>
+                                                            <th>Số câu đúng</th>
+                                                            <th>Kết quả</th>
+                                                            <th>Bắt đầu làm</th>
+                                                            <th>Thời gian nộp bài</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {filtered.map((sub, sIdx) => {
+                                                            const totalQ = sub.totalQuestions || 1;
+                                                            const pct = Math.round((sub.score / totalQ) * 100);
+                                                            return (
+                                                                <tr key={sub._id || sIdx}>
+                                                                    <td style={{ color: 'var(--tc-text-muted)', fontWeight: 600 }}>{sIdx + 1}</td>
+                                                                    <td>
+                                                                        <div className="tc-sub-student-info">
+                                                                            <span className="tc-sub-student-name">{sub.studentName}</span>
+                                                                            <span className="tc-sub-student-user">@{sub.studentUsername}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <strong style={{ fontSize: '14px', color: '#34d399' }}>{sub.score}</strong> câu
+                                                                    </td>
+                                                                    <td>
+                                                                        <span className="tc-sub-score-badge">
+                                                                            {sub.score}/{sub.totalQuestions} ({pct}%)
+                                                                        </span>
+                                                                    </td>
+                                                                    <td style={{ fontSize: '12.5px', color: 'var(--tc-text-muted)' }}>
+                                                                        {sub.startedAt ? new Date(sub.startedAt).toLocaleString('vi-VN') : '—'}
+                                                                    </td>
+                                                                    <td style={{ fontSize: '12.5px', color: 'var(--tc-text)' }}>
+                                                                        {sub.submittedAt ? new Date(sub.submittedAt).toLocaleString('vi-VN') : '—'}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        );
+                                    })()
+                                )}
+                            </div>
+
+                            <div className="tc-modal-footer">
+                                <span className="tc-modal-counter">
+                                    Đã hiển thị: <strong>{submissionsData?.submissions?.length || 0}</strong> lượt nộp
+                                </span>
+                                <button 
+                                    type="button"
+                                    className="tc-btn-modal-cancel"
+                                    onClick={handleCloseSubmissions}
+                                >
+                                    Đóng
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

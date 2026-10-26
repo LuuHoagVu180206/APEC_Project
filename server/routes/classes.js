@@ -4,8 +4,41 @@ const TeacherClass = require('../models/TeacherClass');
 const QuestionSet = require('../models/QuestionSet');
 const Question = require('../models/Question');
 const Assignment = require('../models/Assignment');
+const AssignmentSubmission = require('../models/AssignmentSubmission');
 const SchoolMember = require('../models/SchoolMember');
 const { verifyToken } = require('../verifyToken');
+
+const isAnswerCorrect = (selected, correct, options = []) => {
+    if (selected === undefined || selected === null || correct === undefined || correct === null) return false;
+    const s = String(selected).trim().toLowerCase();
+    const c = String(correct).trim().toLowerCase();
+    if (!s || !c) return false;
+
+    // Direct match
+    if (s === c) return true;
+
+    // Stripped of prefix like "A. ", "B) ", "c: "
+    const stripPrefix = (str) => str.replace(/^[a-d][\.\:\)\-]\s*/i, '').trim().toLowerCase();
+    const sStripped = stripPrefix(s);
+    const cStripped = stripPrefix(c);
+    if (sStripped === cStripped) return true;
+
+    // Check letter vs options
+    const letters = ['a', 'b', 'c', 'd'];
+    const cLetterIdx = letters.indexOf(c);
+    if (cLetterIdx !== -1 && options[cLetterIdx]) {
+        const optText = String(options[cLetterIdx]).trim().toLowerCase();
+        if (s === optText || sStripped === stripPrefix(optText)) return true;
+    }
+
+    const sLetterIdx = letters.indexOf(s);
+    if (sLetterIdx !== -1 && options[sLetterIdx]) {
+        const optText = String(options[sLetterIdx]).trim().toLowerCase();
+        if (c === optText || cStripped === stripPrefix(optText)) return true;
+    }
+
+    return false;
+};
 
 const requireTeacher = (req, res, next) => {
     if (req.user.role !== 'teacher') {
@@ -29,18 +62,85 @@ const getTeacherCount = (classDoc) => {
     ]).size;
 };
 
-const serializeStudentClass = (classDoc) => {
-    const classData = classDoc.toObject();
+const serializeStudentClass = (classDoc, submissionMap = null) => {
+    const studentCount = Array.isArray(classDoc.students) ? classDoc.students.length : 0;
+    const classData = classDoc.toObject ? classDoc.toObject() : { ...classDoc };
     delete classData.students;
     delete classData.teachers;
     delete classData.questionSets;
-    const assignments = classDoc.assignments || [];
+    const rawAssignments = classDoc.assignments || [];
+
+    const now = new Date();
+    let completedCount = 0;
+    let pendingCount = 0;
+    let overdueCount = 0;
+
+    const enrichedAssignments = rawAssignments.map((assignment) => {
+        const assignObj = assignment.toObject ? assignment.toObject() : { ...assignment };
+        const assignIdStr = (assignObj._id || '').toString();
+
+        let sub = null;
+        if (submissionMap) {
+            sub = submissionMap.get(assignIdStr) || submissionMap.get(`${classDoc._id}_${assignIdStr}`);
+        }
+
+        const isSubmitted = Boolean(sub);
+        const isOverdue = !isSubmitted && Boolean(assignObj.dueDate && new Date(assignObj.dueDate) < now);
+
+        let status = 'pending';
+        if (isSubmitted) {
+            status = 'completed';
+            completedCount += 1;
+        } else if (isOverdue) {
+            status = 'overdue';
+            overdueCount += 1;
+        } else {
+            pendingCount += 1;
+        }
+
+        const maxAttempts = assignObj.maxAttempts || 1;
+        const attemptNumber = sub ? sub.attemptNumber : 0;
+        const canTake = !isOverdue && (!sub || attemptNumber < maxAttempts);
+
+        // Security check: Only include correctAnswer and explanation if student has already submitted!
+        const sanitizedQuestions = (assignObj.questions || []).map((q) => {
+            const qObj = q ? (q.toObject ? q.toObject() : { ...q }) : {};
+            if (!isSubmitted) {
+                delete qObj.correctAnswer;
+                delete qObj.explanation;
+            }
+            return qObj;
+        });
+
+        return {
+            ...assignObj,
+            questions: sanitizedQuestions,
+            status, // 'pending' | 'completed' | 'overdue'
+            isSubmitted,
+            isOverdue,
+            canTake,
+            submission: sub ? {
+                _id: sub._id,
+                score: sub.score,
+                totalQuestions: sub.totalQuestions,
+                startedAt: sub.startedAt,
+                submittedAt: sub.submittedAt,
+                attemptNumber: sub.attemptNumber,
+                answers: sub.answers
+            } : null
+        };
+    });
+
     return {
         ...classData,
+        studentCount: studentCount,
         teacherCount: getTeacherCount(classDoc),
         questionSetCount: classDoc.questionSets ? classDoc.questionSets.length : 0,
-        assignmentCount: assignments.length,
-        assignments: assignments
+        assignmentCount: rawAssignments.length,
+        completedAssignmentCount: completedCount,
+        pendingAssignmentCount: pendingCount,
+        overdueAssignmentCount: overdueCount,
+        assignments: enrichedAssignments
     };
 };
 
@@ -92,7 +192,7 @@ router.get('/student/mine', verifyToken, requireStudent, async (req, res) => {
                     options: { sort: { createdAt: -1 } },
                     populate: {
                         path: 'questions',
-                        select: 'questionText options correctAnswer difficulty topic explanation'
+                        select: 'questionText options difficulty topic'
                     }
                 }),
             SchoolMember.find({ user: req.user.id }).select('school')
@@ -104,8 +204,24 @@ router.get('/student/mine', verifyToken, requireStudent, async (req, res) => {
         await Promise.all(visibleClasses.map(async (classDoc) => {
             if (!classDoc.classCode) await classDoc.save();
         }));
+
+        // OPTIMIZED QUERY: Find student submissions for all visible classes in a single query
+        const visibleClassIds = visibleClasses.map(c => c._id);
+        const userSubmissions = await AssignmentSubmission.find({
+            classId: { $in: visibleClassIds },
+            studentId: req.user.id
+        }).select('classId assignmentId score totalQuestions attemptNumber submittedAt').lean();
+
+        const submissionMap = new Map();
+        for (const sub of userSubmissions) {
+            submissionMap.set(`${sub.classId}_${sub.assignmentId}`, sub);
+            if (!submissionMap.has(sub.assignmentId.toString())) {
+                submissionMap.set(sub.assignmentId.toString(), sub);
+            }
+        }
+
         res.status(200).json(visibleClasses.map((classDoc) => ({
-            ...serializeStudentClass(classDoc),
+            ...serializeStudentClass(classDoc, submissionMap),
             isAssistant: classDoc.teachers.some((teacherId) => teacherId.toString() === req.user.id)
         })));
     } catch (err) {
@@ -187,12 +303,223 @@ router.get('/student/:id', verifyToken, requireStudent, async (req, res) => {
             if (!membership) return res.status(403).json('Bạn không còn là thành viên của School Community này!');
         }
         if (!classDoc.classCode) await classDoc.save();
+
+        // Query student submissions for this class in a SINGLE indexed query (classId + studentId)
+        const submissions = await AssignmentSubmission.find({
+            classId: classDoc._id,
+            studentId: req.user.id
+        }).sort({ attemptNumber: -1 }).lean();
+
+        const submissionMap = new Map();
+        for (const sub of submissions) {
+            const key = sub.assignmentId.toString();
+            if (!submissionMap.has(key)) {
+                submissionMap.set(key, sub);
+            }
+        }
+
         res.status(200).json({
-            ...serializeStudentClass(classDoc),
+            ...serializeStudentClass(classDoc, submissionMap),
             isAssistant: classDoc.teachers.some((teacherId) => teacherId.toString() === req.user.id)
         });
     } catch (err) {
         res.status(500).json('Không thể tải lớp học!');
+    }
+});
+
+// STUDENT NỘP BÀI ASSIGNMENT (1.2, 1.4, 1.5)
+router.post('/student/:id/assignments/:assignmentId/submit', verifyToken, requireStudent, async (req, res) => {
+    const { id: classId, assignmentId } = req.params;
+    const { startedAt, answers } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(classId) || !mongoose.Types.ObjectId.isValid(assignmentId)) {
+        return res.status(400).json('Mã lớp hoặc mã bài tập không hợp lệ!');
+    }
+
+    try {
+        const classDoc = await TeacherClass.findOne({
+            _id: classId,
+            $or: [{ students: req.user.id }, { teachers: req.user.id }]
+        });
+        if (!classDoc) {
+            return res.status(404).json('Không tìm thấy lớp học hoặc bạn chưa tham gia lớp này!');
+        }
+
+        const assignment = await Assignment.findOne({ _id: assignmentId, classId }).populate('questions');
+        if (!assignment) {
+            return res.status(404).json('Không tìm thấy bài tập trong lớp học này!');
+        }
+
+        // Kiểm tra quá hạn
+        if (assignment.dueDate && new Date(assignment.dueDate) < new Date()) {
+            return res.status(400).json('Bài tập đã quá thời hạn nộp bài!');
+        }
+
+        // Chính sách làm bài: Mặc định mỗi học sinh 1 lần, mở rộng theo maxAttempts (1.5)
+        const maxAttempts = assignment.maxAttempts || 1;
+        const currentAttempts = await AssignmentSubmission.countDocuments({
+            assignmentId: assignment._id,
+            studentId: req.user.id
+        });
+
+        if (currentAttempts >= maxAttempts) {
+            const existingSub = await AssignmentSubmission.findOne({
+                assignmentId: assignment._id,
+                studentId: req.user.id
+            }).sort({ attemptNumber: -1 });
+
+            return res.status(409).json({
+                message: 'Bạn đã hoàn thành số lần nộp bài cho phép của bài tập này!',
+                submission: existingSub
+            });
+        }
+
+        const nextAttemptNumber = currentAttempts + 1;
+        const questionsList = assignment.questions || [];
+        let correctCount = 0;
+
+        const studentAnswersMap = new Map();
+        if (Array.isArray(answers)) {
+            for (const item of answers) {
+                if (item?.questionId) {
+                    studentAnswersMap.set(item.questionId.toString(), item.selectedAnswer || '');
+                }
+            }
+        }
+
+        const evaluatedAnswers = questionsList.map((q) => {
+            const qIdStr = q._id.toString();
+            const selected = studentAnswersMap.get(qIdStr) || '';
+            const correct = q.correctAnswer || '';
+            const isCorrect = isAnswerCorrect(selected, correct, q.options || []);
+
+            if (isCorrect) correctCount += 1;
+
+            return {
+                questionId: q._id,
+                selectedAnswer: selected,
+                correctAnswer: correct,
+                isCorrect: isCorrect
+            };
+        });
+
+        const parsedStartedAt = startedAt ? new Date(startedAt) : new Date();
+        const submittedAt = new Date();
+
+        // Lưu kết quả (1.4 - Compound unique index chống duplicate submission)
+        let submission;
+        try {
+            submission = await AssignmentSubmission.create({
+                assignmentId: assignment._id,
+                classId: classDoc._id,
+                studentId: req.user.id,
+                attemptNumber: nextAttemptNumber,
+                answers: evaluatedAnswers,
+                score: correctCount,
+                totalQuestions: questionsList.length,
+                startedAt: isNaN(parsedStartedAt.getTime()) ? new Date() : parsedStartedAt,
+                submittedAt: submittedAt,
+                status: 'submitted'
+            });
+        } catch (dbErr) {
+            // E11000 duplicate key check (anti-double-click / network retry)
+            if (dbErr.code === 11000) {
+                submission = await AssignmentSubmission.findOne({
+                    assignmentId: assignment._id,
+                    studentId: req.user.id,
+                    attemptNumber: nextAttemptNumber
+                });
+            } else {
+                throw dbErr;
+            }
+        }
+
+        // Trả kết quả chi tiết để hiển thị giao diện đáp án đúng/sai (1.3)
+        const questionsMap = new Map(questionsList.map((q) => [q._id.toString(), q]));
+        const detailedAnswers = submission.answers.map((ans) => {
+            const q = questionsMap.get(ans.questionId.toString());
+            return {
+                questionId: ans.questionId,
+                questionText: q?.questionText || '',
+                options: q?.options || [],
+                selectedAnswer: ans.selectedAnswer,
+                correctAnswer: ans.correctAnswer,
+                isCorrect: ans.isCorrect,
+                explanation: q?.explanation || '',
+                difficulty: q?.difficulty || 'medium'
+            };
+        });
+
+        res.status(201).json({
+            message: 'Nộp bài tập thành công!',
+            submission: {
+                _id: submission._id,
+                assignmentId: submission.assignmentId,
+                score: submission.score,
+                totalQuestions: submission.totalQuestions,
+                startedAt: submission.startedAt,
+                submittedAt: submission.submittedAt,
+                attemptNumber: submission.attemptNumber,
+                answers: detailedAnswers
+            }
+        });
+    } catch (err) {
+        console.error('Lỗi khi nộp bài tập:', err);
+        res.status(500).json('Không thể nộp bài tập: ' + (err.message || ''));
+    }
+});
+
+// STUDENT XEM LẠI KẾT QUẢ BÀI TẬP ĐÃ LÀM (1.3)
+router.get('/student/:id/assignments/:assignmentId/my-result', verifyToken, requireStudent, async (req, res) => {
+    const { id: classId, assignmentId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(classId) || !mongoose.Types.ObjectId.isValid(assignmentId)) {
+        return res.status(400).json('Mã không hợp lệ!');
+    }
+
+    try {
+        const assignment = await Assignment.findOne({ _id: assignmentId, classId }).populate('questions');
+        if (!assignment) {
+            return res.status(404).json('Không tìm thấy bài tập!');
+        }
+
+        const submission = await AssignmentSubmission.findOne({
+            assignmentId: assignment._id,
+            studentId: req.user.id
+        }).sort({ attemptNumber: -1 });
+
+        if (!submission) {
+            return res.status(404).json('Bạn chưa làm bài tập này!');
+        }
+
+        const questionsMap = new Map((assignment.questions || []).map((q) => [q._id.toString(), q]));
+        const detailedAnswers = submission.answers.map((ans) => {
+            const q = questionsMap.get(ans.questionId.toString());
+            return {
+                questionId: ans.questionId,
+                questionText: q?.questionText || '',
+                options: q?.options || [],
+                selectedAnswer: ans.selectedAnswer,
+                correctAnswer: ans.correctAnswer,
+                isCorrect: ans.isCorrect,
+                explanation: q?.explanation || '',
+                difficulty: q?.difficulty || 'medium'
+            };
+        });
+
+        res.status(200).json({
+            _id: submission._id,
+            assignmentId: submission.assignmentId,
+            assignmentTitle: assignment.title,
+            score: submission.score,
+            totalQuestions: submission.totalQuestions,
+            startedAt: submission.startedAt,
+            submittedAt: submission.submittedAt,
+            attemptNumber: submission.attemptNumber,
+            answers: detailedAnswers
+        });
+    } catch (err) {
+        console.error('Lỗi khi lấy kết quả bài tập:', err);
+        res.status(500).json('Không thể lấy kết quả bài tập!');
     }
 });
 
@@ -360,6 +687,7 @@ router.delete('/:id/assistants/:userId', requirePrimaryTeacher, async (req, res)
     }
 });
 
+// CHI TIẾT LỚP HỌC DÀNH CHO GIÁO VIÊN (2.1 - TỔNG QUAN ASSIGNMENT)
 router.get('/:id', requireClassTeacher, async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
         return res.status(400).json('Mã lớp không hợp lệ!');
@@ -392,17 +720,158 @@ router.get('/:id', requireClassTeacher, async (req, res) => {
         const classData = classDoc.toObject();
         const { students, ...details } = classData;
         delete details.teachers;
+
+        const studentCount = Array.isArray(students) ? students.length : 0;
+        const assignmentIds = (classDoc.assignments || []).map(a => a._id);
+
+        // OPTIMIZED QUERY: Truy vấn duy nhất qua aggregation để lấy số lượng học sinh duy nhất đã nộp cho từng assignment
+        // Tuyệt đối không dùng brute force / N+1
+        const assignmentStatsMap = new Map();
+        if (assignmentIds.length > 0) {
+            const aggStats = await AssignmentSubmission.aggregate([
+                { $match: { assignmentId: { $in: assignmentIds } } },
+                {
+                    $group: {
+                        _id: '$assignmentId',
+                        uniqueStudents: { $addToSet: '$studentId' },
+                        totalSubmissions: { $sum: 1 }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        submittedCount: { $size: '$uniqueStudents' },
+                        totalSubmissions: 1
+                    }
+                }
+            ]);
+            for (const s of aggStats) {
+                assignmentStatsMap.set(s._id.toString(), s);
+            }
+        }
+
+        const enrichedAssignments = (classDoc.assignments || []).map((assignment) => {
+            const aObj = assignment.toObject ? assignment.toObject() : assignment;
+            const stat = assignmentStatsMap.get(aObj._id.toString());
+            const submittedCount = stat ? stat.submittedCount : 0;
+            const notSubmittedCount = Math.max(0, studentCount - submittedCount);
+            const completionRate = studentCount > 0 ? Math.round((submittedCount / studentCount) * 1000) / 10 : 0;
+
+            return {
+                ...aObj,
+                stats: {
+                    totalStudents: studentCount,
+                    submittedCount,
+                    notSubmittedCount,
+                    completionRate,
+                    totalSubmissions: stat ? stat.totalSubmissions : 0
+                }
+            };
+        });
+
         res.status(200).json({
             ...details,
             isPrimaryTeacher: classDoc.teacher.toString() === req.user.id,
-            studentCount: students.length,
+            studentCount: studentCount,
             teacherCount: getTeacherCount(classDoc),
             questionSetCount: classDoc.questionSets ? classDoc.questionSets.length : 0,
-            assignmentCount: classDoc.assignments ? classDoc.assignments.length : 0,
-            assignments: classDoc.assignments || []
+            assignmentCount: enrichedAssignments.length,
+            assignments: enrichedAssignments
         });
     } catch (err) {
         res.status(500).json('Không thể tải thông tin lớp học!');
+    }
+});
+
+// THỐNG KÊ TỔNG QUAN & DANH SÁCH HỌC SINH ĐÃ NỘP BÀI TẬP (2.1 & 2.2)
+router.get('/:id/assignments/:assignmentId/submissions', requireClassTeacher, async (req, res) => {
+    const { id: classId, assignmentId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(classId) || !mongoose.Types.ObjectId.isValid(assignmentId)) {
+        return res.status(400).json('Mã không hợp lệ!');
+    }
+
+    try {
+        const classDoc = await TeacherClass.findOne({
+            _id: classId,
+            $or: [{ teacher: req.user.id }, { teachers: req.user.id }]
+        }).select('students');
+
+        if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
+
+        const assignment = await Assignment.findOne({ _id: assignmentId, classId }).select('title dueDate questions');
+        if (!assignment) return res.status(404).json('Không tìm thấy bài tập!');
+
+        const totalStudents = Array.isArray(classDoc.students) ? classDoc.students.length : 0;
+
+        // TRUY VẤN TỐI ƯU BẰNG AGGREGATION PIPELINE:
+        // TUYỆT ĐỐI KHÔNG SỬ DỤNG BRUTE FORCE
+        // Sử dụng index { assignmentId: 1, submittedAt: -1 }
+        // Nhóm theo studentId để lấy bài nộp gần nhất theo từng học sinh duy nhất (Requirement 2.1 Note: unique students)
+        const submissions = await AssignmentSubmission.aggregate([
+            { $match: { assignmentId: new mongoose.Types.ObjectId(assignmentId) } },
+            { $sort: { submittedAt: -1 } },
+            {
+                $group: {
+                    _id: '$studentId',
+                    latestSubmission: { $first: '$$ROOT' },
+                    attemptCount: { $sum: 1 }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'student'
+                }
+            },
+            { $unwind: '$student' },
+            {
+                $project: {
+                    _id: '$latestSubmission._id',
+                    studentId: '$_id',
+                    studentName: {
+                        $cond: [
+                            { $and: ['$student.fullName', { $ne: ['$student.fullName', ''] }] },
+                            '$student.fullName',
+                            '$student.username'
+                        ]
+                    },
+                    studentUsername: '$student.username',
+                    score: '$latestSubmission.score',
+                    totalQuestions: '$latestSubmission.totalQuestions',
+                    startedAt: '$latestSubmission.startedAt',
+                    submittedAt: '$latestSubmission.submittedAt',
+                    attemptNumber: '$latestSubmission.attemptNumber',
+                    attemptCount: '$attemptCount',
+                    answers: '$latestSubmission.answers'
+                }
+            },
+            { $sort: { submittedAt: -1 } }
+        ]);
+
+        const submittedCount = submissions.length;
+        const notSubmittedCount = Math.max(0, totalStudents - submittedCount);
+        const completionRate = totalStudents > 0 ? Math.round((submittedCount / totalStudents) * 1000) / 10 : 0;
+
+        res.status(200).json({
+            assignment: {
+                _id: assignment._id,
+                title: assignment.title,
+                dueDate: assignment.dueDate,
+                totalQuestions: assignment.questions?.length || 0
+            },
+            stats: {
+                totalStudents,
+                submittedCount,
+                notSubmittedCount,
+                completionRate
+            },
+            submissions
+        });
+    } catch (err) {
+        console.error('Lỗi khi tải danh sách nộp bài:', err);
+        res.status(500).json('Không thể tải danh sách nộp bài!');
     }
 });
 
@@ -433,7 +902,6 @@ router.post('/:id/question-sets', requireClassTeacher, async (req, res) => {
     }
 });
 
-
 // TẠO ASSIGNMENT MỚI CHO LỚP
 router.post('/:id/assignments', requireClassTeacher, async (req, res) => {
     const { title, dueDate, questionIds, description } = req.body;
@@ -446,11 +914,11 @@ router.post('/:id/assignments', requireClassTeacher, async (req, res) => {
         return res.status(400).json('Vui lòng chọn ít nhất 1 câu hỏi từ các bộ câu hỏi của lớp!');
     }
 
-    const validIds = questionIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+    const validIds = questionIds.filter((id) => mongoose.Types.ObjectId.isValid(id));
     if (validIds.length === 0) {
         return res.status(400).json('Danh sách câu hỏi không hợp lệ!');
     }
-    const uniqueQuestionIds = [...new Set(validIds.map(id => id.toString()))];
+    const uniqueQuestionIds = [...new Set(validIds.map((id) => id.toString()))];
 
     try {
         const classDoc = await TeacherClass.findOne({
@@ -460,7 +928,6 @@ router.post('/:id/assignments', requireClassTeacher, async (req, res) => {
 
         if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
 
-        // Lấy tất cả Question IDs có trong các QuestionSets của lớp này
         const classQuestionIdStrings = new Set();
         for (const qSet of classDoc.questionSets || []) {
             for (const qId of qSet.questions || []) {
@@ -469,7 +936,7 @@ router.post('/:id/assignments', requireClassTeacher, async (req, res) => {
             }
         }
 
-        const validClassQuestions = uniqueQuestionIds.filter(id => classQuestionIdStrings.has(id));
+        const validClassQuestions = uniqueQuestionIds.filter((id) => classQuestionIdStrings.has(id));
         if (validClassQuestions.length === 0) {
             return res.status(400).json('Các câu hỏi đã chọn không thuộc các bộ câu hỏi trong lớp học này!');
         }
@@ -508,7 +975,7 @@ router.post('/:id/assignments', requireClassTeacher, async (req, res) => {
     }
 });
 
-// XÓA ASSIGNMENT TRONG LỚP
+// XÓA ASSIGNMENT TRONG LỚP (ĐỒNG THỜI XÓA HẾT BÀI NỘP CỦA NÓ)
 router.delete('/:id/assignments/:assignmentId', requireClassTeacher, async (req, res) => {
     const { assignmentId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
@@ -523,7 +990,9 @@ router.delete('/:id/assignments/:assignmentId', requireClassTeacher, async (req,
         if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
 
         await Assignment.deleteOne({ _id: assignmentId, classId: classDoc._id });
-        classDoc.assignments = (classDoc.assignments || []).filter(id => id.toString() !== assignmentId);
+        await AssignmentSubmission.deleteMany({ assignmentId });
+
+        classDoc.assignments = (classDoc.assignments || []).filter((id) => id.toString() !== assignmentId);
         await classDoc.save();
 
         res.status(200).json({ message: 'Đã xóa Assignment thành công!' });
