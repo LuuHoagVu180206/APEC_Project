@@ -20,7 +20,13 @@ import {
     Globe, 
     Lock,
     Lightbulb,
-    Loader2
+    Loader2,
+    Wand2,
+    Bot,
+    CheckCircle2,
+    PencilLine,
+    BookmarkCheck,
+    RotateCcw
 } from 'lucide-react';
 
 const StudioPage = () => {
@@ -48,7 +54,19 @@ const StudioPage = () => {
         handleLogout,
         isGeneratingAi,
         canGenerateAiExplanation,
-        handleGenerateAiExplanation
+        handleGenerateAiExplanation,
+        creationMode,
+        setCreationMode,
+        aiInputData,
+        setAiInputData,
+        isGeneratingBatch,
+        isSavingBatch,
+        generatedQuestions,
+        handleGenerateQuestionsFromContext,
+        handleLoadIntoForm,
+        handleSaveSingleGeneratedQuestion,
+        handleSaveAllGeneratedQuestions,
+        handleClearGeneratedQuestions
     } = StudioPageLogic();
 
     const { isDark, toggleTheme } = useDarkMode();
@@ -376,11 +394,33 @@ const StudioPage = () => {
                     <div className="studio-view-grid">
                         {/* Cột Trái: Form thêm câu hỏi mới */}
                         <div className="studio-form-card">
-                            <div className="studio-card-head">
-                                <HelpCircle size={19} color="var(--accent-blue)" />
-                                <h3>Thêm Câu Hỏi Trắc Nghiệm</h3>
+                            <div className="studio-card-head" style={{ flexWrap: 'wrap', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <HelpCircle size={19} color="var(--accent-blue)" />
+                                    <h3>Thêm Câu Hỏi Trắc Nghiệm</h3>
+                                </div>
+
+                                <div className="creation-mode-tabs">
+                                    <button 
+                                        type="button" 
+                                        className={`mode-tab-btn ${creationMode === 'manual' ? 'active' : ''}`}
+                                        onClick={() => setCreationMode('manual')}
+                                    >
+                                        <PencilLine size={13} />
+                                        <span>Thủ công</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className={`mode-tab-btn ${creationMode === 'ai' ? 'active' : ''}`}
+                                        onClick={() => setCreationMode('ai')}
+                                    >
+                                        <Sparkles size={13} />
+                                        <span>AI Trợ lý tạo đề</span>
+                                    </button>
+                                </div>
                             </div>
 
+                            {creationMode === 'manual' ? (
                             <form onSubmit={handleCreateQuestion} className="studio-form-stack">
                                 <div className="form-group-field">
                                     <label htmlFor="q-text">Nội dung câu hỏi</label>
@@ -556,6 +596,223 @@ const StudioPage = () => {
                                     <span>Lưu Câu Hỏi</span>
                                 </button>
                             </form>
+                            ) : (
+                                <div className="studio-ai-generator-panel">
+                                    <div className="ai-banner-card">
+                                        <div className="ai-banner-icon">
+                                            <Bot size={22} />
+                                        </div>
+                                        <div className="ai-banner-text">
+                                            <h4>Trợ lý AI Qwen 2.5 Soạn Câu Hỏi</h4>
+                                            <p>Dán đoạn tài liệu, bài giảng hoặc khái niệm (Vật lý, Toán, Lịch sử...). AI sẽ đọc dữ liệu và tự động tạo số câu hỏi trắc nghiệm mong muốn kèm lời giải thích!</p>
+                                        </div>
+                                    </div>
+
+                                    <form onSubmit={handleGenerateQuestionsFromContext} className="studio-form-stack">
+                                        <div className="form-group-field">
+                                            <label htmlFor="ai-context" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <FileText size={14} color="var(--accent-purple)" />
+                                                <span>Dữ liệu / Khái niệm tài liệu đầu vào</span>
+                                                <span style={{ color: 'var(--error-red)' }}>*</span>
+                                            </label>
+                                            <textarea 
+                                                id="ai-context"
+                                                className="studio-textarea"
+                                                required 
+                                                placeholder="Ví dụ: Định luật I Newton: Một vật không chịu tác dụng của lực nào hoặc chịu tác dụng của các lực có hợp lực bằng 0 thì vật đang đứng yên sẽ tiếp tục đứng yên, đang chuyển động thẳng đều sẽ tiếp tục chuyển động thẳng đều..."
+                                                value={aiInputData.context}
+                                                onChange={(e) => setAiInputData({...aiInputData, context: e.target.value})}
+                                                style={{ minHeight: '110px' }}
+                                            />
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                            <div className="form-group-field">
+                                                <label htmlFor="ai-num">Số câu hỏi muốn tạo</label>
+                                                <input 
+                                                    id="ai-num"
+                                                    type="number"
+                                                    min="1"
+                                                    max="10"
+                                                    className="studio-input"
+                                                    value={aiInputData.numQuestions}
+                                                    onChange={(e) => setAiInputData({...aiInputData, numQuestions: parseInt(e.target.value, 10) || 1})}
+                                                />
+                                            </div>
+
+                                            <div className="form-group-field">
+                                                <label htmlFor="ai-topic">Chủ đề môn học</label>
+                                                <select 
+                                                    id="ai-topic"
+                                                    className="studio-select"
+                                                    value={aiInputData.topic}
+                                                    onChange={(e) => setAiInputData({...aiInputData, topic: e.target.value})}
+                                                >
+                                                    <option value="Vật lý">Vật lý</option>
+                                                    <option value="Toán">Toán học</option>
+                                                    <option value="Hoá học">Hoá học</option>
+                                                    <option value="Sinh học">Sinh học</option>
+                                                    <option value="Tiếng Anh">Tiếng Anh</option>
+                                                    <option value="Lịch sử">Lịch sử</option>
+                                                    <option value="Địa lý">Địa lý</option>
+                                                    <option value="Tin học">Tin học</option>
+                                                    <option value="Khác">Khác</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                            <div className="form-group-field">
+                                                <label htmlFor="ai-diff">Độ khó mong muốn</label>
+                                                <select 
+                                                    id="ai-diff"
+                                                    className="studio-select"
+                                                    value={aiInputData.difficulty}
+                                                    onChange={(e) => setAiInputData({...aiInputData, difficulty: e.target.value})}
+                                                >
+                                                    <option value="mixed">Đa dạng (Hỗn hợp)</option>
+                                                    <option value="easy">Dễ (Nhận biết)</option>
+                                                    <option value="medium">Trung bình (Vận dụng)</option>
+                                                    <option value="hard">Khó (Phân tích)</option>
+                                                </select>
+                                            </div>
+
+                                            {mySets.length > 0 ? (
+                                                <div className="form-group-field">
+                                                    <label htmlFor="ai-set">Gán vào bộ đề</label>
+                                                    <select 
+                                                        id="ai-set"
+                                                        className="studio-select"
+                                                        value={aiInputData.setId}
+                                                        onChange={(e) => setAiInputData({...aiInputData, setId: e.target.value})}
+                                                    >
+                                                        <option value="">Lưu ngân hàng chung</option>
+                                                        {mySets.map(set => (
+                                                            <option key={set._id} value={set._id}>📦 {set.title}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            ) : <div />}
+                                        </div>
+
+                                        <button 
+                                            type="submit" 
+                                            className={`btn-ai-submit-generate ${isGeneratingBatch ? 'loading' : ''}`}
+                                            disabled={isGeneratingBatch || !aiInputData.context.trim()}
+                                        >
+                                            {isGeneratingBatch ? (
+                                                <>
+                                                    <Loader2 size={18} className="spin-animation" />
+                                                    <span>AI đang đọc dữ liệu & tạo {aiInputData.numQuestions} câu hỏi...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Wand2 size={18} />
+                                                    <span>Tạo {aiInputData.numQuestions} Câu Hỏi Bằng AI Qwen 2.5</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </form>
+
+                                    {/* DANH SÁCH CÂU HỎI VỪA TẠO RA BẰNG AI */}
+                                    {generatedQuestions.length > 0 && (
+                                        <div className="ai-results-container">
+                                            <div className="ai-results-header">
+                                                <div className="ai-results-count">
+                                                    <CheckCircle2 size={17} color="var(--accent-emerald)" />
+                                                    <span>AI đã tạo <strong>{generatedQuestions.length} câu hỏi</strong>:</span>
+                                                </div>
+
+                                                <div style={{ display: 'flex', gap: '6px' }}>
+                                                    <button
+                                                        type="button"
+                                                        className="btn-save-all-batch"
+                                                        onClick={handleSaveAllGeneratedQuestions}
+                                                        disabled={isSavingBatch}
+                                                        title="Lưu toàn bộ các câu hỏi trên vào cơ sở dữ liệu"
+                                                    >
+                                                        {isSavingBatch ? (
+                                                            <>
+                                                                <Loader2 size={13} className="spin-animation" />
+                                                                <span>Đang lưu...</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <BookmarkCheck size={14} />
+                                                                <span>Lưu tất cả ({generatedQuestions.length}) câu</span>
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn-clear-batch"
+                                                        onClick={handleClearGeneratedQuestions}
+                                                        title="Xóa danh sách tạm này"
+                                                    >
+                                                        <RotateCcw size={13} />
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="ai-questions-list">
+                                                {generatedQuestions.map((q, idx) => (
+                                                    <div key={idx} className="ai-generated-card">
+                                                        <div className="ai-card-title-row">
+                                                            <strong>Câu {idx + 1}: {q.questionText}</strong>
+                                                            <span className="pill-difficulty-medium">• {q.difficulty}</span>
+                                                        </div>
+
+                                                        <div className="ai-card-options-grid">
+                                                            {q.options.map((opt, i) => {
+                                                                const label = ['A', 'B', 'C', 'D'][i];
+                                                                const isCorrect = q.correctAnswer === opt || q.correctAnswer === label;
+                                                                return (
+                                                                    <div key={i} className={`ai-option-item ${isCorrect ? 'is-correct' : ''}`}>
+                                                                        <span><strong>{label}.</strong> {opt}</span>
+                                                                        {isCorrect && <CheckCircle2 size={14} />}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+
+                                                        {q.explanation && (
+                                                            <div className="item-explanation-preview" style={{ marginTop: '8px' }}>
+                                                                <div className="explanation-preview-title">
+                                                                    <Lightbulb size={13} />
+                                                                    <span>Giải thích:</span>
+                                                                </div>
+                                                                <p className="explanation-preview-content">{q.explanation}</p>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="ai-card-actions-bar">
+                                                            <button
+                                                                type="button"
+                                                                className="btn-ai-card-action btn-fill-form"
+                                                                onClick={() => handleLoadIntoForm(q)}
+                                                                title="Đổ câu hỏi này vào component form để chỉnh sửa chi tiết"
+                                                            >
+                                                                <PencilLine size={13} />
+                                                                <span>Nạp vào form chỉnh sửa</span>
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                className="btn-ai-card-action btn-save-one"
+                                                                onClick={() => handleSaveSingleGeneratedQuestion(q)}
+                                                                title="Lưu câu hỏi này ngay vào cơ sở dữ liệu"
+                                                            >
+                                                                <Plus size={13} />
+                                                                <span>Lưu câu này</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Cột Phải: Danh sách câu hỏi lẻ đã tạo */}

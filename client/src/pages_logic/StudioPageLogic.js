@@ -26,7 +26,18 @@ export const StudioPageLogic = () => {
     const [savedSetsData, setSavedSetsData] = useState([]);
     const [schoolMemberships, setSchoolMemberships] = useState([]);
     const [activeTab, setActiveTab] = useState('sets'); // 'sets' | 'questions' | 'saved'
+    const [creationMode, setCreationMode] = useState('manual'); // 'manual' | 'ai'
     const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+    const [isGeneratingBatch, setIsGeneratingBatch] = useState(false);
+    const [isSavingBatch, setIsSavingBatch] = useState(false);
+    const [generatedQuestions, setGeneratedQuestions] = useState([]);
+    const [aiInputData, setAiInputData] = useState({
+        context: '',
+        numQuestions: 3,
+        topic: 'Vật lý',
+        difficulty: 'mixed',
+        setId: ''
+    });
 
     const canGenerateAiExplanation = Boolean(
         formData.questionText && formData.questionText.trim() &&
@@ -61,6 +72,123 @@ export const StudioPageLogic = () => {
         } finally {
             setIsGeneratingAi(false);
         }
+    };
+
+    const handleGenerateQuestionsFromContext = async (e) => {
+        if (e) e.preventDefault();
+        if (!aiInputData.context || aiInputData.context.trim().length < 10) {
+            alert("Vui lòng nhập đoạn tài liệu hoặc khái niệm kiến thức (tối thiểu 10 ký tự) để AI có cơ sở tạo câu hỏi!");
+            return;
+        }
+        setIsGeneratingBatch(true);
+        try {
+            const res = await axios.post('http://localhost:5000/api/questions/generate-from-context', {
+                context: aiInputData.context,
+                numQuestions: aiInputData.numQuestions,
+                topic: aiInputData.topic,
+                difficulty: aiInputData.difficulty
+            }, {
+                headers: { token: currentUser.accessToken }
+            });
+
+            if (res.data?.questions && res.data.questions.length > 0) {
+                setGeneratedQuestions(res.data.questions);
+                if (res.data.questions.length === 1) {
+                    const singleQ = res.data.questions[0];
+                    setFormData({
+                        questionText: singleQ.questionText,
+                        optionA: singleQ.options[0] || '',
+                        optionB: singleQ.options[1] || '',
+                        optionC: singleQ.options[2] || '',
+                        optionD: singleQ.options[3] || '',
+                        correctAnswer: singleQ.correctAnswer === singleQ.options[1] ? 'B' : singleQ.correctAnswer === singleQ.options[2] ? 'C' : singleQ.correctAnswer === singleQ.options[3] ? 'D' : 'A',
+                        difficulty: singleQ.difficulty || 'medium',
+                        topic: singleQ.topic || aiInputData.topic || 'Khác',
+                        explanation: singleQ.explanation || '',
+                        setId: aiInputData.setId || ''
+                    });
+                }
+            }
+        } catch (err) {
+            const msg = err.response?.data?.message || err.response?.data || "Không thể tạo câu hỏi từ tài liệu bằng AI. Vui lòng kiểm tra lại dịch vụ Ollama!";
+            alert(typeof msg === 'object' ? JSON.stringify(msg) : msg);
+        } finally {
+            setIsGeneratingBatch(false);
+        }
+    };
+
+    const handleLoadIntoForm = (q) => {
+        setFormData({
+            questionText: q.questionText,
+            optionA: q.options[0] || '',
+            optionB: q.options[1] || '',
+            optionC: q.options[2] || '',
+            optionD: q.options[3] || '',
+            correctAnswer: q.correctAnswer === q.options[1] ? 'B' : q.correctAnswer === q.options[2] ? 'C' : q.correctAnswer === q.options[3] ? 'D' : 'A',
+            difficulty: q.difficulty || 'medium',
+            topic: q.topic || aiInputData.topic || 'Khác',
+            explanation: q.explanation || '',
+            setId: aiInputData.setId || ''
+        });
+        setCreationMode('manual');
+        alert("Đã nạp câu hỏi vào biểu mẫu! Bạn có thể chỉnh sửa nội dung và bấm 'Lưu Câu Hỏi'.");
+    };
+
+    const handleSaveSingleGeneratedQuestion = async (q) => {
+        try {
+            const newQuestion = {
+                questionText: q.questionText,
+                options: q.options,
+                correctAnswer: q.correctAnswer,
+                explanation: q.explanation || '',
+                difficulty: q.difficulty || 'medium',
+                topic: q.topic || aiInputData.topic || 'Khác',
+                owner: currentUser._id
+            };
+            const res = await axios.post('http://localhost:5000/api/questions', newQuestion, {
+                headers: { token: currentUser.accessToken }
+            });
+
+            if (aiInputData.setId) {
+                await axios.put(`http://localhost:5000/api/sets/${aiInputData.setId}/add-question`, {
+                    questionId: res.data._id
+                }, { headers: { token: currentUser.accessToken } });
+            }
+
+            setGeneratedQuestions(prev => prev.filter(item => item !== q));
+            fetchQuestions();
+            alert("Đã lưu câu hỏi vào ngân hàng thành công!");
+        } catch (err) {
+            const msg = err.response?.data?.message || err.response?.data || "Lỗi khi lưu câu hỏi!";
+            alert(typeof msg === 'object' ? JSON.stringify(msg) : msg);
+        }
+    };
+
+    const handleSaveAllGeneratedQuestions = async () => {
+        if (generatedQuestions.length === 0 || isSavingBatch) return;
+        setIsSavingBatch(true);
+        try {
+            const res = await axios.post('http://localhost:5000/api/questions/batch', {
+                questions: generatedQuestions,
+                setId: aiInputData.setId || undefined
+            }, {
+                headers: { token: currentUser.accessToken }
+            });
+
+            alert(res.data?.message || `Đã lưu thành công ${generatedQuestions.length} câu hỏi!`);
+            setGeneratedQuestions([]);
+            fetchQuestions();
+            if (aiInputData.setId) fetchMySets();
+        } catch (err) {
+            const msg = err.response?.data?.message || err.response?.data || "Lỗi khi lưu danh sách câu hỏi!";
+            alert(typeof msg === 'object' ? JSON.stringify(msg) : msg);
+        } finally {
+            setIsSavingBatch(false);
+        }
+    };
+
+    const handleClearGeneratedQuestions = () => {
+        setGeneratedQuestions([]);
     };
 
     useEffect(() => {
@@ -295,6 +423,18 @@ export const StudioPageLogic = () => {
         handleLogout,
         isGeneratingAi,
         canGenerateAiExplanation,
-        handleGenerateAiExplanation
+        handleGenerateAiExplanation,
+        creationMode,
+        setCreationMode,
+        aiInputData,
+        setAiInputData,
+        isGeneratingBatch,
+        isSavingBatch,
+        generatedQuestions,
+        handleGenerateQuestionsFromContext,
+        handleLoadIntoForm,
+        handleSaveSingleGeneratedQuestion,
+        handleSaveAllGeneratedQuestions,
+        handleClearGeneratedQuestions
     };
 };
