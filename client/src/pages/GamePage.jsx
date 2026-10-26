@@ -92,8 +92,14 @@ const GamePage = () => {
                             user.role === 'teacher' ? (
                                 <div className="teacher-account-menu">
                                     <Link className="nav-username" to="/profile">
-                                        <span className="user-avatar-badge">{user.username.charAt(0).toUpperCase()}</span>
-                                        <span>{user.username}</span>
+                                        <span className="user-avatar-badge">
+                                            {user.avatar ? (
+                                                <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
+                                            ) : (
+                                                user.username.charAt(0).toUpperCase()
+                                            )}
+                                        </span>
+                                        <span>{user.displayName || user.username}</span>
                                     </Link>
                                     <div className="teacher-account-dropdown">
                                         <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
@@ -108,8 +114,14 @@ const GamePage = () => {
                             ) : (
                                 <div className="teacher-account-menu">
                                     <Link className="nav-username" to="/profile">
-                                        <span className="user-avatar-badge">{user.username.charAt(0).toUpperCase()}</span>
-                                        <span>{user.username}</span>
+                                        <span className="user-avatar-badge">
+                                            {user.avatar ? (
+                                                <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
+                                            ) : (
+                                                user.username.charAt(0).toUpperCase()
+                                            )}
+                                        </span>
+                                        <span>{user.displayName || user.username}</span>
                                     </Link>
                                     <div className="teacher-account-dropdown">
                                         {user.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}

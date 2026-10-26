@@ -1,0 +1,591 @@
+/* ==========================================================================
+   EASYLEARN QUESTION SET DETAILS PAGE STYLING - CODEDEX GAMIFIED THEME
+   (Xem chi tiết câu hỏi của bộ đề, xuất Excel/PDF, đồng bộ Navbar & Theme)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* --- 1. THEME TOKENS --- */
+:root {
+    --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Light Theme */
+    --bg-page: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: #f1f5f9;
+    --bg-surface-hover: #e2e8f0;
+    --bg-glass: rgba(255, 255, 255, 0.88);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --text-inverse: #ffffff;
+
+    --border-subtle: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --border-focus: #3b82f6;
+
+    --accent-gold: #f59e0b;
+    --accent-gold-hover: #d97706;
+    --accent-gold-shadow: #b45309;
+    --accent-gold-subtle: rgba(245, 158, 11, 0.12);
+
+    --accent-blue: #3b82f6;
+    --accent-blue-hover: #2563eb;
+    --accent-blue-subtle: rgba(59, 130, 246, 0.1);
+
+    --accent-emerald: #10b981;
+    --accent-emerald-subtle: rgba(16, 185, 129, 0.12);
+
+    --accent-purple: #8b5cf6;
+    --accent-purple-subtle: rgba(139, 92, 246, 0.1);
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    --hero-glow: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 158, 11, 0.14), rgba(59, 130, 246, 0.08), transparent);
+
+    --transition-fast: 0.15s ease;
+    --transition-smooth: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] {
+    --bg-page: #070a13;
+    --bg-surface: #0e1424;
+    --bg-surface-elevated: #161f36;
+    --bg-surface-hover: #1f2b4a;
+    --bg-glass: rgba(14, 20, 36, 0.88);
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-inverse: #0f172a;
+
+    --border-subtle: #1e293b;
+    --border-strong: #334155;
+    --border-focus: #60a5fa;
+
+    --accent-gold: #f59e0b;
+    --accent-gold-hover: #fbbf24;
+    --accent-gold-shadow: #b45309;
+    --accent-gold-subtle: rgba(245, 158, 11, 0.18);
+
+    --accent-blue: #3b82f6;
+    --accent-blue-hover: #60a5fa;
+    --accent-blue-subtle: rgba(59, 130, 246, 0.16);
+
+    --accent-emerald: #10b981;
+    --accent-emerald-subtle: rgba(16, 185, 129, 0.16);
+
+    --accent-purple: #a855f7;
+    --accent-purple-subtle: rgba(168, 85, 247, 0.16);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.6);
+    --hero-glow: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 158, 11, 0.22), rgba(59, 130, 246, 0.16), transparent);
+}
+
+/* --- 2. BASE WRAPPER --- */
+.qset-page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* --- 3. NAVBAR ĐỒNG BỘ --- */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+    transition: all var(--transition-smooth);
+}
+
+.nav-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+}
+
+.brand-coin {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.brand-name {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14.5px;
+    font-weight: 600;
+    transition: color var(--transition-fast);
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--accent-gold);
+    background-color: var(--bg-surface-elevated);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.theme-toggle-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background-color: var(--bg-surface-elevated);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+    color: var(--accent-gold);
+    border-color: var(--accent-gold);
+    background-color: var(--accent-gold-subtle);
+}
+
+/* User Menu & Dropdown */
+.teacher-account-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.nav-username {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background-color: var(--bg-surface-elevated);
+    cursor: pointer;
+}
+
+.user-avatar-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    overflow: hidden;
+}
+
+.user-avatar-img-nav {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.teacher-account-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    min-width: 230px;
+    padding: 8px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: all 0.18s ease;
+}
+
+.teacher-account-menu:hover .teacher-account-dropdown,
+.teacher-account-menu:focus-within .teacher-account-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.teacher-account-dropdown a,
+.teacher-account-dropdown button {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.teacher-account-dropdown a:hover,
+.teacher-account-dropdown button:hover {
+    background: var(--bg-surface-elevated);
+    color: var(--accent-gold);
+}
+
+.teacher-account-dropdown .logout-btn:hover {
+    color: #ef4444;
+}
+
+/* --- 4. KHU VỰC NỘI DUNG CHÍNH --- */
+.qset-main-container {
+    max-width: 960px;
+    width: 100%;
+    margin: 28px auto 60px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.qset-top-nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.btn-qset-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    background-color: var(--bg-surface);
+    border: 1.5px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-family: var(--font-main);
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-qset-back:hover {
+    background-color: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+}
+
+.qset-export-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-qset-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background-color: var(--bg-surface);
+    border: 1.5px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-qset-export:hover {
+    background-color: var(--bg-surface-hover);
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+}
+
+/* THẺ HERO THÔNG TIN BỘ ĐỀ */
+.qset-hero-card {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.qset-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.qset-pill-topic {
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--accent-gold-subtle);
+    color: var(--accent-gold);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.qset-pill-count {
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--accent-blue-subtle);
+    color: var(--accent-blue);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.qset-title {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    line-height: 1.35;
+}
+
+.qset-description {
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.qset-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.qset-author-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+}
+
+.author-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-play-game-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    border: none;
+    color: #0f172a;
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--accent-gold-shadow);
+    transition: all var(--transition-fast);
+}
+
+.btn-play-game-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 var(--accent-gold-shadow);
+}
+
+/* DANH SÁCH CÂU HỎI */
+.qset-questions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.qset-questions-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.qset-question-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+
+.qset-question-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
+}
+
+.qset-q-title {
+    margin: 0 0 16px 0;
+    color: var(--text-primary);
+    font-size: 16.5px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.qset-q-num {
+    color: var(--accent-blue);
+    font-weight: 800;
+    margin-right: 6px;
+}
+
+.qset-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.qset-option-item {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all var(--transition-fast);
+    background: var(--bg-surface-elevated);
+    border: 1.5px solid var(--border-subtle);
+    color: var(--text-primary);
+}
+
+.qset-option-item.correct {
+    background: var(--accent-emerald-subtle);
+    border-color: var(--accent-emerald);
+    color: var(--accent-emerald);
+    font-weight: 700;
+}
+
+.option-badge-letter {
+    font-weight: 800;
+    margin-right: 6px;
+}
+
+.qset-card-meta {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.meta-answer-highlight {
+    color: var(--accent-emerald);
+    font-weight: 800;
+}
+
+/* --- 5. RESPONSIVE --- */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+
+    .qset-options-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .qset-hero-card {
+        padding: 22px 18px;
+    }
+}
+

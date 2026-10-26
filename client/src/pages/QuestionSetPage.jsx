@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { QuestionSetPageLogic } from '../pages_logic/QuestionSetPageLogic';
 import { useDarkMode } from '../pages_logic/useDarkMode';
-import '../pages_styling/LibraryPageStyling.css';
+import '../pages_styling/QuestionSetStyling.css';
 import { 
     Sparkles, 
     ArrowLeft, 
@@ -73,10 +73,10 @@ const QuestionSetPage = () => {
 
     if (!setData) {
         return (
-            <div className="library-wrapper" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="qset-page-wrapper" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                    <div className="empty-icon-wrap" style={{ margin: '0 auto 16px auto' }}>
-                        <Layers size={32} />
+                    <div style={{ width: '48px', height: '48px', margin: '0 auto 16px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'var(--bg-surface-elevated)' }}>
+                        <Layers size={28} />
                     </div>
                     <h3>Đang tải dữ liệu bộ câu hỏi...</h3>
                 </div>
@@ -85,7 +85,7 @@ const QuestionSetPage = () => {
     }
 
     return (
-        <div className="library-wrapper">
+        <div className="qset-page-wrapper">
             {/* 1. NAVBAR ĐỒNG BỘ */}
             <header className="navbar">
                 <div className="nav-container">
@@ -119,8 +119,14 @@ const QuestionSetPage = () => {
                         {user ? (
                             <div className="teacher-account-menu">
                                 <Link className="nav-username" to="/profile">
-                                    <span className="user-avatar-badge">{user.username.charAt(0).toUpperCase()}</span>
-                                    <span>{user.username}</span>
+                                    <span className="user-avatar-badge">
+                                        {user.avatar ? (
+                                            <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
+                                        ) : (
+                                            user.username.charAt(0).toUpperCase()
+                                        )}
+                                    </span>
+                                    <span>{user.displayName || user.username}</span>
                                 </Link>
                                 <div className="teacher-account-dropdown">
                                     {user.role === 'teacher' ? (
@@ -158,156 +164,123 @@ const QuestionSetPage = () => {
             </header>
 
             {/* 2. NỘI DUNG CHI TIẾT BỘ ĐỀ */}
-            <main style={{ maxWidth: '960px', width: '100%', margin: '0 auto', padding: '30px 20px 60px 20px', boxSizing: 'border-box' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <main className="qset-main-container">
+                {/* Hàng điều hướng trên cùng */}
+                <div className="qset-top-nav-row">
                     <button 
                         onClick={() => navigate('/library')} 
-                        className="btn-card-icon"
-                        style={{ padding: '8px 16px', fontSize: '13.5px' }}
+                        className="btn-qset-back"
                     >
                         <ArrowLeft size={16} />
                         <span>Về Thư Viện</span>
                     </button>
 
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div className="qset-export-group">
                         <button 
-                            className="btn-export-mini" 
-                            style={{ padding: '8px 14px', fontSize: '13px' }}
+                            className="btn-qset-export" 
                             onClick={() => handleExport('excel')}
+                            title="Tải về file bảng tính Excel"
                         >
-                            <FileSpreadsheet size={15} style={{ marginRight: '4px' }} />
-                            Tải Excel
+                            <FileSpreadsheet size={15} />
+                            <span>Tải Excel</span>
                         </button>
                         <button 
-                            className="btn-export-mini" 
-                            style={{ padding: '8px 14px', fontSize: '13px' }}
+                            className="btn-qset-export" 
                             onClick={() => handleExport('pdf')}
+                            title="Tải về file tài liệu in ấn PDF"
                         >
-                            <FileText size={15} style={{ marginRight: '4px' }} />
-                            Tải PDF
+                            <FileText size={15} />
+                            <span>Tải PDF</span>
                         </button>
                     </div>
                 </div>
 
                 {/* Banner Thông Tin Bộ Đề */}
-                <div style={{ 
-                    background: 'var(--bg-surface)', 
-                    border: '1.5px solid var(--border-subtle)', 
-                    borderRadius: '18px', 
-                    padding: '28px', 
-                    marginBottom: '28px',
-                    boxShadow: 'var(--shadow-sm)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                        <span style={{ 
-                            padding: '4px 12px', 
-                            borderRadius: '20px', 
-                            background: 'var(--accent-gold-subtle)', 
-                            color: 'var(--accent-gold)', 
-                            fontSize: '12px', 
-                            fontWeight: '800', 
-                            textTransform: 'uppercase' 
-                        }}>
+                <div className="qset-hero-card">
+                    <div className="qset-badge-row">
+                        <span className="qset-pill-topic">
                             🏷️ {setData.topic || 'Khác'}
                         </span>
-                        <span style={{ 
-                            padding: '4px 12px', 
-                            borderRadius: '20px', 
-                            background: 'var(--accent-blue-subtle)', 
-                            color: 'var(--accent-blue)', 
-                            fontSize: '12px', 
-                            fontWeight: '800' 
-                        }}>
+                        <span className="qset-pill-count">
                             📝 {questions.length} câu hỏi
                         </span>
                     </div>
 
-                    <h1 style={{ margin: '0 0 10px 0', fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)' }}>
+                    <h1 className="qset-title">
                         {setData.title}
                     </h1>
 
-                    <p style={{ margin: '0 0 16px 0', fontSize: '14.5px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                        {setData.description || "Bộ câu hỏi chất lượng cao phục vụ rèn luyện và củng cố kiến thức."}
+                    <p className="qset-description">
+                        {setData.description || "Bộ câu hỏi chất lượng cao phục vụ rèn luyện, nâng cao kỹ năng và củng cố kiến thức."}
                     </p>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)' }}>
-                        <span style={{ fontSize: '13.5px', color: 'var(--text-muted)' }}>
-                            Tác giả: <strong>{setData.owner?.username || "Ẩn danh"}</strong>
-                        </span>
+                    <div className="qset-card-footer">
+                        <div className="qset-author-info">
+                            <div className="author-circle">
+                                {(setData.owner?.username || 'A').charAt(0).toUpperCase()}
+                            </div>
+                            <span>
+                                Tác giả: <strong>{setData.owner?.username || "Ẩn danh"}</strong>
+                            </span>
+                        </div>
 
                         <button 
-                            className="btn-primary-nav"
+                            className="btn-play-game-cta"
                             onClick={() => navigate('/game')}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                         >
-                            <Gamepad2 size={16} />
+                            <Gamepad2 size={18} />
                             <span>Vào Game luyện tập</span>
                         </button>
                     </div>
                 </div>
 
                 {/* Danh Sách Chi Tiết Các Câu Hỏi */}
-                <h3 style={{ fontSize: '19px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '18px' }}>
-                    Danh sách câu hỏi chi tiết ({questions.length})
-                </h3>
+                <div className="qset-questions-header">
+                    <h3>Danh sách câu hỏi chi tiết ({questions.length})</h3>
+                </div>
 
                 {questions.length === 0 ? (
-                    <div className="library-empty-state">
-                        <div className="empty-icon-wrap">
-                            <BookOpen size={28} />
+                    <div style={{ textAlign: 'center', padding: '40px 20px', background: 'var(--bg-surface)', border: '1px dashed var(--border-strong)', borderRadius: '16px' }}>
+                        <div style={{ width: '48px', height: '48px', margin: '0 auto 12px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'var(--bg-surface-elevated)', color: 'var(--text-muted)' }}>
+                            <BookOpen size={24} />
                         </div>
-                        <h3>Bộ câu hỏi này chưa có câu hỏi nào</h3>
-                        <p>Bạn có thể vào Studio để tạo thêm câu hỏi và gán vào bộ đề này nhé.</p>
+                        <h4 style={{ margin: '0 0 6px 0', fontSize: '16px', color: 'var(--text-primary)' }}>Bộ câu hỏi này chưa có câu hỏi nào</h4>
+                        <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--text-secondary)' }}>Bạn có thể vào Studio để tạo thêm câu hỏi và gán vào bộ đề này.</p>
                     </div>
                 ) : (
                     questions.map((q, index) => (
-                        <div key={q._id} style={{ 
-                            background: 'var(--bg-surface)', 
-                            border: '1px solid var(--border-subtle)', 
-                            borderRadius: '14px', 
-                            padding: '22px', 
-                            marginBottom: '16px', 
-                            boxShadow: 'var(--shadow-sm)' 
-                        }}>
-                            <h4 style={{ margin: '0 0 16px 0', color: 'var(--text-primary)', fontSize: '16.5px', lineHeight: '1.5', fontWeight: '700' }}>
-                                <span style={{ color: 'var(--accent-blue)', marginRight: '6px' }}>Câu {index + 1}:</span> 
+                        <div key={q._id} className="qset-question-card">
+                            <h4 className="qset-q-title">
+                                <span className="qset-q-num">Câu {index + 1}:</span> 
                                 {q.questionText}
                             </h4>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+                            <div className="qset-options-grid">
                                 {q.options && q.options.map((opt, i) => {
                                     const labels = ['A', 'B', 'C', 'D'];
                                     const isCorrect = q.correctAnswer === labels[i] || q.correctAnswer === opt;
                                     return (
-                                        <div key={i} style={{ 
-                                            padding: '11px 14px', 
-                                            background: isCorrect ? 'var(--accent-emerald-subtle)' : 'var(--bg-surface-elevated)', 
-                                            border: isCorrect ? '1.5px solid var(--accent-emerald)' : '1px solid var(--border-subtle)',
-                                            borderRadius: '8px',
-                                            color: isCorrect ? 'var(--accent-emerald)' : 'var(--text-primary)',
-                                            fontWeight: isCorrect ? '800' : '500',
-                                            fontSize: '13.5px',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center'
-                                        }}>
-                                            <span><strong>{labels[i]}.</strong> {opt}</span>
+                                        <div key={i} className={`qset-option-item ${isCorrect ? 'correct' : ''}`}>
+                                            <span>
+                                                <strong className="option-badge-letter">{labels[i]}.</strong> {opt}
+                                            </span>
                                             {isCorrect && <CheckCircle2 size={16} />}
                                         </div>
                                     );
                                 })}
                             </div>
 
-                            <div style={{ 
-                                borderTop: '1px solid var(--border-subtle)', 
-                                paddingTop: '10px', 
-                                fontSize: '13px', 
-                                color: 'var(--text-muted)',
-                                display: 'flex',
-                                gap: '20px'
-                            }}>
-                                <div>Đáp án đúng: <strong style={{ color: 'var(--accent-emerald)' }}>{q.correctAnswer}</strong></div>
-                                <div>Độ khó: <span style={{ textTransform: 'capitalize', fontWeight: '600' }}>{q.difficulty || 'Chưa phân loại'}</span></div>
+                            <div className="qset-card-meta">
+                                <div>
+                                    <span>Đáp án đúng: </span>
+                                    <strong className="meta-answer-highlight">{q.correctAnswer}</strong>
+                                </div>
+                                <div>
+                                    <span>Độ khó: </span>
+                                    <strong style={{ textTransform: 'capitalize' }}>
+                                        {q.difficulty === 'hard' ? 'Khó' : q.difficulty === 'medium' ? 'Trung bình' : 'Dễ'}
+                                    </strong>
+                                </div>
                             </div>
                         </div>
                     ))

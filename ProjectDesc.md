@@ -30,7 +30,5 @@ Xem meDashboard quên mật khẩu
 Nhập gmail đã có trong hồ sơ để nhận OTP reset mật khẩumbers của trường.
 							
 Tính năng bổ sung 
-import file csv, excel thành các câu hỏi.
-Các bộ  câu hỏi được tạo sẵn, sẽ có các bộ mặc định cho mọi người và các bộ câu hỏi theo mùa để người chơi tranh tài hoặc để sử dụng như bình thường đều được.
-Leaderboard chung cho các câu hỏi/ bộ câu hỏi được tạo sẵn để người chơi tranh tài ( Trang LeaderBoard hoàn chỉnh)
-Nâng cấp file Trang profile của web.
+Thêm xác thực bằng email cho việc thay đổi thông tin quan trọng trong web
+

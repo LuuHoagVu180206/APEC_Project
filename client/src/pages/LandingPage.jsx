@@ -186,13 +186,20 @@ const LandingPage = () => {
                         {user?.role === 'teacher' ? (
                             <div className="teacher-account-menu">
                                 <Link className="nav-username" to="/profile">
-                                    <span className="user-avatar-badge">{user.username.charAt(0).toUpperCase()}</span>
-                                    <span>{user.username}</span>
+                                    <span className="user-avatar-badge">
+                                        {user.avatar ? (
+                                            <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
+                                        ) : (
+                                            user.username.charAt(0).toUpperCase()
+                                        )}
+                                    </span>
+                                    <span>{user.displayName || user.username}</span>
                                 </Link>
                                 <div className="teacher-account-dropdown">
                                     <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
                                     <Link to="/schools">{schoolActionLabel}</Link>
                                     <Link to="/studio">Studio tạo bộ đề</Link>
+                                    <Link to="/profile">Hồ sơ cá nhân</Link>
                                     <button type="button" onClick={handleLogout} className="logout-btn">
                                         <LogOut size={16} /> Đăng xuất
                                     </button>
@@ -201,14 +208,21 @@ const LandingPage = () => {
                         ) : user?.role === 'user' || user?.role === 'admin' ? (
                             <div className="teacher-account-menu">
                                 <Link className="nav-username" to="/profile">
-                                    <span className="user-avatar-badge">{user.username.charAt(0).toUpperCase()}</span>
-                                    <span>{user.username}</span>
+                                    <span className="user-avatar-badge">
+                                        {user.avatar ? (
+                                            <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
+                                        ) : (
+                                            user.username.charAt(0).toUpperCase()
+                                        )}
+                                    </span>
+                                    <span>{user.displayName || user.username}</span>
                                 </Link>
                                 <div className="teacher-account-dropdown">
                                     {user.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
                                     <Link to="/schools">{schoolActionLabel}</Link>
                                     <Link to="/student/classes">Lớp học của tôi</Link>
                                     <Link to="/game">Chơi Game Quiz</Link>
+                                    <Link to="/profile">Hồ sơ cá nhân</Link>
                                     <button type="button" onClick={handleLogout} className="logout-btn">
                                         <LogOut size={16} /> Đăng xuất
                                     </button>
