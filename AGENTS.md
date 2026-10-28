@@ -40,3 +40,21 @@
 2. Các bộ câu hỏi được tạo sẵn, sẽ có các bộ mặc định cho mọi người và các bộ câu hỏi theo mùa để người chơi tranh tài hoặc để sử dụng như bình thường đều được.
 3. Leaderboard chung cho các câu hỏi/ bộ câu hỏi được tạo sẵn để người chơi tranh tài (Trang LeaderBoard hoàn chỉnh)
 4. Nâng cấp file Trang profile của web.
+
+
+# 3. Quy chuẩn Thiết kế & UI/UX (Bắt buộc tuân thủ)
+
+Tuân thủ nghiêm ngặt toàn bộ nguyên tắc thiết kế được định nghĩa trong [DESIGN_SYSTEM.MD](file:///d:/APEC_Project/DESIGN_SYSTEM.MD) (hoặc [.agents/rules/design_system.md](file:///d:/APEC_Project/.agents/rules/design_system.md)):
+- **Phong cách chủ đạo:** Modern Creative EdTech × Premium SaaS × Artistic Digital Experience (tham chiếu cảm hứng sáng tạo từ Codédex, không sao chép nguyên mẫu thô).
+- **Light Mode & Dark Mode:** Thiết kế độc lập, kiểm soát độ tương phản chặt chẽ (WCAG 2.2 AA), tuyệt đối không để xảy ra lỗi chữ trắng trên nền trắng, icon hay nút bấm chìm vào nền.
+- **Typography & Tiếng Việt:** Hỗ trợ chuẩn xác tiếng Việt đầy đủ dấu, không vỡ glyph, phân cấp visual hierarchy rõ ràng từ Headings đến Body.
+- **Hệ thống Spacing & Components:** Thang đo 4px, thiết kế thành phần có chủ đích, tương tác micro-interactions tinh tế và đồng bộ trên toàn bộ hệ thống.
+
+
+# 3. Quy chuẩn Thiết kế & UI/UX (Bắt buộc tuân thủ)
+
+Tuân thủ nghiêm ngặt toàn bộ nguyên tắc thiết kế được định nghĩa trong [DESIGN_SYSTEM.MD](file:///d:/APEC_Project/DESIGN_SYSTEM.MD) (hoặc [.agents/rules/design_system.md](file:///d:/APEC_Project/.agents/rules/design_system.md)):
+- **Phong cách chủ đạo:** Modern Creative EdTech × Premium SaaS × Artistic Digital Experience (tham chiếu cảm hứng sáng tạo từ Codédex, không sao chép nguyên mẫu thô).
+- **Light Mode & Dark Mode:** Thiết kế độc lập, kiểm soát độ tương phản chặt chẽ (WCAG 2.2 AA), tuyệt đối không để xảy ra lỗi chữ trắng trên nền trắng, icon hay nút bấm chìm vào nền.
+- **Typography & Tiếng Việt:** Hỗ trợ chuẩn xác tiếng Việt đầy đủ dấu, không vỡ glyph, phân cấp visual hierarchy rõ ràng từ Headings đến Body.
+- **Hệ thống Spacing & Components:** Thang đo 4px, thiết kế thành phần có chủ đích, tương tác micro-interactions tinh tế và đồng bộ trên toàn bộ hệ thống.
