@@ -37,10 +37,16 @@ app.use('/api/admin', adminRoute);
 
 // 4. Kết nối Database MongoDB
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
+    .then(async () => {
         console.log('✅ Đã kết nối MongoDB thành công!');
         console.log("🏠 Địa chỉ máy chủ DB:", mongoose.connection.host);
         console.log("📂 Tên Database đang dùng:", mongoose.connection.name);
+        try {
+            const { seedDefaultAndWeeklySets } = require('./seedData');
+            await seedDefaultAndWeeklySets();
+        } catch (seedErr) {
+            console.error('Lỗi khởi tạo seedData:', seedErr);
+        }
     })
     .catch((err) => console.error('❌ Lỗi kết nối MongoDB:', err));
 

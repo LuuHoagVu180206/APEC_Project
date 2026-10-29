@@ -58,9 +58,33 @@ router.post('/', verifyToken, async (req, res) => {
 router.get('/library', async (req, res) => {
     try {
         const publicSets = await QuestionSet.find({ isPublic: true })
-            .populate('owner', 'username') // Kéo thêm tên người tạo để hiển thị
-            .sort({ likesCount: -1 });     // Sắp xếp theo lượt thích giảm dần
+            .populate('owner', 'username displayName avatar')
+            .sort({ isDefault: -1, isWeekly: -1, likesCount: -1, createdAt: -1 });
         res.status(200).json(publicSets);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+// LẤY CÁC BỘ CÂU HỎI THỬ THÁCH TUẦN (WEEKLY CHALLENGES)
+router.get('/weekly', async (req, res) => {
+    try {
+        const weeklySets = await QuestionSet.find({ isWeekly: true, isPublic: true })
+            .populate('owner', 'username displayName avatar')
+            .sort({ weekNumber: 1 });
+        res.status(200).json(weeklySets);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+// LẤY CÁC BỘ CÂU HỎI MẶC ĐỊNH CHÍNH THỨC CỦA APEC GROUP
+router.get('/defaults', async (req, res) => {
+    try {
+        const defaultSets = await QuestionSet.find({ isDefault: true, isPublic: true })
+            .populate('owner', 'username displayName avatar')
+            .sort({ createdAt: 1 });
+        res.status(200).json(defaultSets);
     } catch (err) {
         res.status(500).json(err);
     }

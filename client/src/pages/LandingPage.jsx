@@ -35,8 +35,8 @@ const LandingPage = () => {
         toggleTheme,
         searchDev,
         setSearchDev,
-        searchCommunity,
-        setSearchCommunity,
+
+
         selectedCategory,
         setSelectedCategory,
         handleSearch
@@ -51,6 +51,13 @@ const LandingPage = () => {
         }
     });
     const [schoolMemberships, setSchoolMemberships] = useState([]);
+    const [weeklySets, setWeeklySets] = useState([]);
+
+    useEffect(() => {
+        axios.get('http://localhost:5000/api/sets/weekly')
+            .then(res => setWeeklySets(res.data || []))
+            .catch(() => {});
+    }, []);
 
     useEffect(() => {
         if (!user?.accessToken) return undefined;
@@ -307,6 +314,48 @@ const LandingPage = () => {
                                     <span>Vào Chơi Game</span>
                                 </button>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* KHU VỰC THỬ THÁCH TUẦN TRONG HERO (WEEKLY QUESTION SETS) */}
+                    <div className="hero-weekly-section">
+                        <div className="hero-weekly-header">
+                            <div className="hero-weekly-left">
+                                <div className="hero-weekly-badge">
+                                    <Flame size={15} className="hero-flame-icon" />
+                                    <span>SỰ KIỆN TUẦN • ĐẤU TRÍ TRANH TÀI</span>
+                                </div>
+                                <h3 className="hero-weekly-heading">Thử Thách Đấu Trí Hàng Tuần (Weekly Challenge)</h3>
+                            </div>
+                            <Link to="/leaderboard" className="hero-weekly-link">
+                                <Trophy size={15} />
+                                <span>Xem Bảng Xếp Hạng Tuần</span>
+                                <ArrowRight size={14} />
+                            </Link>
+                        </div>
+
+                        <div className="hero-weekly-grid">
+                            {(weeklySets.length > 0 ? weeklySets : [
+                                { _id: 'w1', weekNumber: 1, title: 'Vũ Trụ Bí Ẩn & Khoa Học Không Gian', topic: 'Thiên văn học', description: 'Khám phá bí ẩn hệ mặt trời, lỗ đen và các hành tinh xa xôi.' },
+                                { _id: 'w2', weekNumber: 2, title: 'Bí Ẩn Đại Dương & Đa Dạng Sinh Thái', topic: 'Sinh thái học', description: 'Du hành xuống đáy vực sâu ngàn mét và rạn san hô kỳ thú.' },
+                                { _id: 'w3', weekNumber: 3, title: 'Đấu Trí Trí Tuệ Nhân Tạo & Cách Mạng 4.0', topic: 'Công nghệ', description: 'Thử tài tư duy thuật toán, AI, robot và công nghệ tương lai.' }
+                            ]).map((w) => (
+                                <div key={w._id} className="hero-weekly-card" onClick={() => navigate(w._id ? `/game?setId=${w._id}` : '/game')}>
+                                    <div className="hero-weekly-card-top">
+                                        <span className="hero-weekly-tag">⚡ TUẦN {w.weekNumber}</span>
+                                        <span className="hero-weekly-topic">{w.topic}</span>
+                                    </div>
+                                    <h4 className="hero-weekly-card-title">{w.title}</h4>
+                                    <p className="hero-weekly-card-desc">{w.description}</p>
+                                    <div className="hero-weekly-card-footer">
+                                        <span className="hero-weekly-author">APEC Group</span>
+                                        <button className="btn-hero-weekly-play">
+                                            <Play size={13} fill="currentColor" />
+                                            <span>Tranh tài</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 

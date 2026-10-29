@@ -20,6 +20,7 @@ export const LibraryPageLogic = () => {
     const initialCategory = searchParams.get('category') || "Tất cả";
 
     const [questionSets, setQuestionSets] = useState([]);
+    const [weeklySets, setWeeklySets] = useState([]);
     const [searchTerm, setSearchTerm] = useState(initialSearch);
     const [activeCategory, setActiveCategory] = useState(initialCategory);
     const [savedSets, setSavedSets] = useState(currentUser?.savedSets || []);
@@ -28,6 +29,7 @@ export const LibraryPageLogic = () => {
 
     useEffect(() => {
         fetchLibrary();
+        fetchWeeklySets();
     }, []);
 
     // Tải danh sách trường cho navbar
@@ -51,6 +53,15 @@ export const LibraryPageLogic = () => {
             console.error("Lỗi lấy dữ liệu thư viện:", err);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchWeeklySets = async () => {
+        try {
+            const res = await axios.get('http://localhost:5000/api/sets/weekly');
+            setWeeklySets(res.data || []);
+        } catch (err) {
+            console.warn("Lỗi lấy danh sách đề Weekly:", err);
         }
     };
 
@@ -163,7 +174,7 @@ export const LibraryPageLogic = () => {
             activeCategory === "Tất cả" || 
             activeCategory === "Phổ biến" || 
             (set.topic && set.topic.toLowerCase().includes(activeCategory.toLowerCase())) ||
-            (activeCategory === "Khác" && (!set.topic || !['toán', 'tiếng anh', 'lịch sử', 'hoá học', 'vật lý', 'tin học'].some(k => set.topic.toLowerCase().includes(k))));
+            (activeCategory === "Khác" && (!set.topic || !['toán', 'tiếng anh', 'lịch sử', 'hoá học', 'vật lý', 'tin học', 'sinh'].some(k => set.topic.toLowerCase().includes(k))));
             
         return matchesSearch && matchesCategory;
     });
@@ -179,6 +190,7 @@ export const LibraryPageLogic = () => {
         setActiveCategory,
         savedSets,
         filteredSets,
+        weeklySets,
         isLoading,
         schoolActionLabel,
         canDelete,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GamePageLogic } from '../pages_logic/GamePageLogic';
 import { useDarkMode } from '../pages_logic/useDarkMode';
@@ -17,13 +17,22 @@ import {
     HelpCircle, 
     Award, 
     FolderPlus, 
-    ArrowRight
+    ArrowRight,
+    Flame,
+    CheckCircle2,
+    X
 } from 'lucide-react';
 
 const GamePage = () => {
     const {
         user,
         questions,
+        activeSet,
+        defaultSets,
+        weeklySets,
+        isSetModalOpen,
+        setIsSetModalOpen,
+        handleSelectSet,
         gameVersion,
         isLoadingGame,
         isFullscreen,
@@ -37,6 +46,7 @@ const GamePage = () => {
     } = GamePageLogic();
 
     const { isDark, toggleTheme } = useDarkMode();
+    const [modalTab, setModalTab] = useState('defaults'); // 'defaults' hoặc 'weekly'
 
     const isGuest = !user || user.role === 'guest';
 
@@ -75,6 +85,14 @@ const GamePage = () => {
                             <div className="game-score-pill" title="Điểm kỷ lục cao nhất của bạn">
                                 <Trophy size={14} />
                                 <span>{user.highScore} XP</span>
+                            </div>
+                        )}
+
+                        {/* Điểm Tuần nếu có */}
+                        {user?.weeklyScore !== undefined && user.weeklyScore > 0 && (
+                            <div className="game-score-pill weekly-score-pill" title="Điểm Thử Thách Tuần của bạn">
+                                <Flame size={14} />
+                                <span>{user.weeklyScore} Tuần</span>
                             </div>
                         )}
 
@@ -175,6 +193,41 @@ const GamePage = () => {
                     </div>
                 )}
 
+                {/* THANH THÔNG TIN BỘ ĐỀ ĐANG CHƠI */}
+                <div className="active-set-strip">
+                    <div className="active-set-left">
+                        {activeSet?.isWeekly ? (
+                            <span className="active-set-tag tag-weekly">
+                                <Flame size={14} /> Thử Thách Tuần {activeSet.weekNumber || ''}
+                            </span>
+                        ) : (
+                            <span className="active-set-tag tag-official">
+                                ⭐ Đề Chính Thức • APEC Group
+                            </span>
+                        )}
+                        <h2 className="active-set-title">
+                            {activeSet?.title || 'Bộ đề khởi động chuẩn'}
+                        </h2>
+                        <span className="active-set-meta">
+                            {activeSet?.topic && `[${activeSet.topic}] • `} {questions.length} câu đố
+                        </span>
+                    </div>
+
+                    <div className="active-set-actions">
+                        <button 
+                            className="btn-select-set-modal"
+                            onClick={() => setIsSetModalOpen(true)}
+                        >
+                            <BookOpen size={16} />
+                            <span>Đổi bộ câu hỏi</span>
+                        </button>
+                        <Link to="/leaderboard" className="btn-view-leaderboard">
+                            <Trophy size={16} />
+                            <span>Đua Top BXH</span>
+                        </Link>
+                    </div>
+                </div>
+
                 {/* KHUNG ARCADE CONSOLE CHỨA GAME */}
                 <section className="arcade-console-card">
                     {/* Header thanh công cụ điều khiển Arcade */}
@@ -226,8 +279,8 @@ const GamePage = () => {
                             <button 
                                 type="button"
                                 className="arcade-ctrl-btn" 
-                                onClick={() => navigate('/library')} 
-                                title="Đến thư viện chọn bộ câu hỏi khác"
+                                onClick={() => setIsSetModalOpen(true)} 
+                                title="Chọn bộ câu hỏi khác từ danh sách"
                             >
                                 <BookOpen size={15} />
                                 <span>Đổi đề</span>
@@ -305,6 +358,113 @@ const GamePage = () => {
                     </div>
                 </section>
             </main>
+
+            {/* MODAL CHỌN BỘ ĐỀ THI */}
+            {isSetModalOpen && (
+                <div className="set-picker-overlay" onClick={() => setIsSetModalOpen(false)}>
+                    <div className="set-picker-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="set-picker-header">
+                            <div className="set-picker-title-group">
+                                <h3>Chọn Bộ Đề Trắc Nghiệm</h3>
+                                <p>Lựa chọn bộ câu hỏi bạn muốn thử thách trong màn chơi tiếp theo</p>
+                            </div>
+                            <button 
+                                className="btn-close-modal" 
+                                onClick={() => setIsSetModalOpen(false)}
+                                title="Đóng cửa sổ"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Tabs chuyển đổi giữa đề APEC và đề Weekly */}
+                        <div className="set-picker-tabs">
+                            <button 
+                                className={`set-tab-btn ${modalTab === 'defaults' ? 'active' : ''}`}
+                                onClick={() => setModalTab('defaults')}
+                            >
+                                <Sparkles size={16} />
+                                <span>Bộ Đề Mặc Định APEC Group (7 Môn)</span>
+                            </button>
+                            <button 
+                                className={`set-tab-btn ${modalTab === 'weekly' ? 'active' : ''}`}
+                                onClick={() => setModalTab('weekly')}
+                            >
+                                <Flame size={16} />
+                                <span>Thử Thách Tuần (Weekly Challenge)</span>
+                            </button>
+                        </div>
+
+                        {/* Danh sách các bộ câu hỏi */}
+                        <div className="set-picker-list">
+                            {modalTab === 'defaults' ? (
+                                defaultSets.length > 0 ? (
+                                    defaultSets.map((s) => (
+                                        <div 
+                                            key={s._id} 
+                                            className={`set-picker-item ${activeSet?._id === s._id ? 'selected' : ''}`}
+                                            onClick={() => handleSelectSet(s)}
+                                        >
+                                            <div className="item-left">
+                                                <div className="item-topic-badge">{s.topic || 'Toán'}</div>
+                                                <div className="item-details">
+                                                    <h4>{s.title}</h4>
+                                                    <p>{s.description || 'Bộ đề chuẩn mực do APEC Group biên soạn.'}</p>
+                                                    <span className="item-author">Tác giả: <strong>APEC Group</strong></span>
+                                                </div>
+                                            </div>
+                                            <div className="item-right">
+                                                {activeSet?._id === s._id ? (
+                                                    <span className="selected-badge"><CheckCircle2 size={16} /> Đang chọn</span>
+                                                ) : (
+                                                    <button className="btn-item-choose">Chọn bộ này</button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="picker-empty">Đang tải danh sách bộ đề chính thức...</div>
+                                )
+                            ) : (
+                                weeklySets.length > 0 ? (
+                                    weeklySets.map((s) => (
+                                        <div 
+                                            key={s._id} 
+                                            className={`set-picker-item weekly-item ${activeSet?._id === s._id ? 'selected' : ''}`}
+                                            onClick={() => handleSelectSet(s)}
+                                        >
+                                            <div className="item-left">
+                                                <div className="item-topic-badge badge-weekly">⚡ TUẦN {s.weekNumber || 1}</div>
+                                                <div className="item-details">
+                                                    <h4>{s.title}</h4>
+                                                    <p>{s.description}</p>
+                                                    <span className="item-author">Chủ đề: <strong>{s.topic}</strong> • APEC Challenge</span>
+                                                </div>
+                                            </div>
+                                            <div className="item-right">
+                                                {activeSet?._id === s._id ? (
+                                                    <span className="selected-badge"><CheckCircle2 size={16} /> Đang chọn</span>
+                                                ) : (
+                                                    <button className="btn-item-choose btn-item-weekly">Tranh tài</button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="picker-empty">Đang tải danh sách thử thách tuần...</div>
+                                )
+                            )}
+                        </div>
+
+                        <div className="set-picker-footer">
+                            <Link to="/library" className="link-to-library" onClick={() => setIsSetModalOpen(false)}>
+                                <BookOpen size={15} />
+                                <span>Khám phá thêm hàng trăm đề khác trong Thư viện cộng đồng</span>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,0 +1,898 @@
+/* ==========================================================================
+   EASYLEARN LEADERBOARD PAGE STYLING - CODEDEX MODERN GAMIFIED THEME
+   (Podium Vinh Quang, Tabs Tuần/All-Time, Đồng bộ Navbar hoàn toàn)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Light Theme */
+    --bg-page: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: #f1f5f9;
+    --bg-surface-hover: #e2e8f0;
+    --bg-glass: rgba(255, 255, 255, 0.88);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --text-inverse: #ffffff;
+
+    --border-subtle: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --border-focus: #3b82f6;
+
+    --accent-gold: #f59e0b;
+    --accent-gold-hover: #d97706;
+    --accent-gold-shadow: #b45309;
+    --accent-gold-subtle: rgba(245, 158, 11, 0.12);
+
+    --accent-blue: #3b82f6;
+    --accent-blue-hover: #2563eb;
+    --accent-blue-subtle: rgba(59, 130, 246, 0.1);
+
+    --accent-emerald: #10b981;
+    --accent-emerald-subtle: rgba(16, 185, 129, 0.1);
+
+    --accent-purple: #8b5cf6;
+    --accent-purple-subtle: rgba(139, 92, 246, 0.1);
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    --shadow-card-hover: 0 12px 24px -4px rgba(15, 23, 42, 0.12);
+
+    --transition-fast: 0.15s ease;
+    --transition-smooth: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] {
+    --bg-page: #070a13;
+    --bg-surface: #0e1424;
+    --bg-surface-elevated: #161f36;
+    --bg-surface-hover: #1f2b4a;
+    --bg-glass: rgba(14, 20, 36, 0.88);
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-inverse: #0f172a;
+
+    --border-subtle: #1e293b;
+    --border-strong: #334155;
+    --border-focus: #60a5fa;
+
+    --accent-gold: #f59e0b;
+    --accent-gold-hover: #fbbf24;
+    --accent-gold-shadow: #b45309;
+    --accent-gold-subtle: rgba(245, 158, 11, 0.18);
+
+    --accent-blue: #3b82f6;
+    --accent-blue-hover: #60a5fa;
+    --accent-blue-subtle: rgba(59, 130, 246, 0.16);
+
+    --accent-emerald: #10b981;
+    --accent-emerald-subtle: rgba(16, 185, 129, 0.16);
+
+    --accent-purple: #a855f7;
+    --accent-purple-subtle: rgba(168, 85, 247, 0.16);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.6);
+    --shadow-card-hover: 0 14px 28px rgba(0, 0, 0, 0.7);
+}
+
+/* --- 1. BASE LAYOUT --- */
+.leaderboard-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* --- 2. NAVBAR (ĐỒNG BỘ CHUẨN) --- */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background-color var(--transition-smooth), border-color var(--transition-smooth);
+}
+
+.nav-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.brand-coin {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-gold), #ea580c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+    transition: transform var(--transition-smooth);
+}
+
+.brand-logo:hover .brand-coin {
+    transform: rotate(15deg) scale(1.05);
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.nav-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    position: relative;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--text-primary);
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -18px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--accent-gold);
+    border-radius: 2px;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.theme-toggle-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background-color: var(--bg-surface);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-surface-elevated);
+    border-color: var(--border-strong);
+}
+
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-secondary-nav {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-secondary-nav:hover {
+    background-color: var(--bg-surface-elevated);
+    border-color: var(--border-strong);
+}
+
+.btn-primary-nav {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent-gold), #ea580c);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    transition: all var(--transition-fast);
+}
+
+.btn-primary-nav:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45);
+}
+
+/* User Account Dropdown */
+.teacher-account-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-username {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.user-avatar-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    overflow: hidden;
+}
+
+.user-avatar-img-nav {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.teacher-account-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 210px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    padding: 8px;
+    z-index: 100;
+}
+
+.teacher-account-menu:hover .teacher-account-dropdown {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.teacher-account-dropdown a,
+.teacher-account-dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--transition-fast);
+}
+
+.teacher-account-dropdown a:hover,
+.teacher-account-dropdown button:hover {
+    background: var(--bg-surface-elevated);
+    color: var(--text-primary);
+}
+
+.teacher-account-dropdown .logout-btn {
+    color: #ef4444;
+}
+
+/* --- 3. HERO SECTION LEADERBOARD --- */
+.leaderboard-hero {
+    position: relative;
+    padding: 48px 24px 32px 24px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.leaderboard-backdrop-glow {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(245, 158, 11, 0.16) 0%, rgba(59, 130, 246, 0.08) 50%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.leaderboard-header-content {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.leaderboard-pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(245, 158, 11, 0.14);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: var(--accent-gold);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.leaderboard-title {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text-primary);
+    margin: 0 0 12px 0;
+}
+
+.leaderboard-highlight {
+    background: linear-gradient(135deg, var(--accent-gold), #ea580c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.leaderboard-subtitle {
+    font-size: 15.5px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 28px 0;
+}
+
+/* TABS CHUYỂN ĐỔI TUẦN / TOÀN THỜI GIAN */
+.leaderboard-tabs {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 6px;
+    gap: 6px;
+    box-shadow: var(--shadow-sm);
+}
+
+.tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, var(--accent-gold), #ea580c);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+}
+
+.tab-btn.tab-weekly.active {
+    background: linear-gradient(135deg, #ef4444, #f59e0b);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+/* --- 4. KHUNG THỨ HẠNG CÁ NHÂN (YOUR RANK BANNER) --- */
+.user-rank-banner {
+    max-width: 960px;
+    margin: 0 auto 36px auto;
+    padding: 0 24px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.user-rank-card {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(245, 158, 11, 0.08));
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 16px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+}
+
+.user-rank-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.user-rank-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    overflow: hidden;
+    border: 2px solid #fff;
+    box-shadow: var(--shadow-sm);
+}
+
+.user-rank-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-rank-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.user-rank-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.rank-badge-pill {
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(245, 158, 11, 0.18);
+    color: var(--accent-gold);
+    font-weight: 800;
+}
+
+.score-badge-pill {
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-emerald);
+    font-weight: 800;
+}
+
+.btn-play-climb-rank {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent-gold), #ea580c);
+    border: none;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.btn-play-climb-rank:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+}
+
+/* --- 5. TOP 3 PODIUM (BỤC VINH QUANG) --- */
+.podium-container {
+    max-width: 860px;
+    margin: 0 auto 40px auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1.15fr 1fr;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.podium-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* Column 1: Quán quân (Vàng) */
+.podium-column.first-place {
+    order: 2;
+}
+
+/* Column 2: Á quân (Bạc) */
+.podium-column.second-place {
+    order: 1;
+}
+
+/* Column 3: Hạng 3 (Đồng) */
+.podium-column.third-place {
+    order: 3;
+}
+
+.podium-crown-icon {
+    font-size: 28px;
+    margin-bottom: -6px;
+    animation: bounceCrown 2s infinite;
+}
+
+@keyframes bounceCrown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.podium-avatar-wrapper {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.podium-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    overflow: hidden;
+    background: var(--bg-surface-elevated);
+    box-shadow: var(--shadow-md);
+}
+
+.first-place .podium-avatar {
+    width: 90px;
+    height: 90px;
+    font-size: 34px;
+    border: 3px solid #f59e0b;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.45);
+}
+
+.second-place .podium-avatar {
+    border: 3px solid #94a3b8;
+    box-shadow: 0 0 20px rgba(148, 163, 184, 0.35);
+}
+
+.third-place .podium-avatar {
+    border: 3px solid #d97706;
+    box-shadow: 0 0 20px rgba(217, 119, 6, 0.35);
+}
+
+.podium-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.podium-medal-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 2px solid var(--bg-surface);
+}
+
+.first-place .podium-medal-badge { background: #f59e0b; color: #fff; }
+.second-place .podium-medal-badge { background: #94a3b8; color: #fff; }
+.third-place .podium-medal-badge { background: #b45309; color: #fff; }
+
+.podium-user-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 4px;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.podium-user-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.first-place .podium-user-score {
+    background: rgba(245, 158, 11, 0.18);
+    color: var(--accent-gold);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.second-place .podium-user-score {
+    background: rgba(148, 163, 184, 0.18);
+    color: #64748b;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.third-place .podium-user-score {
+    background: rgba(217, 119, 6, 0.18);
+    color: #b45309;
+    border: 1px solid rgba(217, 119, 6, 0.4);
+}
+
+/* Khối trụ bục giảng */
+.podium-pedestal {
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 900;
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
+    box-shadow: var(--shadow-md);
+}
+
+.first-place .podium-pedestal {
+    height: 140px;
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0.05));
+    border-color: rgba(245, 158, 11, 0.4);
+    color: var(--accent-gold);
+}
+
+.second-place .podium-pedestal {
+    height: 105px;
+    background: linear-gradient(180deg, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.05));
+    border-color: rgba(148, 163, 184, 0.35);
+    color: #64748b;
+}
+
+.third-place .podium-pedestal {
+    height: 80px;
+    background: linear-gradient(180deg, rgba(217, 119, 6, 0.2), rgba(217, 119, 6, 0.05));
+    border-color: rgba(217, 119, 6, 0.35);
+    color: #b45309;
+}
+
+/* --- 6. DANH SÁCH THỨ HẠNG 4 TRỞ ĐI --- */
+.leaderboard-table-section {
+    max-width: 860px;
+    margin: 0 auto 60px auto;
+    padding: 0 24px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.leaderboard-card-container {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 80px 1fr 140px;
+    padding: 14px 20px;
+    background: var(--bg-surface-elevated);
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table-header-score {
+    text-align: right;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 140px;
+    padding: 14px 20px;
+    align-items: center;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background var(--transition-fast);
+}
+
+.table-row:last-child {
+    border-bottom: none;
+}
+
+.table-row:hover {
+    background: var(--bg-surface-elevated);
+}
+
+.table-row.is-current-user {
+    background: rgba(59, 130, 246, 0.08);
+    border-left: 3px solid var(--accent-blue);
+}
+
+.table-rank-number {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-muted);
+}
+
+.table-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.table-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+.table-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.table-user-names {
+    display: flex;
+    flex-direction: column;
+}
+
+.table-display-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.table-user-role {
+    font-size: 11.5px;
+    color: var(--text-muted);
+}
+
+.table-score-cell {
+    text-align: right;
+}
+
+.table-score-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.empty-leaderboard {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* --- 7. RESPONSIVE --- */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+
+    .leaderboard-title {
+        font-size: 28px;
+    }
+
+    .podium-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .podium-column.first-place { order: 1; }
+    .podium-column.second-place { order: 2; }
+    .podium-column.third-place { order: 3; }
+
+    .podium-pedestal {
+        display: none;
+    }
+
+    .user-rank-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-play-climb-rank {
+        justify-content: center;
+    }
+}
+

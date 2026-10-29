@@ -18,7 +18,11 @@ import {
     LogOut, 
     Play, 
     BookOpen,
-    Layers
+    Layers,
+    Flame,
+    Trophy,
+    Gamepad2,
+    Star
 } from 'lucide-react';
 
 const LibraryPage = () => {
@@ -31,6 +35,7 @@ const LibraryPage = () => {
         setActiveCategory,
         savedSets,
         filteredSets,
+        weeklySets,
         isLoading,
         schoolActionLabel,
         canDelete,
@@ -45,12 +50,13 @@ const LibraryPage = () => {
 
     const categories = [
         'Tất cả',
-        'Toán học',
+        'Toán',
         'Tiếng Anh',
-        'Hoá học',
         'Vật lý',
+        'Hoá học',
+        'Sinh học',
+        'Tiếng Việt',
         'Lịch sử',
-        'Tin học',
         'Khác'
     ];
 
@@ -162,12 +168,12 @@ const LibraryPage = () => {
                 <div className="library-header-content">
                     <div className="library-pill-badge">
                         <BookOpen size={14} />
-                        <span>Kho Tàng Đề Thi & Tri Thức</span>
+                        <span>Kho Tàng Đề Thi & Tri Thức Chuẩn Hóa</span>
                     </div>
 
-                    <h1 className="library-title">Thư Viện Câu Hỏi Cộng Đồng</h1>
+                    <h1 className="library-title">Thư Viện Câu Hỏi & Đề Thi Mẫu</h1>
                     <p className="library-subtitle">
-                        Nơi giáo viên và người học trên cả nước chia sẻ các bộ câu hỏi chọn lọc. Ôn luyện, lưu bộ đề yêu thích hoặc xuất tài liệu ôn thi.
+                        Khám phá các bộ câu hỏi chính thức do <strong>APEC Group</strong> biên soạn cùng các đề thi chia sẻ từ cộng đồng giáo viên và học sinh toàn quốc.
                     </p>
 
                     {/* Thanh tìm kiếm & Nút Tạo đề */}
@@ -177,7 +183,7 @@ const LibraryPage = () => {
                             <input 
                                 type="text"
                                 className="library-search-input"
-                                placeholder="Tìm kiếm bộ câu hỏi theo tên, chủ đề hoặc mô tả..."
+                                placeholder="Tìm kiếm bộ câu hỏi theo tên môn học, chủ đề..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -217,12 +223,75 @@ const LibraryPage = () => {
                 </div>
             </section>
 
-            {/* 3. LƯỚI BỘ CÂU HỎI */}
+            {/* 3. HERO SECTION ĐẶC BIỆT: THỬ THÁCH TUẦN (WEEKLY CHALLENGES) */}
+            <section className="weekly-hero-section">
+                <div className="weekly-hero-container">
+                    <div className="weekly-hero-header">
+                        <div className="weekly-title-badge">
+                            <Flame size={16} className="weekly-flame-icon" />
+                            <span>SỰ KIỆN ĐẤU TRÍ TUẦN • TRANH TÀI BẢNG VÀNG</span>
+                        </div>
+                        <h2 className="weekly-hero-heading">
+                            Thử Thách Đấu Trí Hàng Tuần (Weekly Challenges)
+                        </h2>
+                        <p className="weekly-hero-desc">
+                            Chinh phục các bộ đề sự kiện tuần đặc biệt do APEC Group thiết kế để ghi danh lên Bảng Xếp Hạng Tuần và tranh tài cùng cộng đồng!
+                        </p>
+                    </div>
+
+                    <div className="weekly-cards-grid">
+                        {weeklySets.length > 0 ? (
+                            weeklySets.map((wSet) => (
+                                <div key={wSet._id} className="weekly-event-card">
+                                    <div className="weekly-card-banner">
+                                        <span className="weekly-number-badge">
+                                            ⚡ TUẦN {wSet.weekNumber || 1}
+                                        </span>
+                                        <span className="weekly-topic-pill">
+                                            {wSet.topic}
+                                        </span>
+                                    </div>
+                                    <h3 className="weekly-card-title">{wSet.title}</h3>
+                                    <p className="weekly-card-desc">{wSet.description}</p>
+                                    
+                                    <div className="weekly-card-footer">
+                                        <div className="weekly-author-tag">
+                                            <Sparkles size={13} />
+                                            <span>Biên soạn: <strong>APEC Group</strong></span>
+                                        </div>
+                                        <button 
+                                            className="btn-weekly-play"
+                                            onClick={() => navigate(`/game?setId=${wSet._id}`)}
+                                        >
+                                            <Gamepad2 size={16} />
+                                            <span>Tranh tài ngay</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="weekly-loading-card">
+                                <span>Đang chuẩn bị các thử thách tuần mới...</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            {/* 4. LƯỚI TẤT CẢ BỘ CÂU HỎI (BỘ ĐỀ CHÍNH THỨC APEC GROUP Ở ĐẦU) */}
             <main className="library-main-content">
                 <div className="library-meta-bar">
-                    <span className="library-count-text">
-                        Hiển thị <strong>{filteredSets.length}</strong> bộ câu hỏi công khai
-                    </span>
+                    <div className="meta-bar-left">
+                        <span className="library-count-text">
+                            Hiển thị <strong>{filteredSets.length}</strong> bộ câu hỏi trong thư viện
+                        </span>
+                    </div>
+                    <div className="meta-bar-right">
+                        <Link to="/leaderboard" className="link-meta-leaderboard">
+                            <Trophy size={15} />
+                            <span>Xem Bảng Xếp Hạng</span>
+                        </Link>
+                    </div>
                 </div>
 
                 {isLoading ? (
@@ -253,14 +322,30 @@ const LibraryPage = () => {
                         {filteredSets.map((qSet) => {
                             const isSaved = savedSets.includes(qSet._id);
                             const topicClass = getTopicBadgeClass(qSet.topic);
+                            const isApecOfficial = qSet.isDefault || qSet.authorName === 'APEC Group' || qSet.owner?.username === 'APEC Group';
 
                             return (
-                                <div key={qSet._id} className="set-card">
+                                <div 
+                                    key={qSet._id} 
+                                    className={`set-card ${isApecOfficial ? 'card-official-apec' : ''} ${qSet.isWeekly ? 'card-weekly-event' : ''}`}
+                                >
                                     <div>
                                         <div className="set-card-header">
-                                            <span className={`set-topic-badge ${topicClass}`}>
-                                                {qSet.topic || 'Khác'}
-                                            </span>
+                                            <div className="badge-group-header">
+                                                {isApecOfficial && (
+                                                    <span className="official-apec-badge">
+                                                        <Star size={11} fill="currentColor" /> CHÍNH THỨC • APEC GROUP
+                                                    </span>
+                                                )}
+                                                {qSet.isWeekly && (
+                                                    <span className="weekly-apec-badge">
+                                                        <Flame size={11} /> SỰ KIỆN TUẦN {qSet.weekNumber || ''}
+                                                    </span>
+                                                )}
+                                                <span className={`set-topic-badge ${topicClass}`}>
+                                                    {qSet.topic || 'Khác'}
+                                                </span>
+                                            </div>
 
                                             {canDelete(qSet.owner?._id || qSet.owner) && (
                                                 <button 
@@ -286,11 +371,11 @@ const LibraryPage = () => {
                                         </p>
 
                                         <div className="set-card-author">
-                                            <div className="author-avatar">
-                                                {(qSet.owner?.username || 'A').charAt(0).toUpperCase()}
+                                            <div className={`author-avatar ${isApecOfficial ? 'author-avatar-apec' : ''}`}>
+                                                {isApecOfficial ? '⭐' : (qSet.owner?.username || 'A').charAt(0).toUpperCase()}
                                             </div>
                                             <span className="author-name">
-                                                Tác giả: <strong>{qSet.owner?.username || "Ẩn danh"}</strong>
+                                                Tác giả: <strong>{isApecOfficial ? 'APEC Group' : (qSet.owner?.displayName || qSet.owner?.username || 'Ẩn danh')}</strong>
                                             </span>
                                         </div>
                                     </div>
@@ -317,12 +402,12 @@ const LibraryPage = () => {
                                             </button>
 
                                             <button 
-                                                className="btn-card-icon"
-                                                onClick={() => navigate(`/set/${qSet._id}`)}
-                                                title="Xem danh sách câu hỏi"
+                                                className="btn-card-icon btn-card-play-now"
+                                                onClick={() => navigate(`/game?setId=${qSet._id}`)}
+                                                title="Chơi ngay bộ đề này trong game"
                                             >
                                                 <Play size={13} fill="currentColor" />
-                                                <span>Xem bộ</span>
+                                                <span>Chơi ngay</span>
                                             </button>
                                         </div>
 
