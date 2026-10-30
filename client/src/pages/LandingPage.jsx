@@ -18,7 +18,7 @@ import {
     Flame, 
     Shield, 
     Zap, 
-    Award, 
+ 
     CheckCircle2, 
     GraduationCap, 
     Star, 
@@ -253,121 +253,76 @@ const LandingPage = () => {
             {/* 2. HERO SECTION - HÀNH TRÌNH CHINH PHỤC TRI THỨC */}
             <section className="hero-section">
                 <div className="hero-backdrop-glow"></div>
-                <div className="hero-content">
-                    <div className="hero-pill-badge">
-                        <Sparkles size={15} className="sparkle-icon" />
-                        <span>Hành trình học tập tương tác & trò chơi hoá</span>
-                    </div>
 
-                    <h1 className="hero-title">
-                        Khởi Đầu Chuyến Phiêu Lưu <br />
-                        <span className="hero-highlight">Chinh Phục Tri Thức</span>
-                    </h1>
-
-                    <p className="hero-subtitle">
-                        Phương pháp ôn luyện và làm trắc nghiệm cuốn hút nhất. Vừa chơi game, vừa tích lũy điểm kinh nghiệm, mở khóa huy hiệu và thăng tiến cùng bạn bè trong lớp học!
-                    </p>
-
-                    <div className="hero-actions">
-                        <button className="btn-codedex-primary" onClick={() => navigate(user ? '/game' : '/login?mode=register')}>
-                            <Gamepad2 size={20} />
-                            <span>Bắt đầu chơi ngay</span>
-                        </button>
-                        <button className="btn-codedex-secondary" onClick={() => navigate('/register/teacher')}>
-                            <GraduationCap size={20} />
-                            <span>Dành cho Giáo viên</span>
-                        </button>
-                    </div>
-
-                    {/* Banner hiển thị thẻ Game Quest giả lập tương tác */}
-                    <div className="hero-stage-card">
-                        <div className="stage-card-header">
-                            <div className="stage-dots">
-                                <span className="dot dot-red"></span>
-                                <span className="dot dot-yellow"></span>
-                                <span className="dot dot-green"></span>
-                            </div>
-                            <span className="stage-title">MÀN ĐẤU TRÍ TRỰC QUAN • CẤP ĐỘ 1-1</span>
-                            <div className="stage-xp-tag">+100 XP</div>
+                {/* HERO BANNER - BỐ CỤC KHÔNG KHUNG VỚI BACKGROUND ARTWORK MỚI */}
+                <div className="hero-banner-wrap">
+                    <div className="hero-text-content">
+                        <div className="hero-pill-badge">
+                            <Sparkles size={15} className="sparkle-icon" />
+                            <span>Hành trình học tập tương tác & trò chơi hoá</span>
                         </div>
-                        <div className="stage-card-body">
-                            <div className="stage-left">
-                                <div className="character-display">
-                                    <div className="avatar-circle">
-                                        <Compass size={28} />
-                                    </div>
-                                    <div className="character-info">
-                                        <h4>Nhà Thám Hiểm Tri Thức</h4>
-                                        <div className="xp-bar-wrapper">
-                                            <div className="xp-bar-fill" style={{ width: '70%' }}></div>
-                                        </div>
-                                        <span className="xp-text">700 / 1000 XP (Cấp 5)</span>
-                                    </div>
+
+                        <h1 className="hero-title">
+                            Khởi Đầu Chuyến Phiêu Lưu <br />
+                            <span className="hero-highlight">Chinh Phục Tri Thức</span>
+                        </h1>
+
+                        <p className="hero-subtitle">
+                            Phương pháp ôn luyện và làm trắc nghiệm cuốn hút nhất. Vừa chơi game, vừa tích lũy điểm kinh nghiệm, mở khóa huy hiệu và thăng tiến cùng bạn bè trong lớp học!
+                        </p>
+
+                        <div className="hero-actions">
+                            <button className="btn-codedex-primary" onClick={() => navigate(user ? '/game' : '/login?mode=register')}>
+                                <Gamepad2 size={20} />
+                                <span>Bắt đầu chơi ngay</span>
+                            </button>
+                            <button className="btn-codedex-secondary" onClick={() => navigate('/register/teacher')}>
+                                <GraduationCap size={20} />
+                                <span>Dành cho Giáo viên</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* KHU VỰC THỬ THÁCH TUẦN TRONG HERO (WEEKLY QUESTION SETS) */}
+                <div className="hero-weekly-section">
+                    <div className="hero-weekly-header">
+                        <div className="hero-weekly-left">
+                            <div className="hero-weekly-badge">
+                                <Flame size={15} className="hero-flame-icon" />
+                                <span>SỰ KIỆN TUẦN • ĐẤU TRÍ TRANH TÀI</span>
+                            </div>
+                            <h3 className="hero-weekly-heading">Thử Thách Đấu Trí Hàng Tuần (Weekly Challenge)</h3>
+                        </div>
+                        <Link to="/leaderboard" className="hero-weekly-link">
+                            <Trophy size={15} />
+                            <span>Xem Bảng Xếp Hạng Tuần</span>
+                            <ArrowRight size={14} />
+                        </Link>
+                    </div>
+
+                    <div className="hero-weekly-grid">
+                        {(weeklySets.length > 0 ? weeklySets : [
+                            { _id: 'w1', weekNumber: 1, title: 'Vũ Trụ Bí Ẩn & Khoa Học Không Gian', topic: 'Thiên văn học', description: 'Khám phá bí ẩn hệ mặt trời, lỗ đen và các hành tinh xa xôi.' },
+                            { _id: 'w2', weekNumber: 2, title: 'Bí Ẩn Đại Dương & Đa Dạng Sinh Thái', topic: 'Sinh thái học', description: 'Du hành xuống đáy vực sâu ngàn mét và rạn san hô kỳ thú.' },
+                            { _id: 'w3', weekNumber: 3, title: 'Đấu Trí Trí Tuệ Nhân Tạo & Cách Mạng 4.0', topic: 'Công nghệ', description: 'Thử tài tư duy thuật toán, AI, robot và công nghệ tương lai.' }
+                        ]).map((w) => (
+                            <div key={w._id} className="hero-weekly-card" onClick={() => navigate(w._id ? `/game?setId=${w._id}` : '/game')}>
+                                <div className="hero-weekly-card-top">
+                                    <span className="hero-weekly-tag">⚡ TUẦN {w.weekNumber}</span>
+                                    <span className="hero-weekly-topic">{w.topic}</span>
                                 </div>
-                                <p className="stage-mission">
-                                    Nhiệm vụ: Hoàn thành 10 câu hỏi thử thách để phá khóa rương báu vật phẩm học tập!
-                                </p>
-                            </div>
-                            <div className="stage-right">
-                                <button className="btn-stage-play" onClick={() => navigate('/game')}>
-                                    <Play size={18} fill="currentColor" />
-                                    <span>Vào Chơi Game</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* KHU VỰC THỬ THÁCH TUẦN TRONG HERO (WEEKLY QUESTION SETS) */}
-                    <div className="hero-weekly-section">
-                        <div className="hero-weekly-header">
-                            <div className="hero-weekly-left">
-                                <div className="hero-weekly-badge">
-                                    <Flame size={15} className="hero-flame-icon" />
-                                    <span>SỰ KIỆN TUẦN • ĐẤU TRÍ TRANH TÀI</span>
+                                <h4 className="hero-weekly-card-title">{w.title}</h4>
+                                <p className="hero-weekly-card-desc">{w.description}</p>
+                                <div className="hero-weekly-card-footer">
+                                    <span className="hero-weekly-author">APEC Group</span>
+                                    <button className="btn-hero-weekly-play">
+                                        <Play size={13} fill="currentColor" />
+                                        <span>Tranh tài</span>
+                                    </button>
                                 </div>
-                                <h3 className="hero-weekly-heading">Thử Thách Đấu Trí Hàng Tuần (Weekly Challenge)</h3>
                             </div>
-                            <Link to="/leaderboard" className="hero-weekly-link">
-                                <Trophy size={15} />
-                                <span>Xem Bảng Xếp Hạng Tuần</span>
-                                <ArrowRight size={14} />
-                            </Link>
-                        </div>
-
-                        <div className="hero-weekly-grid">
-                            {(weeklySets.length > 0 ? weeklySets : [
-                                { _id: 'w1', weekNumber: 1, title: 'Vũ Trụ Bí Ẩn & Khoa Học Không Gian', topic: 'Thiên văn học', description: 'Khám phá bí ẩn hệ mặt trời, lỗ đen và các hành tinh xa xôi.' },
-                                { _id: 'w2', weekNumber: 2, title: 'Bí Ẩn Đại Dương & Đa Dạng Sinh Thái', topic: 'Sinh thái học', description: 'Du hành xuống đáy vực sâu ngàn mét và rạn san hô kỳ thú.' },
-                                { _id: 'w3', weekNumber: 3, title: 'Đấu Trí Trí Tuệ Nhân Tạo & Cách Mạng 4.0', topic: 'Công nghệ', description: 'Thử tài tư duy thuật toán, AI, robot và công nghệ tương lai.' }
-                            ]).map((w) => (
-                                <div key={w._id} className="hero-weekly-card" onClick={() => navigate(w._id ? `/game?setId=${w._id}` : '/game')}>
-                                    <div className="hero-weekly-card-top">
-                                        <span className="hero-weekly-tag">⚡ TUẦN {w.weekNumber}</span>
-                                        <span className="hero-weekly-topic">{w.topic}</span>
-                                    </div>
-                                    <h4 className="hero-weekly-card-title">{w.title}</h4>
-                                    <p className="hero-weekly-card-desc">{w.description}</p>
-                                    <div className="hero-weekly-card-footer">
-                                        <span className="hero-weekly-author">APEC Group</span>
-                                        <button className="btn-hero-weekly-play">
-                                            <Play size={13} fill="currentColor" />
-                                            <span>Tranh tài</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Social proof bar */}
-                    <div className="hero-trust-bar">
-                        <span className="trust-label">ĐỒNG HÀNH CÙNG</span>
-                        <div className="trust-items">
-                            <span className="trust-badge"><Shield size={14} /> 500+ Lớp học</span>
-                            <span className="trust-badge"><Users size={14} /> Cộng đồng Giáo viên</span>
-                            <span className="trust-badge"><Award size={14} /> Mini-LMS Chuẩn hóa</span>
-                            <span className="trust-badge"><Flame size={14} /> Đua Top Bảng Vàng</span>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </section>
