@@ -396,6 +396,63 @@ const defaultSubjectData = [
                 difficulty: 'easy'
             }
         ]
+    },
+    {
+        weekNumber: 4,
+        title: 'Thử Thách Tuần 04: Đấu Trường Logic & Toán Ứng Dụng',
+        topic: 'Toán học & Logic',
+        badge: 'Tuần 4 • Đấu trí đỉnh cao',
+        description: 'Sự kiện thi đấu tuần 4: Khám phá bí ẩn các con số, hình học không gian, dãy số Fibonacci và câu đố tư duy logic.',
+        questions: [
+            {
+                questionText: 'Số nguyên tố nhỏ nhất và cũng là số nguyên tố chẵn duy nhất là số nào?',
+                options: ['2', '0', '1', '3'],
+                correctAnswer: '2',
+                difficulty: 'easy'
+            },
+            {
+                questionText: 'Trong hình học phẳng Euclide, tổng số đo ba góc trong một tam giác luôn bằng bao nhiêu độ?',
+                options: ['180°', '90°', '360°', '270°'],
+                correctAnswer: '180°',
+                difficulty: 'easy'
+            },
+            {
+                questionText: 'Hằng số Pi (π) biểu thị tỉ số giữa chu vi hình tròn và đại lượng nào?',
+                options: ['Đường kính', 'Bán kính', 'Diện tích', 'Dây cung'],
+                correctAnswer: 'Đường kính',
+                difficulty: 'easy'
+            },
+            {
+                questionText: 'Định lý nổi tiếng nào phát biểu: "Trong tam giác vuông, bình phương cạnh huyền bằng tổng bình phương hai cạnh góc vuông"?',
+                options: ['Định lý Pythagoras', 'Định lý Thales', 'Định lý Fermat', 'Định lý Euclid'],
+                correctAnswer: 'Định lý Pythagoras',
+                difficulty: 'easy'
+            },
+            {
+                questionText: 'Dãy số 1, 1, 2, 3, 5, 8, 13, 21... được đặt theo tên của nhà toán học người Ý nào?',
+                options: ['Fibonacci (Leonardo da Pisa)', 'Blaise Pascal', 'Carl Friedrich Gauss', 'Leonhard Euler'],
+                correctAnswer: 'Fibonacci (Leonardo da Pisa)',
+                difficulty: 'medium'
+            },
+            {
+                questionText: 'Nhà toán học cổ đại nào đã thốt lên "Eureka!" khi phát hiện ra định luật về lực đẩy của chất lỏng?',
+                options: ['Archimedes (Ác-si-mét)', 'Aristotle', 'Socrates', 'Plato'],
+                correctAnswer: 'Archimedes (Ác-si-mét)',
+                difficulty: 'easy'
+            },
+            {
+                questionText: 'Nếu một khối lập phương có cạnh bằng 3 cm thì thể tích của nó bằng bao nhiêu cm³?',
+                options: ['27 cm³', '9 cm³', '18 cm³', '54 cm³'],
+                correctAnswer: '27 cm³',
+                difficulty: 'easy'
+            },
+            {
+                questionText: 'Góc lượng giác có số đo đúng bằng 90 độ được gọi là loại góc nào trong hình học?',
+                options: ['Góc vuông', 'Góc nhọn', 'Góc tù', 'Góc bẹt'],
+                correctAnswer: 'Góc vuông',
+                difficulty: 'easy'
+            }
+        ]
     }
 ];
 

@@ -27,6 +27,19 @@ export const LibraryPageLogic = () => {
     const [schoolMemberships, setSchoolMemberships] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Tự động nhận và đồng bộ từ khóa tìm kiếm khi chuyển hướng từ Landing Page
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const searchVal = params.get('search');
+        const catVal = params.get('category');
+        if (searchVal !== null) {
+            setSearchTerm(searchVal);
+        }
+        if (catVal !== null) {
+            setActiveCategory(catVal);
+        }
+    }, [location.search]);
+
     useEffect(() => {
         fetchLibrary();
         fetchWeeklySets();

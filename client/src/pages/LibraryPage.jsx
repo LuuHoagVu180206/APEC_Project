@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { LibraryPageLogic } from '../pages_logic/LibraryPageLogic';
 import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/LibraryPageStyling.css';
+import { getBentoIllustration } from '../components/BentoIllustration';
 import { 
     Sparkles, 
     Search, 
@@ -21,11 +22,29 @@ import {
     Layers,
     Flame,
     Trophy,
-    Gamepad2,
+    ArrowUpRight,
     Star
 } from 'lucide-react';
 
 const LibraryPage = () => {
+    const splitTitleLines = (title) => {
+        if (!title) return ['Sự Kiện Tuần'];
+        if (title.includes('&')) {
+            const parts = title.split('&');
+            return [parts[0].trim(), parts[1].trim()];
+        }
+        if (title.includes(' - ')) {
+            const parts = title.split(' - ');
+            return [parts[0].trim(), parts[1].trim()];
+        }
+        const words = title.split(' ');
+        if (words.length > 3) {
+            const mid = Math.ceil(words.length / 2);
+            return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+        }
+        return [title];
+    };
+
     const {
         navigate,
         currentUser,
@@ -239,41 +258,60 @@ const LibraryPage = () => {
                         </p>
                     </div>
 
-                    <div className="weekly-cards-grid">
-                        {weeklySets.length > 0 ? (
-                            weeklySets.map((wSet) => (
-                                <div key={wSet._id} className="weekly-event-card">
-                                    <div className="weekly-card-banner">
-                                        <span className="weekly-number-badge">
-                                            ⚡ TUẦN {wSet.weekNumber || 1}
-                                        </span>
-                                        <span className="weekly-topic-pill">
-                                            {wSet.topic}
-                                        </span>
+                    <div className="hero-weekly-bento-grid">
+                        {(weeklySets.length > 0 ? weeklySets : [
+                            { _id: 'w1', weekNumber: 1, title: 'Vũ Trụ Bí Ẩn & Khoa Học Không Gian', topic: 'Thiên văn học' },
+                            { _id: 'w2', weekNumber: 2, title: 'Bí Ẩn Đại Dương & Đa Dạng Sinh Thái', topic: 'Sinh thái học' },
+                            { _id: 'w3', weekNumber: 3, title: 'Đấu Trí Trí Tuệ Nhân Tạo & Cách Mạng 4.0', topic: 'Công nghệ' },
+                            { _id: 'w4', weekNumber: 4, title: 'Đấu Trường Logic & Toán Ứng Dụng', topic: 'Toán học & Logic' }
+                        ]).map((wSet, index) => {
+                            const variants = ['light', 'blue', 'dark', 'light', 'blue', 'dark'];
+                            const variant = variants[index % variants.length];
+
+                            return (
+                                <div 
+                                    key={wSet._id || index} 
+                                    className={`hero-bento-card variant-${variant}`}
+                                    onClick={() => navigate(wSet._id && !wSet._id.startsWith('w') ? `/set/${wSet._id}` : `/game?setId=${wSet._id}`)}
+                                >
+                                    <div className="bento-card-top">
+                                        <span className="bento-card-tag">{wSet.topic || 'Sự kiện'}</span>
+                                        <span className="bento-card-topic">{wSet.questions?.length ? `${wSet.questions.length} câu hỏi` : '8 câu hỏi'}</span>
                                     </div>
-                                    <h3 className="weekly-card-title">{wSet.title}</h3>
-                                    <p className="weekly-card-desc">{wSet.description}</p>
-                                    
-                                    <div className="weekly-card-footer">
-                                        <div className="weekly-author-tag">
-                                            <Sparkles size={13} />
-                                            <span>Biên soạn: <strong>APEC Group</strong></span>
-                                        </div>
+
+                                    <div className="bento-title-wrapper">
+                                        <h3 className="bento-title-group">
+                                            {splitTitleLines(wSet.title).map((line, lIdx) => (
+                                                <span key={lIdx} className="bento-title-highlight">
+                                                    {line}
+                                                </span>
+                                            ))}
+                                        </h3>
+                                    </div>
+
+                                    <div className="bento-art-container">
+                                        {getBentoIllustration(wSet.topic, index, variant)}
+                                    </div>
+
+                                    <div className="bento-cta-wrapper">
                                         <button 
-                                            className="btn-weekly-play"
-                                            onClick={() => navigate(`/game?setId=${wSet._id}`)}
+                                            type="button" 
+                                            className="btn-bento-play-now"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(wSet._id ? `/game?setId=${wSet._id}` : '/game');
+                                            }}
+                                            title="Luyện tập ngay"
                                         >
-                                            <Gamepad2 size={16} />
-                                            <span>Tranh tài ngay</span>
+                                            <div className="bento-cta-circle">
+                                                <ArrowUpRight size={17} strokeWidth={2.5} />
+                                            </div>
+                                            <span className="bento-cta-label">Luyện tập</span>
                                         </button>
                                     </div>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="weekly-loading-card">
-                                <span>Đang chuẩn bị các thử thách tuần mới...</span>
-                            </div>
-                        )}
+                            );
+                        })}
                     </div>
                 </div>
             </section>

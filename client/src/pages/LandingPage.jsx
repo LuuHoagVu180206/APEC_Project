@@ -8,25 +8,41 @@ import {
     Sparkles, 
     Gamepad2, 
     Trophy, 
-    BookOpen, 
     Users, 
     ArrowRight, 
+    ArrowUpRight, 
     Sun, 
     Moon, 
     LogOut, 
-    Compass, 
-    Flame, 
-    Shield, 
-    Zap, 
- 
     CheckCircle2, 
     GraduationCap, 
-    Star, 
-    Play, 
-    BarChart2, 
-    FolderPlus,
-    Layers
+    FolderPlus, 
+    X 
 } from 'lucide-react';
+import { getBentoIllustration } from '../components/BentoIllustration';
+import toanImg from '../assets/Toan.png';
+import vatLiImg from '../assets/VatLi.png';
+import hoaHocImg from '../assets/HoaHoc.png';
+import sinhHocImg from '../assets/SinhHoc.png';
+import tiengAnhImg from '../assets/TiengAnh.png';
+import tiengVietImg from '../assets/TiengViet.png';
+import lichSuImg from '../assets/LichSu.png';
+import gameLearningMapImg from '../assets/collage_updated_water_scene.png';
+
+
+
+// Hàm lấy hình ảnh minh họa tương ứng từ assets
+const getSubjectAsset = (topic) => {
+    const t = (topic || '').toLowerCase();
+    if (t.includes('toán') || t.includes('math')) return toanImg;
+    if (t.includes('vật lý') || t.includes('vật lí') || t.includes('lý') || t.includes('physics')) return vatLiImg;
+    if (t.includes('hóa') || t.includes('hoá') || t.includes('chemistry')) return hoaHocImg;
+    if (t.includes('sinh') || t.includes('biology')) return sinhHocImg;
+    if (t.includes('anh') || t.includes('english')) return tiengAnhImg;
+    if (t.includes('việt') || t.includes('văn') || t.includes('literature')) return tiengVietImg;
+    if (t.includes('sử') || t.includes('history')) return lichSuImg;
+    return toanImg;
+};
 
 const LandingPage = () => {
     const {
@@ -35,11 +51,6 @@ const LandingPage = () => {
         toggleTheme,
         searchDev,
         setSearchDev,
-
-
-        selectedCategory,
-        setSelectedCategory,
-        handleSearch
     } = LandingPageLogic();
 
     const [user, setUser] = useState(() => {
@@ -52,6 +63,24 @@ const LandingPage = () => {
     });
     const [schoolMemberships, setSchoolMemberships] = useState([]);
     const [weeklySets, setWeeklySets] = useState([]);
+
+    const splitTitleLines = (title) => {
+        if (!title) return ['Sự Kiện Tuần'];
+        if (title.includes('&')) {
+            const parts = title.split('&');
+            return [parts[0].trim(), parts[1].trim()];
+        }
+        if (title.includes(' - ')) {
+            const parts = title.split(' - ');
+            return [parts[0].trim(), parts[1].trim()];
+        }
+        const words = title.split(' ');
+        if (words.length > 3) {
+            const mid = Math.ceil(words.length / 2);
+            return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+        }
+        return [title];
+    };
 
     useEffect(() => {
         axios.get('http://localhost:5000/api/sets/weekly')
@@ -79,84 +108,116 @@ const LandingPage = () => {
         navigate('/');
     };
 
-    // Danh sách bộ câu hỏi mẫu hiển thị dạng card phong cách Codédex hiện đại
-    const sampleQuestionSets = [
+    // 7 Bộ câu hỏi chính thức (Default) của APEC Group làm fallback
+    const defaultApecQuestionSets = [
         {
-            id: 'set-1',
-            category: 'Toán học',
-            title: 'Đại số Tuyến tính & Ma trận',
-            desc: 'Chinh phục hệ phương trình, ma trận không gian và định thức qua các câu đố tư duy logic.',
-            difficulty: 'Cơ bản',
-            questionsCount: 20,
-            xp: '+100 XP',
-            iconType: 'math',
-            badgeColor: 'emerald'
+            _id: 'def-toan',
+            title: 'Đại Số & Hình Học Đột Phá - APEC Group',
+            topic: 'Toán',
+            description: 'Bộ đề Toán học chuẩn mực do APEC Group biên soạn: rèn luyện tư duy logic, hàm số, giải tích và hình học không gian.',
+            questionsCount: 10,
+            badge: 'APEC Official',
+            likesCount: 99,
+            isDefault: true,
+            authorName: 'APEC Group'
         },
         {
-            id: 'set-2',
-            category: 'Tiếng Anh',
-            title: 'Tổng ôn THPT Quốc Gia & Từ vựng',
-            desc: 'Nắm vững ngữ pháp cốt lõi, phrasal verbs và ngữ cảnh giao tiếp để bứt phá điểm số.',
-            difficulty: 'Trung bình',
-            questionsCount: 30,
-            xp: '+150 XP',
-            iconType: 'english',
-            badgeColor: 'blue'
+            _id: 'def-ly',
+            title: 'Vật Lý Đại Cương & Vũ Trụ Ứng Dụng - APEC Group',
+            topic: 'Vật lý',
+            description: 'Tổng hợp các quy luật cơ học Newton, nhiệt học, quang học và sóng âm kỳ thú do APEC Group xây dựng.',
+            questionsCount: 10,
+            badge: 'APEC Official',
+            likesCount: 99,
+            isDefault: true,
+            authorName: 'APEC Group'
         },
         {
-            id: 'set-3',
-            category: 'Hoá học',
-            title: 'Hóa Học Hữu Cơ & Phòng Thí Nghiệm',
-            desc: 'Giải mã liên kết cacbon, phản ứng este hóa và chuỗi thí nghiệm giả kim kỳ thú.',
-            difficulty: 'Thử thách',
-            questionsCount: 25,
-            xp: '+200 XP',
-            iconType: 'chemistry',
-            badgeColor: 'purple'
+            _id: 'def-hoa',
+            title: 'Hóa Học Kỳ Thú & Thế Giới Nguyên Tử - APEC Group',
+            topic: 'Hoá học',
+            description: 'Chinh phục bảng tuần hoàn Men-đê-lê-ép, phản ứng este hoá và hoá học hữu cơ cùng APEC Group.',
+            questionsCount: 10,
+            badge: 'APEC Official',
+            likesCount: 99,
+            isDefault: true,
+            authorName: 'APEC Group'
         },
         {
-            id: 'set-4',
-            category: 'Vật lý',
-            title: 'Cơ học Cổ điển & Động lực học',
-            desc: 'Khám phá các định luật chuyển động Newton, thế năng và quy luật va chạm trong vũ trụ.',
-            difficulty: 'Cơ bản',
-            questionsCount: 18,
-            xp: '+90 XP',
-            iconType: 'physics',
-            badgeColor: 'emerald'
+            _id: 'def-sinh',
+            title: 'Sinh Học & Bí Ẩn Thế Giới Sống - APEC Group',
+            topic: 'Sinh học',
+            description: 'Khám phá thế giới tế bào, ADN di truyền, cơ thể người và hệ sinh thái đa dạng do APEC Group tuyển chọn.',
+            questionsCount: 10,
+            badge: 'APEC Official',
+            likesCount: 99,
+            isDefault: true,
+            authorName: 'APEC Group'
         },
         {
-            id: 'set-5',
-            category: 'Lịch sử',
-            title: 'Dấu ấn Kỷ nguyên Đại Việt',
-            desc: 'Du hành thời gian qua các triều đại lịch sử hào hùng cùng hệ thống tư liệu và câu đố sinh động.',
-            difficulty: 'Trung bình',
-            questionsCount: 22,
-            xp: '+120 XP',
-            iconType: 'history',
-            badgeColor: 'blue'
+            _id: 'def-tienganh',
+            title: 'Tiếng Anh Chuẩn Quốc Tế & Giao Tiếp - APEC Group',
+            topic: 'Tiếng Anh',
+            description: 'Luyện phản xạ từ vựng, ngữ pháp cốt lõi và thành ngữ tiếng Anh thông dụng cùng APEC Group.',
+            questionsCount: 10,
+            badge: 'APEC Official',
+            likesCount: 99,
+            isDefault: true,
+            authorName: 'APEC Group'
         },
         {
-            id: 'set-6',
-            category: 'Tin học',
-            title: 'Tư duy Thuật toán & Cấu trúc Dữ liệu',
-            desc: 'Rèn luyện tư duy lập trình từ các thuật toán sắp xếp, ngăn xếp đến cấu trúc cây phân nhánh.',
-            difficulty: 'Thử thách',
-            questionsCount: 20,
-            xp: '+180 XP',
-            iconType: 'tech',
-            badgeColor: 'purple'
+            _id: 'def-tiengviet',
+            title: 'Tiếng Việt & Tinh Hoa Văn Học Dân Tộc - APEC Group',
+            topic: 'Tiếng Việt',
+            description: 'Tổng hợp vẻ đẹp ca dao, thành ngữ, biện pháp tu từ và tác phẩm văn học Việt Nam do APEC Group xây dựng.',
+            questionsCount: 10,
+            badge: 'APEC Official',
+            likesCount: 99,
+            isDefault: true,
+            authorName: 'APEC Group'
+        },
+        {
+            _id: 'def-su',
+            title: 'Lịch Sử Dân Tộc & Những Trang Sử Hào Hùng - APEC Group',
+            topic: 'Lịch sử',
+            description: 'Hành trình qua các thời khắc lịch sử dựng nước và giữ nước oai hùng của dân tộc Việt Nam do APEC Group đúc kết.',
+            questionsCount: 10,
+            badge: 'APEC Official',
+            likesCount: 99,
+            isDefault: true,
+            authorName: 'APEC Group'
         }
     ];
 
-    // Lọc bộ câu hỏi theo tab đang chọn và từ khóa tìm kiếm
-    const filteredSets = sampleQuestionSets.filter((item) => {
-        const matchesCategory = selectedCategory === 'Tất cả' || item.category.toLowerCase().includes(selectedCategory.toLowerCase());
-        const matchesSearch = !searchDev || item.title.toLowerCase().includes(searchDev.toLowerCase()) || item.desc.toLowerCase().includes(searchDev.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    // Danh sách toàn bộ các bộ câu hỏi đồng bộ với Database / Thư viện
+    const [publicQuestionSets, setPublicQuestionSets] = useState(defaultApecQuestionSets);
 
-    const categoryList = ['Tất cả', 'Toán học', 'Tiếng Anh', 'Hoá học', 'Vật lý', 'Lịch sử', 'Tin học'];
+    // Lấy bộ đề chuẩn từ Database (defaults hoặc library)
+    useEffect(() => {
+        axios.get('http://localhost:5000/api/sets/defaults')
+            .then(res => {
+                if (res.data && res.data.length > 0) {
+                    setPublicQuestionSets(res.data);
+                } else {
+                    axios.get('http://localhost:5000/api/sets/library')
+                        .then(resLib => {
+                            if (resLib.data && resLib.data.length > 0) {
+                                setPublicQuestionSets(resLib.data.slice(0, 7));
+                            }
+                        })
+                        .catch(() => {});
+                }
+            })
+            .catch(() => {
+                axios.get('http://localhost:5000/api/sets/library')
+                    .then(resLib => {
+                        if (resLib.data && resLib.data.length > 0) {
+                            setPublicQuestionSets(resLib.data.slice(0, 7));
+                        }
+                    })
+                    .catch(() => {});
+            });
+    }, []);
 
     return (
         <div className="landing-wrapper">
@@ -256,19 +317,15 @@ const LandingPage = () => {
 
                 {/* HERO BANNER - BỐ CỤC KHÔNG KHUNG VỚI BACKGROUND ARTWORK MỚI */}
                 <div className="hero-banner-wrap">
+                    <div className="hero-banner-inner">
                     <div className="hero-text-content">
-                        <div className="hero-pill-badge">
-                            <Sparkles size={15} className="sparkle-icon" />
-                            <span>Hành trình học tập tương tác & trò chơi hoá</span>
-                        </div>
-
                         <h1 className="hero-title">
-                            Khởi Đầu Chuyến Phiêu Lưu <br />
-                            <span className="hero-highlight">Chinh Phục Tri Thức</span>
+                            <span className="hero-title-main">KHỞI ĐẦU CHUYẾN PHIÊU LƯU</span>
+                            <span className="hero-highlight">CHINH PHỤC TRI THỨC</span>
                         </h1>
 
                         <p className="hero-subtitle">
-                            Phương pháp ôn luyện và làm trắc nghiệm cuốn hút nhất. Vừa chơi game, vừa tích lũy điểm kinh nghiệm, mở khóa huy hiệu và thăng tiến cùng bạn bè trong lớp học!
+                            Phương pháp ôn luyện và làm trắc nghiệm cuốn hút nhất. Vừa chơi game, vừa rèn luyện tư duy, mở khóa huy hiệu và đồng hành cùng bạn bè trong lớp học!
                         </p>
 
                         <div className="hero-actions">
@@ -284,14 +341,12 @@ const LandingPage = () => {
                     </div>
                 </div>
 
-                {/* KHU VỰC THỬ THÁCH TUẦN TRONG HERO (WEEKLY QUESTION SETS) */}
+                </div>
+
+                {/* KHU VỰC THỬ THÁCH TUẦN TRONG HERO (BENTO-GRID HIỆN ĐẠI THEO ẢNH MẪU) */}
                 <div className="hero-weekly-section">
                     <div className="hero-weekly-header">
                         <div className="hero-weekly-left">
-                            <div className="hero-weekly-badge">
-                                <Flame size={15} className="hero-flame-icon" />
-                                <span>SỰ KIỆN TUẦN • ĐẤU TRÍ TRANH TÀI</span>
-                            </div>
                             <h3 className="hero-weekly-heading">Thử Thách Đấu Trí Hàng Tuần (Weekly Challenge)</h3>
                         </div>
                         <Link to="/leaderboard" className="hero-weekly-link">
@@ -301,33 +356,65 @@ const LandingPage = () => {
                         </Link>
                     </div>
 
-                    <div className="hero-weekly-grid">
+                    <div className="hero-weekly-bento-grid">
                         {(weeklySets.length > 0 ? weeklySets : [
-                            { _id: 'w1', weekNumber: 1, title: 'Vũ Trụ Bí Ẩn & Khoa Học Không Gian', topic: 'Thiên văn học', description: 'Khám phá bí ẩn hệ mặt trời, lỗ đen và các hành tinh xa xôi.' },
-                            { _id: 'w2', weekNumber: 2, title: 'Bí Ẩn Đại Dương & Đa Dạng Sinh Thái', topic: 'Sinh thái học', description: 'Du hành xuống đáy vực sâu ngàn mét và rạn san hô kỳ thú.' },
-                            { _id: 'w3', weekNumber: 3, title: 'Đấu Trí Trí Tuệ Nhân Tạo & Cách Mạng 4.0', topic: 'Công nghệ', description: 'Thử tài tư duy thuật toán, AI, robot và công nghệ tương lai.' }
-                        ]).map((w) => (
-                            <div key={w._id} className="hero-weekly-card" onClick={() => navigate(w._id ? `/game?setId=${w._id}` : '/game')}>
-                                <div className="hero-weekly-card-top">
-                                    <span className="hero-weekly-tag">⚡ TUẦN {w.weekNumber}</span>
-                                    <span className="hero-weekly-topic">{w.topic}</span>
+                            { _id: 'w1', weekNumber: 1, title: 'Thử Thách Tuần 01: Vũ Trụ Bí Ẩn & Khoa Học Không Gian', topic: 'Thiên văn học', questionsCount: 8, authorName: 'APEC Group' },
+                            { _id: 'w2', weekNumber: 2, title: 'Thử Thách Tuần 02: Bí Ẩn Đại Dương & Đa Dạng Sinh Thái', topic: 'Khoa học Tự nhiên', questionsCount: 8, authorName: 'APEC Group' },
+                            { _id: 'w3', weekNumber: 3, title: 'Thử Thách Tuần 03: Đấu Trí Trí Tuệ Nhân Tạo & Cách Mạng 4.0', topic: 'Công nghệ AI', questionsCount: 8, authorName: 'APEC Group' },
+                            { _id: 'w4', weekNumber: 4, title: 'Thử Thách Tuần 04: Đấu Trường Logic & Toán Ứng Dụng', topic: 'Toán học & Logic', questionsCount: 8, authorName: 'APEC Group' }
+                        ]).map((w, index) => {
+                            const variants = ['light', 'blue', 'dark', 'light', 'blue', 'dark'];
+                            const variant = variants[index % variants.length];
+
+                            return (
+                                <div 
+                                    key={w._id || index} 
+                                    className={`hero-bento-card variant-${variant}`} 
+                                    onClick={() => navigate(w._id && !w._id.startsWith('w') ? `/set/${w._id}` : '/library')}
+                                >
+                                    <div className="bento-card-top">
+                                        <span className="bento-card-tag">{w.topic || 'Sự kiện'}</span>
+                                        <span className="bento-card-topic">{w.questions?.length ? `${w.questions.length} câu hỏi` : (w.authorName || 'APEC Group')}</span>
+                                    </div>
+
+                                    <div className="bento-title-wrapper">
+                                        <h4 className="bento-title-group">
+                                            {splitTitleLines(w.title).map((line, lIdx) => (
+                                                <span key={lIdx} className="bento-title-highlight">
+                                                    {line}
+                                                </span>
+                                            ))}
+                                        </h4>
+                                    </div>
+
+                                    <div className="bento-art-container">
+                                        {getBentoIllustration(w.topic, index, variant)}
+                                    </div>
+
+                                    <div className="bento-cta-wrapper">
+                                        <button 
+                                            type="button" 
+                                            className="btn-bento-play-now" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(w._id ? `/game?setId=${w._id}` : '/game');
+                                            }}
+                                            title="Luyện tập ngay"
+                                        >
+                                            <div className="bento-cta-circle">
+                                                <ArrowUpRight size={17} strokeWidth={2.5} />
+                                            </div>
+                                            <span className="bento-cta-label">Luyện tập</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <h4 className="hero-weekly-card-title">{w.title}</h4>
-                                <p className="hero-weekly-card-desc">{w.description}</p>
-                                <div className="hero-weekly-card-footer">
-                                    <span className="hero-weekly-author">APEC Group</span>
-                                    <button className="btn-hero-weekly-play">
-                                        <Play size={13} fill="currentColor" />
-                                        <span>Tranh tài</span>
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </section>
 
-            {/* 3. KHÁM PHÁ BỘ CÂU HỎI (CATALOG SECTION THEO BỐ CỤC CODEDEX) */}
+            {/* 3. KHÁM PHÁ BỘ CÂU HỎI (ĐỒNG BỘ CSDL & TÌM KIẾM TRUYỀN SANG THƯ VIỆN) */}
             <section className="catalog-section" id="catalog">
                 <div className="section-container">
                     <div className="section-header">
@@ -335,87 +422,116 @@ const LandingPage = () => {
                             Khám phá hàng trăm bộ câu hỏi tương tác miễn phí
                         </h2>
                         <p className="section-subtitle">
-                            Học tập và rèn luyện qua các bộ đề chất lượng cao được thiết kế bài bản theo từng chủ đề và cấp độ.
+                            Rèn luyện và tranh tài cùng cộng đồng qua các bộ đề chất lượng cao từ APEC Group và giáo viên trên cả nước.
                         </p>
                     </div>
 
-                    {/* Toolbar tìm kiếm & lọc category phong cách Codédex */}
+                    {/* Toolbar tìm kiếm chuyển tiếp sang thư viện (không cần popover lọc) */}
                     <div className="catalog-toolbar">
-                        <div className="search-box">
-                            <Search 
-                                size={18} 
-                                className="search-icon" 
-                                onClick={(e) => handleSearch(e, searchDev, selectedCategory)}
-                            />
-                            <input 
-                                type="text" 
-                                placeholder="Tìm kiếm bộ câu hỏi, chủ đề, môn học..." 
-                                value={searchDev}
-                                onChange={(e) => setSearchDev(e.target.value)}
-                                onKeyDown={(e) => handleSearch(e, searchDev, selectedCategory)}
-                            />
-                        </div>
-
-                        <div className="filter-pills">
-                            {categoryList.map((cat) => (
-                                <button 
-                                    key={cat}
-                                    className={`filter-pill ${selectedCategory === cat ? 'active' : ''}`}
-                                    onClick={() => setSelectedCategory(cat)}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
+                        <form 
+                            className="catalog-search-form"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                if (searchDev && searchDev.trim()) {
+                                    navigate(`/library?search=${encodeURIComponent(searchDev.trim())}`);
+                                } else {
+                                    navigate('/library');
+                                }
+                            }}
+                        >
+                            <div className="search-box">
+                                <Search size={18} className="search-icon" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Tìm kiếm bộ câu hỏi trong Thư viện..." 
+                                    value={searchDev}
+                                    onChange={(e) => setSearchDev(e.target.value)}
+                                />
+                                {searchDev && (
+                                    <button 
+                                        type="button" 
+                                        className="btn-clear-search-kw"
+                                        onClick={() => setSearchDev('')}
+                                        title="Xóa từ khóa"
+                                    >
+                                        <X size={15} />
+                                    </button>
+                                )}
+                            </div>
+                            <button type="submit" className="btn-catalog-search-submit">
+                                <Search size={16} />
+                                <span>Tìm kiếm trong Thư viện</span>
+                            </button>
+                        </form>
                     </div>
 
-                    {/* Lưới thẻ Quest Cards (2 hàng 3 cột) */}
-                    <div className="quest-grid">
-                        {filteredSets.length > 0 ? (
-                            filteredSets.map((item) => (
+                    {/* Lưới Bento-Grid Thẻ Bộ Câu Hỏi (đồng bộ UI thẻ giống Weekly Challenge) */}
+                    <div className="hero-weekly-bento-grid">
+                        {publicQuestionSets.map((item, index) => {
+                            const variants = ['light', 'blue', 'dark'];
+                            const variant = variants[index % variants.length];
+                            const author = item.authorName || item.owner?.displayName || item.owner?.username || 'APEC Group';
+                            const questionsCount = item.questions?.length ?? item.questionsCount ?? 10;
+
+                            return (
                                 <div 
-                                    key={item.id} 
-                                    className="quest-card"
-                                    onClick={() => navigate(`/library?search=${encodeURIComponent(item.title)}`)}
+                                    key={item._id || item.id || index} 
+                                    className={`hero-bento-card variant-${variant}`}
+                                    onClick={() => {
+                                        if (item._id && !item._id.startsWith('def-')) {
+                                            navigate(`/set/${item._id}`);
+                                        } else {
+                                            navigate(`/library?search=${encodeURIComponent(item.title)}`);
+                                        }
+                                    }}
                                 >
-                                    <div className={`quest-card-banner banner-${item.iconType}`}>
-                                        <div className="banner-icon-badge">
-                                            {item.iconType === 'math' && <BarChart2 size={24} />}
-                                            {item.iconType === 'english' && <BookOpen size={24} />}
-                                            {item.iconType === 'chemistry' && <Zap size={24} />}
-                                            {item.iconType === 'physics' && <Compass size={24} />}
-                                            {item.iconType === 'history' && <Shield size={24} />}
-                                            {item.iconType === 'tech' && <Layers size={24} />}
-                                        </div>
-                                        <span className="banner-xp-badge">{item.xp}</span>
+                                    {/* Metadata trên cùng: Topic badge & Số câu hỏi / Tác giả */}
+                                    <div className="bento-card-top">
+                                        <span className="bento-card-tag">{item.topic || 'Chủ đề'}</span>
+                                        <span className="bento-card-topic">{questionsCount} câu hỏi • {author}</span>
                                     </div>
 
-                                    <div className="quest-card-body">
-                                        <span className="quest-category">{item.category}</span>
-                                        <h3 className="quest-title">{item.title}</h3>
-                                        <p className="quest-desc">{item.desc}</p>
-                                        
-                                        <div className="quest-card-footer">
-                                            <div className={`difficulty-badge badge-${item.badgeColor}`}>
-                                                <Star size={13} fill="currentColor" />
-                                                <span>{item.difficulty}</span>
+                                    {/* Tiêu đề có hiệu ứng highlight */}
+                                    <div className="bento-title-wrapper">
+                                        <h4 className="bento-title-group">
+                                            {splitTitleLines(item.title).map((line, lIdx) => (
+                                                <span key={lIdx} className="bento-title-highlight">
+                                                    {line}
+                                                </span>
+                                            ))}
+                                        </h4>
+                                    </div>
+
+                                    {/* Hình ảnh minh họa môn học nhỏ gọn tại góc thẻ */}
+                                    <div className="bento-art-container">
+                                        <img 
+                                            src={getSubjectAsset(item.topic)} 
+                                            alt={item.topic || 'Minh họa'} 
+                                            className="bento-subject-asset-img"
+                                            loading="lazy"
+                                        />
+                                    </div>
+
+                                    {/* Nút Luyện tập riêng biệt (bấm vào là chơi ngay, không mở trang bộ câu hỏi) */}
+                                    <div className="bento-cta-wrapper">
+                                        <button 
+                                            type="button" 
+                                            className="btn-bento-play-now"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(item._id && !item._id.startsWith('def-') ? `/game?setId=${item._id}` : '/game');
+                                            }}
+                                            title="Luyện tập ngay"
+                                        >
+                                            <div className="bento-cta-circle">
+                                                <ArrowUpRight size={17} strokeWidth={2.5} />
                                             </div>
-                                            <span className="quest-meta-count">{item.questionsCount} câu hỏi</span>
-                                            <span className="quest-action-link">
-                                                Luyện tập <ArrowRight size={14} />
-                                            </span>
-                                        </div>
+                                            <span className="bento-cta-label">Luyện tập</span>
+                                        </button>
                                     </div>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="empty-catalog-message">
-                                <p>Không tìm thấy bộ câu hỏi nào phù hợp với từ khóa "{searchDev}".</p>
-                                <button className="btn-reset-filter" onClick={() => { setSearchDev(""); setSelectedCategory("Tất cả"); }}>
-                                    Đặt lại bộ lọc
-                                </button>
-                            </div>
-                        )}
+                            );
+                        })}
                     </div>
 
                     <div className="catalog-bottom-action">
@@ -427,218 +543,42 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* 4. BẢN ĐỒ THẾ GIỚI TRI THỨC & THỐNG KÊ (CODEDEX MAP SHOWCASE) */}
-            <section className="world-map-section">
-                <div className="section-container">
-                    <div className="section-header">
-                        <h2 className="section-title">
-                            Hành trình phiêu lưu qua thế giới tri thức
-                        </h2>
-                        <p className="section-subtitle">
-                            Mỗi môn học là một vùng đất mới cần khám phá: vượt qua các thử thách, thu thập điểm kinh nghiệm và thăng hạng nhân vật của bạn!
-                        </p>
-                    </div>
+            
 
-                    {/* Khung bản đồ phiêu lưu đồ họa hiện đại (Vector Island Nodes) */}
-                    <div className="world-map-showcase">
-                        <div className="map-canvas">
-                            <div className="island-node island-math">
-                                <div className="island-beacon"></div>
-                                <div className="island-badge">
-                                    <BarChart2 size={18} />
-                                    <span>Vương quốc Số Học</span>
-                                </div>
-                            </div>
-
-                            <div className="map-path path-1"></div>
-
-                            <div className="island-node island-languages">
-                                <div className="island-beacon"></div>
-                                <div className="island-badge">
-                                    <BookOpen size={18} />
-                                    <span>Quần đảo Ngôn Ngữ</span>
-                                </div>
-                            </div>
-
-                            <div className="map-path path-2"></div>
-
-                            <div className="island-node island-science">
-                                <div className="island-beacon active-beacon"></div>
-                                <div className="island-badge featured-island">
-                                    <Zap size={18} />
-                                    <span>Thung lũng Giả Kim</span>
-                                </div>
-                            </div>
-
-                            <div className="map-path path-3"></div>
-
-                            <div className="island-node island-history">
-                                <div className="island-beacon"></div>
-                                <div className="island-badge">
-                                    <Shield size={18} />
-                                    <span>Pháo đài Lịch Sử</span>
-                                </div>
-                            </div>
-
-                            <div className="map-path path-4"></div>
-
-                            <div className="island-node island-tech">
-                                <div className="island-beacon"></div>
-                                <div className="island-badge">
-                                    <Layers size={18} />
-                                    <span>Thành phố Thuật Toán</span>
-                                </div>
-                            </div>
-
-                            <div className="map-center-cta">
-                                <button className="btn-start-quest" onClick={() => navigate('/game')}>
-                                    <Play size={20} fill="currentColor" />
-                                    <span>Bắt đầu cuộc hành trình</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Thanh 4 thông số thống kê ấn tượng (Codédex Stats Bar) */}
-                    <div className="stats-counter-bar">
-                        <div className="stat-item">
-                            <h3 className="stat-number stat-yellow">10,000+</h3>
-                            <p className="stat-label">Học viên tham gia</p>
-                        </div>
-                        <div className="stat-item">
-                            <h3 className="stat-number stat-emerald">500+</h3>
-                            <p className="stat-label">Lớp học & Trường học</p>
-                        </div>
-                        <div className="stat-item">
-                            <h3 className="stat-number stat-blue">25,000+</h3>
-                            <p className="stat-label">Câu đố tương tác</p>
-                        </div>
-                        <div className="stat-item">
-                            <h3 className="stat-number stat-purple">98%</h3>
-                            <p className="stat-label">Tăng hứng thú học tập</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* 5. TÍNH NĂNG NỔI BẬT (Z-PATTERN FEATURE SPOTLIGHT - THEO CODEDEX) */}
+            {/* 5. TÍNH NĂNG NỔI BẬT (TRÒ CHƠI HÓA HỌC TẬP TƯƠNG TÁC) */}
             <section className="features-spotlight-section">
                 <div className="section-container">
-                    {/* Feature 1: Level up your learning */}
                     <div className="feature-row">
                         <div className="feature-visual">
-                            <div className="gamer-profile-card">
-                                <div className="gamer-header">
-                                    <div className="gamer-avatar">
-                                        <Trophy size={26} className="trophy-icon" />
-                                    </div>
-                                    <div className="gamer-details">
-                                        <h4 className="gamer-name">Alex Minh Triết</h4>
-                                        <span className="gamer-rank">Cấp độ 7 • Nhà Thám Hiểm</span>
-                                    </div>
-                                    <div className="gamer-level-badge">LVL 7</div>
-                                </div>
-
-                                <div className="gamer-xp-box">
-                                    <div className="xp-labels">
-                                        <span>Tiến trình thăng cấp</span>
-                                        <span className="xp-digits">1,450 / 2,000 XP</span>
-                                    </div>
-                                    <div className="xp-meter">
-                                        <div className="xp-meter-fill" style={{ width: '72%' }}></div>
-                                    </div>
-                                </div>
-
-                                <div className="gamer-badges-shelf">
-                                    <span className="shelf-title">Huy hiệu đã đạt được:</span>
-                                    <div className="shelf-badges">
-                                        <div className="shelf-badge" title="Chiến binh Đại số">📐 Số Học</div>
-                                        <div className="shelf-badge" title="Hiệp sĩ Ngữ pháp">📖 Ngữ Pháp</div>
-                                        <div className="shelf-badge" title="Chuỗi 7 ngày thắng">🔥 7 Days</div>
-                                        <div className="shelf-badge" title="Bậc thầy Tốc độ">⚡ Speed</div>
-                                    </div>
-                                </div>
+                            <div className="feature-game-showcase">
+                                <img 
+                                    src={gameLearningMapImg} 
+                                    alt="Bản đồ trò chơi học tập tương tác" 
+                                    className="feature-game-img" 
+                                />
                             </div>
                         </div>
 
                         <div className="feature-text">
-                            <span className="feature-eyebrow">THĂNG CẤP BÀI HỌC</span>
+                            <span className="feature-eyebrow">TRÒ CHƠI HÓA HỌC TẬP</span>
                             <h2 className="feature-heading">
-                                Học tập như chơi một tựa game nhập vai yêu thích
+                                Rèn luyện phản xạ với thế giới trò chơi học tập sinh động
                             </h2>
                             <p className="feature-description">
-                                Tạo dựng hồ sơ cá nhân, nhận điểm kinh nghiệm (XP) sau mỗi màn trả lời chính xác và mở khóa các huy hiệu vinh danh. Biến mỗi buổi ôn bài trở thành một chuỗi nhiệm vụ thú vị mà bạn muốn hoàn thành mỗi ngày!
+                                Biến những bài học trắc nghiệm truyền thống thành chuyến phiêu lưu khám phá đầy màu sắc. Học sinh tương tác trực tiếp với thế giới trò chơi, vượt qua các thử thách câu hỏi theo thời gian thực để rèn luyện phản xạ tư duy nhanh nhạy và ghi nhớ kiến thức tự nhiên, sâu sắc.
                             </p>
                             <ul className="feature-perks">
                                 <li>
                                     <CheckCircle2 size={18} className="perk-check" />
-                                    <span>Tích lũy XP và lên cấp nhân vật sau mỗi trận đấu quiz.</span>
+                                    <span>Khám phá các vùng đất tri thức với bản đồ tương tác và đồ họa pixel cuốn hút.</span>
                                 </li>
                                 <li>
                                     <CheckCircle2 size={18} className="perk-check" />
-                                    <span>Ghi tên trên Bảng xếp hạng tuần để tranh tài cùng cả lớp.</span>
+                                    <span>Rèn luyện tốc độ xử lý và phản xạ tư duy qua từng câu hỏi tương tác trực quan.</span>
                                 </li>
                                 <li>
                                     <CheckCircle2 size={18} className="perk-check" />
-                                    <span>Theo dõi lịch sử chơi và chuỗi phong độ ôn thi chi tiết.</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* Feature 2: Practice your chops */}
-                    <div className="feature-row reverse">
-                        <div className="feature-visual">
-                            <div className="interactive-quiz-preview">
-                                <div className="quiz-preview-header">
-                                    <span className="quiz-pill-category">TOÁN HỌC • CÂU HỎI #05</span>
-                                    <div className="quiz-reward-pill">+20 XP</div>
-                                </div>
-                                <h3 className="quiz-preview-question">
-                                    Nghiệm nguyên dương của phương trình 2x + 6 = 14 là bao nhiêu?
-                                </h3>
-                                <div className="quiz-options-list">
-                                    <div className="quiz-option">
-                                        <span className="opt-label">A</span>
-                                        <span className="opt-text">x = 2</span>
-                                    </div>
-                                    <div className="quiz-option correct-glow">
-                                        <span className="opt-label opt-label-correct">B</span>
-                                        <span className="opt-text">x = 4</span>
-                                        <span className="correct-tag">✓ Chính xác!</span>
-                                    </div>
-                                    <div className="quiz-option">
-                                        <span className="opt-label">C</span>
-                                        <span className="opt-text">x = 6</span>
-                                    </div>
-                                    <div className="quiz-option">
-                                        <span className="opt-label">D</span>
-                                        <span className="opt-text">x = 8</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="feature-text">
-                            <span className="feature-eyebrow">LUYỆN TẬP THỰC CHIẾN</span>
-                            <h2 className="feature-heading">
-                                Rèn luyện phản xạ với phản hồi trực quan tức thì
-                            </h2>
-                            <p className="feature-description">
-                                Không còn cảm giác làm đề thi khô khan hay căng thẳng. Từng câu hỏi trắc nghiệm đều được mô phỏng sinh động, đi kèm cơ chế chấm điểm và phân tích lập tức, giúp học sinh nhớ lâu và hiểu sâu bản chất vấn đề.
-                            </p>
-                            <ul className="feature-perks">
-                                <li>
-                                    <CheckCircle2 size={18} className="perk-check" />
-                                    <span>Đa dạng câu hỏi trắc nghiệm với thời gian bấm giờ kịch tính.</span>
-                                </li>
-                                <li>
-                                    <CheckCircle2 size={18} className="perk-check" />
-                                    <span>Phân tích đáp án rõ ràng ngay sau khi hoàn thành.</span>
-                                </li>
-                                <li>
-                                    <CheckCircle2 size={18} className="perk-check" />
-                                    <span>Lưu lại những câu hỏi hay vào bộ sưu tập cá nhân.</span>
+                                    <span>Nhận phản hồi đáp án và phân tích bài học rõ ràng ngay khi hoàn thành thử thách.</span>
                                 </li>
                             </ul>
                         </div>
