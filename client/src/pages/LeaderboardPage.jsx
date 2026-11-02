@@ -1,15 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { LeaderboardPageLogic } from '../pages_logic/LeaderboardPageLogic';
-import { useDarkMode } from '../pages_logic/useDarkMode';
+import Navbar from '../components/Navbar';
 import '../pages_styling/LeaderboardPageStyling.css';
 import { 
-    Sparkles, 
     Trophy, 
     Flame, 
-    Sun, 
-    Moon, 
-    LogOut, 
     Crown, 
     Medal, 
     ArrowRight, 
@@ -30,13 +26,8 @@ const LeaderboardPage = () => {
         thirdPlace,
         remainingLeaders,
         userRank,
-        currentScore,
-        schoolActionLabel,
-        handleLogout,
-        navigate
+        currentScore
     } = LeaderboardPageLogic();
-
-    const { isDark, toggleTheme } = useDarkMode();
 
     const getScore = (player) => {
         if (!player) return 0;
@@ -47,107 +38,12 @@ const LeaderboardPage = () => {
 
     return (
         <div className="leaderboard-wrapper">
-            {/* 1. NAVBAR - ĐỒNG BỘ HOÀN TOÀN VỚI HỆ THỐNG */}
-            <header className="navbar">
-                <div className="nav-container">
-                    <div className="nav-left">
-                        <div className="brand-logo" onClick={() => navigate('/')}>
-                            <div className="brand-coin">
-                                <Sparkles size={18} />
-                            </div>
-                            <span className="brand-name">EasyLearn</span>
-                        </div>
-
-                        <nav className="nav-links">
-                            <Link to="/" className="nav-link">Trang chủ</Link>
-                            <Link to="/library" className="nav-link">Thư viện</Link>
-                            <Link to="/leaderboard" className="nav-link active">Bảng xếp hạng</Link>
-                            <Link to="/schools" className="nav-link">Trường học</Link>
-                            <Link to="/student/classes" className="nav-link">Lớp học</Link>
-                            <Link to="/studio" className="nav-link">Studio</Link>
-                        </nav>
-                    </div>
-
-                    <div className="nav-right">
-                        <button 
-                            className="theme-toggle-btn"
-                            onClick={toggleTheme} 
-                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
-                            aria-label="Toggle Theme"
-                        >
-                            {isDark ? <Sun size={19} /> : <Moon size={19} />}
-                        </button>
-
-                        {user && !isGuest ? (
-                            user.role === 'teacher' ? (
-                                <div className="teacher-account-menu">
-                                    <Link className="nav-username" to="/profile">
-                                        <span className="user-avatar-badge">
-                                            {user.avatar ? (
-                                                <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                            ) : (
-                                                user.username.charAt(0).toUpperCase()
-                                            )}
-                                        </span>
-                                        <span>{user.displayName || user.username}</span>
-                                    </Link>
-                                    <div className="teacher-account-dropdown">
-                                        <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
-                                        <Link to="/schools">{schoolActionLabel}</Link>
-                                        <Link to="/studio">Studio tạo bộ đề</Link>
-                                        <Link to="/profile">Hồ sơ cá nhân</Link>
-                                        <button type="button" onClick={handleLogout} className="logout-btn">
-                                            <LogOut size={16} /> Đăng xuất
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="teacher-account-menu">
-                                    <Link className="nav-username" to="/profile">
-                                        <span className="user-avatar-badge">
-                                            {user.avatar ? (
-                                                <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                            ) : (
-                                                user.username.charAt(0).toUpperCase()
-                                            )}
-                                        </span>
-                                        <span>{user.displayName || user.username}</span>
-                                    </Link>
-                                    <div className="teacher-account-dropdown">
-                                        {user.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
-                                        <Link to="/schools">{schoolActionLabel}</Link>
-                                        <Link to="/student/classes">Lớp học của tôi</Link>
-                                        <Link to="/game">Chơi Game Quiz</Link>
-                                        <Link to="/profile">Hồ sơ cá nhân</Link>
-                                        <button type="button" onClick={handleLogout} className="logout-btn">
-                                            <LogOut size={16} /> Đăng xuất
-                                        </button>
-                                    </div>
-                                </div>
-                            )
-                        ) : (
-                            <div className="auth-buttons">
-                                <button className="btn-secondary-nav" onClick={() => navigate('/login')}>
-                                    Đăng nhập
-                                </button>
-                                <button className="btn-primary-nav" onClick={() => navigate('/login?mode=register')}>
-                                    Bắt đầu ngay
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </header>
+            {/* 1. NAVBAR DÙNG CHUNG ĐỒNG BỘ TOÀN HỆ THỐNG */}
+            <Navbar activePage="leaderboard" />
 
             {/* 2. HERO HEADER LEADERBOARD & TABS */}
             <section className="leaderboard-hero">
-                <div className="leaderboard-backdrop-glow"></div>
                 <div className="leaderboard-header-content">
-                    <div className="leaderboard-pill-badge">
-                        <Trophy size={14} />
-                        <span>Đấu Trường Tranh Tài Thượng Đỉnh</span>
-                    </div>
-
                     <h1 className="leaderboard-title">
                         Bảng Vàng Danh Dự & <span className="leaderboard-highlight">Xếp Hạng</span>
                     </h1>
@@ -193,7 +89,7 @@ const LeaderboardPage = () => {
                                 <div className="user-rank-stats">
                                     <span>Vị trí hiện tại: <strong className="rank-badge-pill">{userRank ? `#${userRank}` : 'Chưa có hạng'}</strong></span>
                                     <span>•</span>
-                                    <span>Điểm {activeTab === 'weekly' ? 'Tuần' : 'Kỷ Lục'}: <strong className="score-badge-pill">{currentScore} XP</strong></span>
+                                    <span>Điểm {activeTab === 'weekly' ? 'Tuần' : 'Kỷ Lục'}: <strong className="score-badge-pill">{currentScore} Điểm</strong></span>
                                 </div>
                             </div>
                         </div>
@@ -227,7 +123,7 @@ const LeaderboardPage = () => {
                                 {secondPlace.displayName || secondPlace.username}
                             </div>
                             <div className="podium-user-score">
-                                <Medal size={13} /> {getScore(secondPlace)} XP
+                                <Medal size={13} /> {getScore(secondPlace)} Điểm
                             </div>
                             <div className="podium-pedestal">2</div>
                         </div>
@@ -251,7 +147,7 @@ const LeaderboardPage = () => {
                                 {firstPlace.displayName || firstPlace.username}
                             </div>
                             <div className="podium-user-score">
-                                <Trophy size={13} /> {getScore(firstPlace)} XP
+                                <Trophy size={13} /> {getScore(firstPlace)} Điểm
                             </div>
                             <div className="podium-pedestal">1</div>
                         </div>
@@ -274,7 +170,7 @@ const LeaderboardPage = () => {
                                 {thirdPlace.displayName || thirdPlace.username}
                             </div>
                             <div className="podium-user-score">
-                                <Award size={13} /> {getScore(thirdPlace)} XP
+                                <Award size={13} /> {getScore(thirdPlace)} Điểm
                             </div>
                             <div className="podium-pedestal">3</div>
                         </div>
@@ -329,7 +225,7 @@ const LeaderboardPage = () => {
                                     </div>
                                     <div className="table-score-cell">
                                         <span className="table-score-pill">
-                                            ⚡ {getScore(player)} XP
+                                            ⚡ {getScore(player)} Điểm
                                         </span>
                                     </div>
                                 </div>
