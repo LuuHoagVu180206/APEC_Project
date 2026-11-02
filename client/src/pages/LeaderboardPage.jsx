@@ -59,14 +59,14 @@ const LeaderboardPage = () => {
                             onClick={() => handleTabChange('weekly')}
                         >
                             <Flame size={16} />
-                            <span>🏆 Thử Thách Tuần (Weekly Challenge)</span>
+                            <span>Thử Thách Tuần (Weekly Challenge)</span>
                         </button>
                         <button 
                             className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
                             onClick={() => handleTabChange('all')}
                         >
                             <Crown size={16} />
-                            <span>👑 Bảng Vinh Danh Toàn Thời Gian</span>
+                            <span>Bảng Vinh Danh Toàn Thời Gian</span>
                         </button>
                     </div>
                 </div>

@@ -1,17 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { StudioPageLogic } from '../pages_logic/StudioPageLogic';
-import { useDarkMode } from '../pages_logic/useDarkMode';
+import Navbar from '../components/Navbar';
 import '../pages_styling/StudioPageStyling.css';
 import { 
     Sparkles, 
-    Sun, 
-    Moon, 
-    LogOut, 
-    FolderPlus, 
-    HelpCircle, 
     Bookmark, 
     Layers, 
+    FolderPlus,
     FileSpreadsheet, 
     FileText, 
     Trash2, 
@@ -23,7 +18,8 @@ import {
     UserX,
     Pencil,
     X,
-    CheckCircle2
+    CheckCircle2,
+    HelpCircle
 } from 'lucide-react';
 
 const StudioPage = () => {
@@ -38,7 +34,6 @@ const StudioPage = () => {
         setQuestionSetFormData, 
         teacherClasses, 
         savedSetsData,
-        schoolActionLabel,
         activeTab,
         setActiveTab,
         isCreateSetModalOpen,
@@ -64,83 +59,14 @@ const StudioPage = () => {
         handleDeleteQuestion, 
         handleRemoveSavedSet, 
         handleExport,
-        handleLogout,
         handleToggleAnonymous,
         handleTogglePrivacy
     } = StudioPageLogic();
 
-    const { isDark, toggleTheme } = useDarkMode();
-
     return (
         <div className="studio-wrapper">
-            {/* 1. NAVBAR - ĐỒNG BỘ HOÀN TOÀN */}
-            <header className="navbar">
-                <div className="nav-container">
-                    <div className="nav-left">
-                        <div className="brand-logo" onClick={() => navigate('/')}>
-                            <div className="brand-coin">
-                                <Sparkles size={18} />
-                            </div>
-                            <span className="brand-name">EasyLearn</span>
-                        </div>
-
-                        <nav className="nav-links">
-                            <Link to="/" className="nav-link">Trang chủ</Link>
-                            <Link to="/library" className="nav-link">Thư viện</Link>
-                            <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
-                            <Link to="/schools" className="nav-link">Trường học</Link>
-                            <Link to="/student/classes" className="nav-link">Lớp học</Link>
-                            <Link to="/studio" className="nav-link active">Studio</Link>
-                        </nav>
-                    </div>
-
-                    <div className="nav-right">
-                        <button 
-                            className="theme-toggle-btn"
-                            onClick={toggleTheme} 
-                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
-                            aria-label="Toggle Theme"
-                        >
-                            {isDark ? <Sun size={19} /> : <Moon size={19} />}
-                        </button>
-
-                        {currentUser && (
-                            <div className="teacher-account-menu">
-                                <Link className="nav-username" to="/profile">
-                                    <span className="user-avatar-badge">
-                                        {currentUser.avatar ? (
-                                            <img src={currentUser.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                        ) : (
-                                            currentUser.username.charAt(0).toUpperCase()
-                                        )}
-                                    </span>
-                                    <span>{currentUser.displayName || currentUser.username}</span>
-                                </Link>
-                                <div className="teacher-account-dropdown">
-                                    {currentUser.role === 'teacher' ? (
-                                        <>
-                                            <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
-                                            <Link to="/schools">{schoolActionLabel}</Link>
-                                            <Link to="/studio">Studio tạo bộ đề</Link>
-                                        </>
-                                    ) : (
-                                        <>
-                                            {currentUser.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
-                                            <Link to="/schools">{schoolActionLabel}</Link>
-                                            <Link to="/student/classes">Lớp học của tôi</Link>
-                                            <Link to="/game">Chơi Game Quiz</Link>
-                                        </>
-                                    )}
-                                    <Link to="/profile">Hồ sơ cá nhân</Link>
-                                    <button type="button" onClick={handleLogout} className="logout-btn">
-                                        <LogOut size={16} /> Đăng xuất
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </header>
+            {/* 1. NAVBAR - ĐỒNG BỘ TOÀN HỆ THỐNG */}
+            <Navbar activePage="studio" />
 
             {/* 2. HERO SECTION & THỐNG KÊ NHANH */}
             <section className="studio-hero">
@@ -379,7 +305,6 @@ const StudioPage = () => {
                                                 title="Xóa bộ đề này khỏi tài khoản"
                                             >
                                                 <Trash2 size={15} />
-                                                <span>Xóa bộ</span>
                                             </button>
                                         </div>
                                     </div>
@@ -453,31 +378,6 @@ const StudioPage = () => {
                                                         <span>• Môn: {q.topic || 'Khác'}</span>
                                                     </div>
                                                 </div>
-
-                                                <div className="q-card-top-actions">
-                                                    <button
-                                                        type="button"
-                                                        className="btn-studio-icon-action"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleOpenEditQuestionModal(q);
-                                                        }}
-                                                        title="Chỉnh sửa câu hỏi này"
-                                                    >
-                                                        <Pencil size={15} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="btn-studio-icon-action btn-del"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteQuestion(q._id);
-                                                        }}
-                                                        title="Xóa câu hỏi khỏi ngân hàng"
-                                                    >
-                                                        <Trash2 size={15} />
-                                                    </button>
-                                                </div>
                                             </div>
 
                                             {/* Preview 4 đáp án */}
@@ -533,7 +433,6 @@ const StudioPage = () => {
                                                     title="Xóa câu hỏi khỏi ngân hàng"
                                                 >
                                                     <Trash2 size={15} />
-                                                    <span>Xóa</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -642,7 +541,6 @@ const StudioPage = () => {
                                                 title="Bỏ lưu bộ đề này"
                                             >
                                                 <Bookmark size={14} fill="currentColor" />
-                                                <span>Bỏ lưu</span>
                                             </button>
                                         </div>
                                     </div>
