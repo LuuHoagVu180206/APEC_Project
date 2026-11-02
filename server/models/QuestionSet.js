@@ -12,7 +12,8 @@ const QuestionSetSchema = new mongoose.Schema({
     isWeekly: { type: Boolean, default: false },  // Bộ câu hỏi sự kiện tuần
     weekNumber: { type: Number, default: 0 },     // Tuần số mấy (1, 2, 3...)
     badge: { type: String, default: '' },         // Huy hiệu hiển thị (VD: "APEC Official", "Tuần 1")
-    authorName: { type: String, default: 'APEC Group' }
+    authorName: { type: String, default: '' },
+    isAnonymous: { type: Boolean, default: false } // Đăng ẩn danh (chỉ có hiệu lực khi isPublic: true)
 }, { timestamps: true });
 
 module.exports = mongoose.model('QuestionSet', QuestionSetSchema);

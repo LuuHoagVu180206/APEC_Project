@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getAuthorInfo } from '../utils/authorUtils';
 
 export const LibraryPageLogic = () => {
     const navigate = useNavigate();
@@ -106,6 +107,7 @@ export const LibraryPageLogic = () => {
             alert("Vui lòng đăng nhập để lưu bộ câu hỏi vào tủ đồ cá nhân!");
             return;
         }
+
         try {
             const res = await axios.put('http://localhost:5000/api/users/toggle-save-set', {
                 setId: setId
@@ -126,7 +128,7 @@ export const LibraryPageLogic = () => {
             localStorage.setItem('user', JSON.stringify(updatedUser));
         } catch (err) {
             const errorMsg = err.response?.data?.message || err.response?.data || err.message;
-            alert("🛑 Không thể lưu: " + (typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg));
+            alert("🛑 " + (typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg));
             console.error("Chi tiết lỗi:", err.response || err);
         }
     };
@@ -141,6 +143,28 @@ export const LibraryPageLogic = () => {
             } catch (err) {
                 alert("Lỗi hoặc bạn không có quyền xóa!");
             }
+        }
+    };
+
+    const handleCopySet = async (setId) => {
+        if (!currentUser) {
+            alert("Vui lòng đăng nhập để sao chép bộ câu hỏi!");
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const res = await axios.post(`http://localhost:5000/api/sets/${setId}/copy`, {}, {
+                headers: { token: currentUser.accessToken }
+            });
+            alert(`✅ ${res.data.message || 'Đã sao chép bộ câu hỏi thành công!'}\nBộ đề mới đã được lưu vào Studio của bạn dưới dạng Riêng tư.`);
+            if (window.confirm("Bạn có muốn chuyển đến Studio để xem bộ đề vừa sao chép không?")) {
+                navigate('/studio');
+            }
+        } catch (err) {
+            console.error("Lỗi sao chép bộ câu hỏi:", err);
+            const msg = err.response?.data?.message || err.response?.data || "Lỗi khi sao chép bộ câu hỏi!";
+            alert(msg);
         }
     };
 
@@ -176,12 +200,14 @@ export const LibraryPageLogic = () => {
 
     const filteredSets = questionSets.filter(set => {
         const searchLower = searchTerm.toLowerCase();
+        const authorInfo = getAuthorInfo(set, currentUser);
         
         const matchesSearch = 
             !searchTerm ||
             set.title.toLowerCase().includes(searchLower) || 
             (set.topic && set.topic.toLowerCase().includes(searchLower)) ||
-            (set.description && set.description.toLowerCase().includes(searchLower));
+            (set.description && set.description.toLowerCase().includes(searchLower)) ||
+            (authorInfo.name && authorInfo.name.toLowerCase().includes(searchLower));
         
         const matchesCategory = 
             activeCategory === "Tất cả" || 
@@ -210,6 +236,7 @@ export const LibraryPageLogic = () => {
         handleLike,
         handleToggleLikeSet,
         handleDelete,
+        handleCopySet,
         handleExport,
         handleLogout
     };

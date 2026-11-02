@@ -20,6 +20,7 @@ import {
     X 
 } from 'lucide-react';
 import { getBentoIllustration } from '../components/BentoIllustration';
+import { getAuthorInfo } from '../utils/authorUtils';
 import toanImg from '../assets/Toan.png';
 import vatLiImg from '../assets/VatLi.png';
 import hoaHocImg from '../assets/HoaHoc.png';
@@ -192,17 +193,19 @@ const LandingPage = () => {
     // Danh sách toàn bộ các bộ câu hỏi đồng bộ với Database / Thư viện
     const [publicQuestionSets, setPublicQuestionSets] = useState(defaultApecQuestionSets);
 
-    // Lấy bộ đề chuẩn từ Database (defaults hoặc library)
+        // Lấy bộ đề chuẩn từ Database (defaults hoặc library), loại trừ hoàn toàn các bộ đề weekly
     useEffect(() => {
         axios.get('http://localhost:5000/api/sets/defaults')
             .then(res => {
                 if (res.data && res.data.length > 0) {
-                    setPublicQuestionSets(res.data);
+                    const cleanSets = res.data.filter(s => !s.isWeekly && !s.title?.toLowerCase().includes('thử thách tuần'));
+                    setPublicQuestionSets(cleanSets.length > 0 ? cleanSets : defaultApecQuestionSets);
                 } else {
                     axios.get('http://localhost:5000/api/sets/library')
                         .then(resLib => {
                             if (resLib.data && resLib.data.length > 0) {
-                                setPublicQuestionSets(resLib.data.slice(0, 7));
+                                const cleanLib = resLib.data.filter(s => !s.isWeekly && !s.title?.toLowerCase().includes('thử thách tuần'));
+                                setPublicQuestionSets(cleanLib.slice(0, 7));
                             }
                         })
                         .catch(() => {});
@@ -212,11 +215,13 @@ const LandingPage = () => {
                 axios.get('http://localhost:5000/api/sets/library')
                     .then(resLib => {
                         if (resLib.data && resLib.data.length > 0) {
-                            setPublicQuestionSets(resLib.data.slice(0, 7));
+                            const cleanLib = resLib.data.filter(s => !s.isWeekly && !s.title?.toLowerCase().includes('thử thách tuần'));
+                            setPublicQuestionSets(cleanLib.slice(0, 7));
                         }
                     })
                     .catch(() => {});
             });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -356,12 +361,15 @@ const LandingPage = () => {
                         </Link>
                     </div>
 
-                    <div className="hero-weekly-bento-grid">
-                        {(weeklySets.length > 0 ? weeklySets : [
-                            { _id: 'w1', weekNumber: 1, title: 'Thử Thách Tuần 01: Vũ Trụ Bí Ẩn & Khoa Học Không Gian', topic: 'Thiên văn học', questionsCount: 8, authorName: 'APEC Group' },
-                            { _id: 'w2', weekNumber: 2, title: 'Thử Thách Tuần 02: Bí Ẩn Đại Dương & Đa Dạng Sinh Thái', topic: 'Khoa học Tự nhiên', questionsCount: 8, authorName: 'APEC Group' },
-                            { _id: 'w3', weekNumber: 3, title: 'Thử Thách Tuần 03: Đấu Trí Trí Tuệ Nhân Tạo & Cách Mạng 4.0', topic: 'Công nghệ AI', questionsCount: 8, authorName: 'APEC Group' },
-                            { _id: 'w4', weekNumber: 4, title: 'Thử Thách Tuần 04: Đấu Trường Logic & Toán Ứng Dụng', topic: 'Toán học & Logic', questionsCount: 8, authorName: 'APEC Group' }
+                                        <div className="hero-weekly-bento-grid">
+                        {(weeklySets.length >= 4 ? weeklySets.slice(0, 4) : [
+                            ...weeklySets,
+                            ...([
+                                { _id: 'w1', weekNumber: 1, title: 'Thử Thách Tuần 01: Vũ Trụ Bí Ẩn & Khoa Học Không Gian', topic: 'Thiên văn học', questionsCount: 8, authorName: 'APEC Group' },
+                                { _id: 'w2', weekNumber: 2, title: 'Thử Thách Tuần 02: Bí Ẩn Đại Dương & Đa Dạng Sinh Thái', topic: 'Khoa học Tự nhiên', questionsCount: 8, authorName: 'APEC Group' },
+                                { _id: 'w3', weekNumber: 3, title: 'Thử Thách Tuần 03: Đấu Trí Trí Tuệ Nhân Tạo & Cách Mạng 4.0', topic: 'Công nghệ AI', questionsCount: 8, authorName: 'APEC Group' },
+                                { _id: 'w4', weekNumber: 4, title: 'Thử Thách Tuần 04: Đấu Trường Logic & Toán Ứng Dụng', topic: 'Toán học & Logic', questionsCount: 8, authorName: 'APEC Group' }
+                            ].slice(weeklySets.length))
                         ]).map((w, index) => {
                             const variants = ['light', 'blue', 'dark', 'light', 'blue', 'dark'];
                             const variant = variants[index % variants.length];
@@ -470,7 +478,8 @@ const LandingPage = () => {
                         {publicQuestionSets.map((item, index) => {
                             const variants = ['light', 'blue', 'dark'];
                             const variant = variants[index % variants.length];
-                            const author = item.authorName || item.owner?.displayName || item.owner?.username || 'APEC Group';
+                            const authorInfo = getAuthorInfo(item, user);
+                            const author = authorInfo.name;
                             const questionsCount = item.questions?.length ?? item.questionsCount ?? 10;
 
                             return (

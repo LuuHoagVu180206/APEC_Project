@@ -20,10 +20,12 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import StudentClassesPage from './pages/StudentClassesPage';
 import AdminSchoolsPage from './pages/AdminSchoolsPage';
 import AdminSchoolDetailPage from './pages/AdminSchoolDetailPage';
+import ToastContainer from './components/ToastContainer';
 
 function App() {
   return (
     <Router>
+      <ToastContainer />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -52,6 +54,5 @@ function App() {
     </Router>
   );
 }
-
 
 export default App;

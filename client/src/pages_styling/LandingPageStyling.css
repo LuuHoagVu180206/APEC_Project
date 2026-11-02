@@ -455,7 +455,7 @@ body {
     max-width: 1240px;
     margin: 0 auto;
     min-height: 100%;
-    padding: 24px clamp(12px, 3vw, 40px) 70px clamp(12px, 3vw, 40px);
+    padding: 12px clamp(8px, 2.2vw, 24px) 50px clamp(8px, 2.2vw, 24px);
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
@@ -467,7 +467,8 @@ body {
 .hero-text-content {
     max-width: 900px;
     padding: 0;
-    margin-top: 8px;
+    margin-top: -6px;
+    margin-left: -8px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -585,66 +586,70 @@ body {
     margin-top: 6px;
 }
 
-/* Nút Chơi Ngay Codedex (Lớn, Bắt mắt, Không chói, Chuẩn UI ban đầu) */
+/* Nút Chơi Ngay Codedex (Lớn, Bắt mắt, Hiệu ứng 3D Tactile nguyên bản) */
 .btn-codedex-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 36px;
-    border-radius: 14px;
-    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    padding: 16px 36px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(180deg, #fcd34d 0%, #f59e0b 50%, #d97706 100%) !important;
     border: none !important;
     color: #0f172a !important;
-    font-size: 17px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 4px 0 var(--accent-gold-shadow, #b45309), 0 10px 24px rgba(245, 158, 11, 0.35);
-    transition: all var(--transition-fast, 0.15s ease);
-    user-select: none;
-    text-decoration: none;
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    box-shadow: 0 5px 0 #b45309, 0 12px 24px rgba(245, 158, 11, 0.38) !important;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    user-select: none !important;
+    text-decoration: none !important;
+    outline: none !important;
 }
 
 .btn-codedex-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 0 var(--accent-gold-shadow, #b45309), 0 14px 28px rgba(245, 158, 11, 0.45);
-    background: linear-gradient(180deg, #fcd34d 0%, #fbbf24 100%);
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 0 #b45309, 0 18px 28px rgba(245, 158, 11, 0.48) !important;
+    background: linear-gradient(180deg, #fde68a 0%, #fbbf24 50%, #f59e0b 100%) !important;
 }
 
 .btn-codedex-primary:active {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 var(--accent-gold-shadow, #b45309);
+    transform: translateY(3px) !important;
+    box-shadow: 0 2px 0 #b45309, 0 4px 8px rgba(245, 158, 11, 0.2) !important;
 }
 
-/* Nút Dành Cho Giáo Viên (Chuẩn UI ban đầu) */
+/* Nút Dành Cho Giáo Viên (Hiệu ứng 3D Tactile nguyên bản) */
 .btn-codedex-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 15px 30px;
-    border-radius: 14px;
-    background-color: var(--bg-surface, #ffffff);
-    border: 1px solid var(--border-strong, #cbd5e1);
-    color: var(--text-primary, #0f172a);
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
-    transition: all var(--transition-fast, 0.15s ease);
-    user-select: none;
-    text-decoration: none;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    padding: 15px 30px !important;
+    border-radius: 14px !important;
+    background-color: #ffffff !important;
+    border: 2px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 0 #cbd5e1, 0 8px 16px rgba(0, 0, 0, 0.06) !important;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    user-select: none !important;
+    text-decoration: none !important;
+    outline: none !important;
 }
 
 .btn-codedex-secondary:hover {
-    background-color: var(--bg-surface-elevated, #f1f5f9);
-    border-color: var(--accent-blue, #3b82f6);
-    color: var(--accent-blue, #3b82f6);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.08));
+    background-color: #f1f5f9 !important;
+    border-color: #3b82f6 !important;
+    color: #3b82f6 !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 7px 0 #3b82f6, 0 14px 24px rgba(59, 130, 246, 0.2) !important;
 }
 
 .btn-codedex-secondary:active {
-    transform: translateY(2px);
-    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+    transform: translateY(3px) !important;
+    box-shadow: 0 1px 0 #3b82f6, 0 2px 4px rgba(59, 130, 246, 0.1) !important;
 }
 
 [data-theme='dark'] .btn-codedex-secondary {
@@ -1460,56 +1465,33 @@ body {
 
 .hero-weekly-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    text-align: center;
     margin-bottom: 24px;
-    flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
 }
 
-.hero-weekly-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    background: rgba(37, 99, 235, 0.12);
-    color: #2563eb;
-    border: 1px solid rgba(37, 99, 235, 0.25);
-    font-size: 11.5px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    margin-bottom: 6px;
-}
-
-[data-theme='dark'] .hero-weekly-badge {
-    background: rgba(56, 189, 248, 0.15);
-    color: #38bdf8;
-    border-color: rgba(56, 189, 248, 0.3);
-}
-
-.hero-flame-icon {
-    animation: flamePulse 1.5s infinite;
-}
-
-@keyframes flamePulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+.hero-weekly-left {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 .hero-weekly-heading {
-    margin: 0;
-    font-size: clamp(25px, 2.8vw, 32px);
-    font-weight: 800;
-    color: #f59e0b;
-    letter-spacing: -0.4px;
-    text-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
+    margin: 0 !important;
+    font-size: clamp(27px, 2.8vw, 34px) !important;
+    font-weight: 800 !important;
+    color: #f59e0b !important;
+    text-align: center !important;
+    letter-spacing: -0.4px !important;
+    text-shadow: 0 2px 10px rgba(245, 158, 11, 0.25) !important;
 }
 
 [data-theme='dark'] .hero-weekly-heading {
-    color: #fbbf24;
-    text-shadow: 0 2px 14px rgba(251, 191, 36, 0.35);
+    color: #fbbf24 !important;
+    text-shadow: 0 2px 14px rgba(251, 191, 36, 0.35) !important;
 }
 
 .hero-weekly-link {

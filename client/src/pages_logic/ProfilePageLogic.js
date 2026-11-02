@@ -47,8 +47,13 @@ export const ProfilePageLogic = () => {
                     headers: { token: currentUser.accessToken }
                 });
                 const userData = res.data;
+                // Nếu chưa nhập tên hiển thị (hoặc rỗng) -> default là username đăng nhập
+                const defaultDisplayName = (userData.displayName && userData.displayName.trim())
+                    ? userData.displayName.trim()
+                    : (userData.username || currentUser.username);
+
                 setFormData({
-                    displayName: userData.displayName || '',
+                    displayName: defaultDisplayName,
                     fullName: userData.fullName || '',
                     phone: userData.phone || '',
                     email: userData.email || '',
@@ -56,13 +61,16 @@ export const ProfilePageLogic = () => {
                 });
 
                 // Cập nhật lại localStorage nếu có dữ liệu mới
-                const updated = { ...currentUser, ...userData };
+                const updated = { ...currentUser, ...userData, displayName: defaultDisplayName };
                 localStorage.setItem('user', JSON.stringify(updated));
                 setCurrentUser(updated);
             } catch (err) {
                 // Fallback nếu không gọi được API
+                const fallbackDisplayName = (currentUser.displayName && currentUser.displayName.trim())
+                    ? currentUser.displayName.trim()
+                    : currentUser.username;
                 setFormData({
-                    displayName: currentUser.displayName || '',
+                    displayName: fallbackDisplayName,
                     fullName: currentUser.fullName || '',
                     phone: currentUser.phone || '',
                     email: currentUser.email || '',
@@ -122,16 +130,32 @@ export const ProfilePageLogic = () => {
 
     // 5. Cập nhật hồ sơ thông tin cá nhân
     const handleUpdateProfile = async (e) => {
-        e.preventDefault();
+        if (e && e.preventDefault) e.preventDefault();
         setIsUpdatingProfile(true);
         setProfileMessage({ type: '', text: '' });
 
+        // Tên hiển thị chính là username đăng nhập nếu người dùng chưa nhập gì (default) hoặc người dùng để trắng và bấm enter
+        const resolvedDisplayName = (formData.displayName && formData.displayName.trim())
+            ? formData.displayName.trim()
+            : (currentUser?.username || '');
+
+        const submissionData = {
+            ...formData,
+            displayName: resolvedDisplayName
+        };
+
+        setFormData(prev => ({ ...prev, displayName: resolvedDisplayName }));
+
         try {
-            const res = await axios.put('http://localhost:5000/api/users/update-profile', formData, {
+            const res = await axios.put('http://localhost:5000/api/users/update-profile', submissionData, {
                 headers: { token: currentUser.accessToken }
             });
 
-            const updatedUser = { ...res.data, accessToken: currentUser.accessToken };
+            const updatedUser = { 
+                ...res.data, 
+                displayName: res.data.displayName || resolvedDisplayName,
+                accessToken: currentUser.accessToken 
+            };
             localStorage.setItem('user', JSON.stringify(updatedUser));
             setCurrentUser(updatedUser);
 

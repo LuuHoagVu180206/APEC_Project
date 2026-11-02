@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const User = require('../models/User');
+const QuestionSet = require('../models/QuestionSet');
 const bcrypt = require('bcryptjs');
 const { verifyToken } = require('../verifyToken');
 
@@ -23,8 +24,12 @@ router.put('/toggle-save-set', verifyToken, async (req, res) => {
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json("Không tìm thấy người dùng!");
         
-        let currentSaved = (user.savedSets || []).map(id => id.toString());
         const targetId = String(req.body.setId);
+        const targetSet = await QuestionSet.findById(targetId);
+        if (targetSet && targetSet.owner && targetSet.owner.toString() === req.user.id) {
+            return res.status(400).json("Bạn không thể lưu bộ câu hỏi của chính mình!");
+        }
+        let currentSaved = (user.savedSets || []).map(id => id.toString());
         let isSaved = false;
 
         if (currentSaved.includes(targetId)) {
@@ -51,10 +56,19 @@ router.put('/toggle-save-set', verifyToken, async (req, res) => {
 // API: CẬP NHẬT THÔNG TIN HỒ SƠ (AVATAR, DISPLAY NAME, FULL NAME, PHONE, EMAIL)
 router.put('/update-profile', verifyToken, async (req, res) => {
     try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json("Không tìm thấy người dùng!");
+        }
+
         const { displayName, fullName, email, phone, avatar } = req.body;
 
         const updateFields = {};
-        if (displayName !== undefined) updateFields.displayName = String(displayName).trim();
+        if (displayName !== undefined) {
+            const trimmed = String(displayName).trim();
+            // Nếu người dùng để trắng hoặc không nhập gì -> mặc định lấy username đăng nhập
+            updateFields.displayName = trimmed || user.username;
+        }
         if (fullName !== undefined) updateFields.fullName = String(fullName).trim();
         if (email !== undefined) updateFields.email = String(email).trim().toLowerCase();
         if (phone !== undefined) updateFields.phone = String(phone).trim();
@@ -71,10 +85,6 @@ router.put('/update-profile', verifyToken, async (req, res) => {
             { new: true }
         );
 
-        if (!updatedUser) {
-            return res.status(404).json("Không tìm thấy người dùng!");
-        }
-
         const { password, ...others } = updatedUser._doc;
         res.status(200).json(others);
     } catch (err) {
@@ -89,7 +99,7 @@ router.put('/change-password', verifyToken, async (req, res) => {
         const { currentPassword, newPassword, confirmPassword } = req.body;
 
         if (!currentPassword || !newPassword || !confirmPassword) {
-            return res.status(400).json("Vui lòng điền đầy đủ thông tin mật khẩu!");
+            return res.status(400).json("Vui lòng điền đầy đủ các trường mật khẩu!");
         }
 
         if (newPassword.length < 6) {
@@ -111,7 +121,7 @@ router.put('/change-password', verifyToken, async (req, res) => {
             return res.status(400).json("Mật khẩu hiện tại không chính xác!");
         }
 
-        // Băm mật khẩu mới
+        // Mã hóa mật khẩu mới
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
         await user.save();

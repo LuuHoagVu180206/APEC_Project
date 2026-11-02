@@ -80,6 +80,7 @@ const ProfilePage = () => {
                             <Link to="/library" className="nav-link">Thư viện</Link>
                             <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
                             <Link to="/schools" className="nav-link">Trường học</Link>
+                            <Link to="/student/classes" className="nav-link">Lớp học</Link>
                             <Link to="/studio" className="nav-link">Studio</Link>
                         </nav>
                     </div>
@@ -266,9 +267,15 @@ const ProfilePage = () => {
                                             id="p-displayname"
                                             className="profile-input"
                                             type="text" 
-                                            placeholder="Tên hiển thị trong game & BXH"
+                                            placeholder={currentUser?.username || "Tên hiển thị trong game & BXH"}
                                             value={formData.displayName} 
-                                            onChange={(e) => setFormData({...formData, displayName: e.target.value})} 
+                                            onChange={(e) => setFormData({...formData, displayName: e.target.value})}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleUpdateProfile(e);
+                                                }
+                                            }}
                                         />
                                     </div>
                                 </div>

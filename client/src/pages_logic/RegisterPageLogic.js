@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../utils/toast';
 
 export const RegisterPageLogic = (role = 'user') => {
     const [username, setUsername] = useState("");
@@ -14,27 +15,44 @@ export const RegisterPageLogic = (role = 'user') => {
         e.preventDefault(); 
         setError(""); 
         
-        if (username.length < 6) return setError("Tên đăng nhập phải có ít nhất 6 ký tự!");
-        if (password.length < 6) return setError("Mật khẩu phải có ít nhất 6 ký tự!");
-        if (password !== confirmPassword) return setError("Mật khẩu nhập lại không khớp!");
+        if (username.length < 6) {
+            setError("Tên đăng nhập phải có ít nhất 6 ký tự!");
+            toast.warning("Tên đăng nhập phải có ít nhất 6 ký tự!");
+            return;
+        }
+        if (password.length < 6) {
+            setError("Mật khẩu phải có ít nhất 6 ký tự!");
+            toast.warning("Mật khẩu phải có ít nhất 6 ký tự!");
+            return;
+        }
+        if (password !== confirmPassword) {
+            setError("Mật khẩu nhập lại không khớp!");
+            toast.warning("Mật khẩu nhập lại không khớp!");
+            return;
+        }
 
         try {
             await axios.post('http://localhost:5000/api/auth/register', { username, password, role });
-            alert("Đăng ký thành công! Đăng nhập ngay thôi nào.");
-            navigate('/login'); 
+            toast.success("Đăng ký thành công! Đăng nhập ngay thôi nào.");
+            setTimeout(() => {
+                navigate('/login'); 
+            }, 600);
         } catch (err) {
+            let errorMsg = "Mất kết nối với máy chủ. Vui lòng kiểm tra lại mạng!";
             if (err.response && err.response.data) {
                 const serverError = err.response.data;
                 if (serverError.code === 11000) {
-                    setError("Tên đăng nhập này đã có người dùng. Hãy chọn tên khác nhé!");
+                    errorMsg = "Tên đăng nhập này đã có người dùng. Hãy chọn tên khác nhé!";
                 } else if (typeof serverError === 'string') {
-                    setError(serverError);
+                    errorMsg = serverError;
+                } else if (serverError.message) {
+                    errorMsg = serverError.message;
                 } else {
-                    setError("Lỗi hệ thống: Không thể tạo tài khoản lúc này.");
+                    errorMsg = "Lỗi hệ thống: Không thể tạo tài khoản lúc này.";
                 }
-            } else {
-                setError("Mất kết nối với máy chủ. Vui lòng kiểm tra lại mạng!");
             }
+            setError(errorMsg);
+            toast.error(errorMsg);
         }
     };
 

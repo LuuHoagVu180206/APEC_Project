@@ -4,6 +4,7 @@ import { LibraryPageLogic } from '../pages_logic/LibraryPageLogic';
 import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/LibraryPageStyling.css';
 import { getBentoIllustration } from '../components/BentoIllustration';
+import { getAuthorInfo } from '../utils/authorUtils';
 import { 
     Sparkles, 
     Search, 
@@ -23,7 +24,8 @@ import {
     Flame,
     Trophy,
     ArrowUpRight,
-    Star
+    Star,
+    Copy
 } from 'lucide-react';
 
 const LibraryPage = () => {
@@ -61,6 +63,7 @@ const LibraryPage = () => {
         handleLike,
         handleToggleLikeSet,
         handleDelete,
+        handleCopySet,
         handleExport,
         handleLogout
     } = LibraryPageLogic();
@@ -246,17 +249,11 @@ const LibraryPage = () => {
             <section className="weekly-hero-section">
                 <div className="weekly-hero-container">
                     <div className="weekly-hero-header">
-                        <div className="weekly-title-badge">
-                            <Flame size={16} className="weekly-flame-icon" />
-                            <span>SỰ KIỆN ĐẤU TRÍ TUẦN • TRANH TÀI BẢNG VÀNG</span>
-                        </div>
+                        
                         <h2 className="weekly-hero-heading">
                             Thử Thách Đấu Trí Hàng Tuần (Weekly Challenges)
                         </h2>
-                        <p className="weekly-hero-desc">
-                            Chinh phục các bộ đề sự kiện tuần đặc biệt do APEC Group thiết kế để ghi danh lên Bảng Xếp Hạng Tuần và tranh tài cùng cộng đồng!
-                        </p>
-                    </div>
+                        </div>
 
                     <div className="hero-weekly-bento-grid">
                         {(weeklySets.length > 0 ? weeklySets : [
@@ -360,7 +357,10 @@ const LibraryPage = () => {
                         {filteredSets.map((qSet) => {
                             const isSaved = savedSets.includes(qSet._id);
                             const topicClass = getTopicBadgeClass(qSet.topic);
-                            const isApecOfficial = qSet.isDefault || qSet.authorName === 'APEC Group' || qSet.owner?.username === 'APEC Group';
+                            const authorInfo = getAuthorInfo(qSet, currentUser);
+                            const isApecOfficial = authorInfo.isOfficial;
+                            const ownerId = qSet.owner?._id || qSet.owner?.id || (typeof qSet.owner === 'string' ? qSet.owner : null);
+                            const isMySet = Boolean(currentUser?._id && ownerId && String(currentUser._id) === String(ownerId));
 
                             return (
                                 <div 
@@ -409,11 +409,15 @@ const LibraryPage = () => {
                                         </p>
 
                                         <div className="set-card-author">
-                                            <div className={`author-avatar ${isApecOfficial ? 'author-avatar-apec' : ''}`}>
-                                                {isApecOfficial ? '⭐' : (qSet.owner?.username || 'A').charAt(0).toUpperCase()}
+                                            <div className={`author-avatar ${authorInfo.isOfficial ? 'author-avatar-apec' : ''} ${authorInfo.isAnonymous ? 'author-avatar-anon' : ''}`}>
+                                                {authorInfo.avatarImg ? (
+                                                    <img src={authorInfo.avatarImg} alt={authorInfo.name} className="author-avatar-thumb" />
+                                                ) : (
+                                                    authorInfo.avatarChar
+                                                )}
                                             </div>
                                             <span className="author-name">
-                                                Tác giả: <strong>{isApecOfficial ? 'APEC Group' : (qSet.owner?.displayName || qSet.owner?.username || 'Ẩn danh')}</strong>
+                                                Tác giả: <strong className={authorInfo.isAnonymous ? 'author-anon-text' : ''}>{authorInfo.name}</strong>
                                             </span>
                                         </div>
                                     </div>
@@ -430,14 +434,29 @@ const LibraryPage = () => {
                                                 <span>{qSet.likesCount || 0}</span>
                                             </button>
 
-                                            <button 
-                                                className={`btn-card-icon ${isSaved ? 'saved' : ''}`}
-                                                onClick={() => handleToggleLikeSet(qSet._id)}
-                                                title={isSaved ? "Đã lưu vào bộ sưu tập cá nhân" : "Lưu vào bộ sưu tập cá nhân"}
-                                            >
-                                                <Bookmark size={14} fill={isSaved ? "var(--accent-blue)" : "none"} />
-                                                <span>{isSaved ? "Đã lưu" : "Lưu bộ"}</span>
-                                            </button>
+                                            {/* Chỉ hiện nút Lưu nếu KHÔNG PHẢI là chủ sở hữu bộ câu hỏi này */}
+                                            {!isMySet && (
+                                                <button 
+                                                    className={`btn-card-icon ${isSaved ? 'saved' : ''}`}
+                                                    onClick={() => handleToggleLikeSet(qSet._id)}
+                                                    title={isSaved ? "Đã lưu vào bộ sưu tập cá nhân" : "Lưu vào bộ sưu tập cá nhân"}
+                                                >
+                                                    <Bookmark size={14} fill={isSaved ? "var(--accent-blue)" : "none"} />
+                                                    <span>{isSaved ? "Đã lưu" : "Lưu bộ"}</span>
+                                                </button>
+                                            )}
+
+                                            {/* Cho phép sao chép bộ câu hỏi của người khác về Studio */}
+                                            {!isMySet && (
+                                                <button 
+                                                    className="btn-card-icon btn-card-copy"
+                                                    onClick={() => handleCopySet(qSet._id)}
+                                                    title="Sao chép bộ đề này về Góc Sáng Tạo của bạn (kèm hậu tố -copy)"
+                                                >
+                                                    <Copy size={13} />
+                                                    <span>Sao chép</span>
+                                                </button>
+                                            )}
 
                                             <button 
                                                 className="btn-card-icon btn-card-play-now"

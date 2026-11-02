@@ -809,59 +809,54 @@
 }
 
 .weekly-hero-container {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(245, 158, 11, 0.08));
-    border: 1px solid rgba(239, 68, 68, 0.25);
-    border-radius: 20px;
-    padding: 28px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 [data-theme='dark'] .weekly-hero-container {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.14), rgba(245, 158, 11, 0.12));
-    border-color: rgba(239, 68, 68, 0.4);
+    background: transparent;
+    border: none;
 }
 
 .weekly-hero-header {
     margin-bottom: 24px;
-}
-
-.weekly-title-badge {
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-    font-size: 11.5px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-}
-
-.weekly-flame-icon {
-    animation: pulseFlame 1.5s infinite;
-}
-
-@keyframes pulseFlame {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+    justify-content: center;
+    text-align: center;
 }
 
 .weekly-hero-heading {
-    margin: 0 0 8px 0;
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--text-primary);
+    margin: 0 0 10px 0;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    color: #f59e0b !important;
+    text-align: center !important;
+    letter-spacing: -0.3px;
+    text-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
+}
+
+[data-theme='dark'] .weekly-hero-heading {
+    margin: 0 0 10px 0;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    color: #f59e0b !important;
+    text-align: center !important;
+    letter-spacing: -0.3px;
+    text-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
 }
 
 .weekly-hero-desc {
-    margin: 0;
+    margin: 0 auto;
     font-size: 14px;
     color: var(--text-secondary);
     max-width: 700px;
+    text-align: center;
 }
 
 .weekly-cards-grid {
@@ -1427,4 +1422,36 @@
 .btn-bento-play-now:hover .catalog-bento-cta-label,
 .btn-bento-play-now:hover .bento-cta-label {
     transform: translateX(3px);
+}
+
+
+/* ANONYMOUS AUTHOR STYLES */
+.author-avatar-anon {
+    background: rgba(148, 163, 184, 0.2) !important;
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+}
+
+.author-anon-text {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.author-avatar-thumb {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+
+/* COPY SET BUTTON STYLING */
+.btn-card-icon.btn-card-copy {
+    color: #10b981;
+}
+
+.btn-card-icon.btn-card-copy:hover {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #10b981;
 }
