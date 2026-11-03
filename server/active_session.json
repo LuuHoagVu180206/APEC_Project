@@ -1,20 +1,23 @@
 {
-  "_id": "6ae9cddbf53eff07e50dd2c1",
-  "username": "toilaadmin",
-  "displayName": "",
-  "fullName": "",
-  "email": "",
-  "phone": "",
-  "avatar": "",
-  "highScore": 5247,
-  "weeklyScore": 5247,
+  "_id": "6a576b8a8b75f393d98f0bcf",
+  "username": "admin123",
+  "highScore": 0,
   "role": "admin",
-  "savedQuestions": [],
-  "savedSets": [],
   "playHistory": [],
+  "createdAt": "2026-07-15T11:14:18.602Z",
+  "updatedAt": "2026-11-02T14:22:31.148Z",
+  "__v": 15,
+  "savedSets": [
+    "6ae55bebf589e9d6143b6185"
+  ],
+  "savedQuestions": [],
+  "bio": "",
+  "email": "",
+  "fullName": "Lưu Hoàng Vũ",
+  "avatar": "",
+  "displayName": "",
+  "phone": "",
   "weeklyHistory": [],
-  "createdAt": "2026-11-03T12:04:43.739Z",
-  "updatedAt": "2026-11-03T12:04:43.739Z",
-  "__v": 0,
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhZTljZGRiZjUzZWZmMDdlNTBkZDJjMSIsInVzZXJuYW1lIjoidG9pbGFhZG1pbiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc5MzcwNzYwNSwiZXhwIjoxNzk2Mjk5NjA1fQ.CiPz1uXQCZtrzW6DARTOFJnVbECwSfDYqoMnB69HzZg"
+  "weeklyScore": 0,
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTc2YjhhOGI3NWYzOTNkOThmMGJjZiIsInVzZXJuYW1lIjoiYWRtaW4xMjMiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3OTM2MzU3NjIsImV4cCI6MTc5NjIyNzc2Mn0.UT0yC086SQnxbcSDLXlf3x23ayTZmZBjx1Tm7mY_f1g"
 }
