@@ -201,6 +201,26 @@ export const GamePageLogic = () => {
                     return;
                 }
 
+                // Nếu là thi đấu trong lớp học -> Lưu vào bảng điểm lớp học
+                if (data.roomType === 'classroom' && data.classId) {
+                    try {
+                        await axios.post(`http://localhost:5000/api/classes/${data.classId}/scores`, {
+                            studentName: currentUser.displayName || currentUser.username,
+                            score: score,
+                            timePlayed: Number(data.timePlayed) || 0,
+                            questionsAnswered: Number(data.questionsAnswered) || 0,
+                            setId: activeSet?._id || '',
+                            setTitle: activeSet?.title || ''
+                        }, {
+                            headers: { token: currentUser.accessToken }
+                        });
+                        alert(`🏫 Đã ghi nhận điểm số lớp học: ${score} XP cho ${currentUser.username}!`);
+                    } catch (classErr) {
+                        console.error('Lỗi lưu điểm lớp học:', classErr);
+                    }
+                    return;
+                }
+
                 try {
                     const isWeekly = Boolean(activeSet?.isWeekly);
                     const res = await axios.post('http://localhost:5000/api/scores/score', {

@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ProfilePageLogic } from '../pages_logic/ProfilePageLogic';
-import { useDarkMode } from '../pages_logic/useDarkMode';
+import Navbar from '../components/Navbar';
 import '../pages_styling/ProfilePageStyling.css';
 import { 
-    Sparkles, 
-    Sun, 
-    Moon, 
-    LogOut, 
     Camera, 
     Trash2, 
     User, 
@@ -24,7 +19,14 @@ import {
     UserCheck,
     GraduationCap,
     Gamepad2,
-    Info
+    Info,
+    X,
+    History,
+    Zap,
+    Clock,
+    HelpCircle,
+    Calendar,
+    Trophy
 } from 'lucide-react';
 
 const ProfilePage = () => {
@@ -38,21 +40,18 @@ const ProfilePage = () => {
         passwordMessage,
         isUpdatingProfile,
         isChangingPassword,
-        schoolActionLabel,
+        playHistory,
         handleAvatarUpload,
         handleRemoveAvatar,
         handleUpdateProfile,
-        handleChangePassword,
-        handleLogout,
-        navigate
+        handleChangePassword
     } = ProfilePageLogic();
-
-    const { isDark, toggleTheme } = useDarkMode();
 
     // Ẩn/Hiện mật khẩu
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
     const userInitial = (formData.displayName || currentUser?.username || 'U').charAt(0).toUpperCase();
 
@@ -62,76 +61,26 @@ const ProfilePage = () => {
         return 'Học sinh';
     };
 
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '--';
+        try {
+            const d = new Date(dateStr);
+            return d.toLocaleString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch {
+            return String(dateStr);
+        }
+    };
+
     return (
         <div className="profile-wrapper">
-            {/* 1. NAVBAR - ĐỒNG BỘ HOÀN TOÀN */}
-            <header className="navbar">
-                <div className="nav-container">
-                    <div className="nav-left">
-                        <div className="brand-logo" onClick={() => navigate('/')}>
-                            <div className="brand-coin">
-                                <Sparkles size={18} />
-                            </div>
-                            <span className="brand-name">EasyLearn</span>
-                        </div>
-
-                        <nav className="nav-links">
-                            <Link to="/" className="nav-link">Trang chủ</Link>
-                            <Link to="/library" className="nav-link">Thư viện</Link>
-                            <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
-                            <Link to="/schools" className="nav-link">Trường học</Link>
-                            <Link to="/student/classes" className="nav-link">Lớp học</Link>
-                            <Link to="/studio" className="nav-link">Studio</Link>
-                        </nav>
-                    </div>
-
-                    <div className="nav-right">
-                        <button 
-                            className="theme-toggle-btn"
-                            onClick={toggleTheme} 
-                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
-                            aria-label="Toggle Theme"
-                        >
-                            {isDark ? <Sun size={19} /> : <Moon size={19} />}
-                        </button>
-
-                        {currentUser && (
-                            <div className="teacher-account-menu">
-                                <Link className="nav-username" to="/profile">
-                                    <span className="user-avatar-badge">
-                                        {formData.avatar ? (
-                                            <img src={formData.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                        ) : (
-                                            currentUser.username.charAt(0).toUpperCase()
-                                        )}
-                                    </span>
-                                    <span>{formData.displayName || currentUser.username}</span>
-                                </Link>
-                                <div className="teacher-account-dropdown">
-                                    {currentUser.role === 'teacher' ? (
-                                        <>
-                                            <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
-                                            <Link to="/schools">{schoolActionLabel}</Link>
-                                            <Link to="/studio">Studio tạo bộ đề</Link>
-                                        </>
-                                    ) : (
-                                        <>
-                                            {currentUser.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
-                                            <Link to="/schools">{schoolActionLabel}</Link>
-                                            <Link to="/student/classes">Lớp học của tôi</Link>
-                                            <Link to="/game">Chơi Game Quiz</Link>
-                                        </>
-                                    )}
-                                    <Link to="/profile">Hồ sơ cá nhân</Link>
-                                    <button type="button" onClick={handleLogout} className="logout-btn">
-                                        <LogOut size={16} /> Đăng xuất
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </header>
+            {/* 1. NAVBAR - ĐỒNG BỘ TOÀN HỆ THỐNG */}
+            <Navbar activePage="profile" />
 
             {/* 2. HERO SECTION */}
             <section className="profile-hero">
@@ -207,8 +156,16 @@ const ProfilePage = () => {
                     {/* Thẻ Thống Kê Nhanh */}
                     <div className="profile-stats-card">
                         <div className="stat-row-item">
-                            <span>🏆 Kỷ lục điểm số:</span>
-                            <strong>{currentUser?.highScore || 0} XP</strong>
+                            <span>🏆 Kỷ lục cá nhân:</span>
+                            <strong>{(currentUser?.highScore || 0).toLocaleString()} XP</strong>
+                        </div>
+                        <div className="stat-row-item">
+                            <span>⚡ Điểm tuần này:</span>
+                            <strong style={{ color: 'var(--accent-gold)' }}>{(currentUser?.weeklyScore || 0).toLocaleString()} XP</strong>
+                        </div>
+                        <div className="stat-row-item">
+                            <span>🎮 Màn solo đã chơi:</span>
+                            <strong>{playHistory?.length || 0} trận</strong>
                         </div>
                         <div className="stat-row-item">
                             <span>🔖 Bộ đề đã lưu:</span>
@@ -221,15 +178,25 @@ const ProfilePage = () => {
                     </div>
                 </div>
 
-                {/* CỘT PHẢI: FORM CẬP NHẬT THÔNG TIN & ĐỔI MẬT KHẨU */}
+                {/* CỘT PHẢI: FORM CẬP NHẬT THÔNG TIN */}
                 <div className="profile-details-column">
-                    {/* KHỐI 1: THÔNG TIN CÁ NHÂN */}
                     <div className="profile-card-section">
-                        <div className="section-head">
-                            <div className="section-head-icon">
-                                <UserCheck size={18} />
+                        <div className="section-head" style={{ justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div className="section-head-icon">
+                                    <UserCheck size={18} />
+                                </div>
+                                <h3>Thông Tin Cá Nhân</h3>
                             </div>
-                            <h3>Thông Tin Cá Nhân</h3>
+                            <button 
+                                type="button" 
+                                className="btn-open-password-sub"
+                                onClick={() => setIsPasswordModalOpen(true)}
+                                title="Mở bảng đổi mật khẩu"
+                            >
+                                <KeyRound size={15} />
+                                <span>Đổi mật khẩu</span>
+                            </button>
                         </div>
 
                         {profileMessage.text && (
@@ -326,42 +293,147 @@ const ProfilePage = () => {
                                 </div>
                             </div>
 
-                            <button 
-                                type="submit" 
-                                className="btn-profile-submit"
-                                disabled={isUpdatingProfile}
-                            >
-                                <Save size={16} />
-                                <span>{isUpdatingProfile ? 'Đang lưu...' : 'Lưu Thay Đổi Hồ Sơ'}</span>
-                            </button>
+                            <div className="profile-form-actions-row">
+                                <button 
+                                    type="submit" 
+                                    className="btn-profile-submit"
+                                    disabled={isUpdatingProfile}
+                                >
+                                    <Save size={16} />
+                                    <span>{isUpdatingProfile ? 'Đang lưu...' : 'Lưu Thay Đổi Hồ Sơ'}</span>
+                                </button>
+
+                                <button 
+                                    type="button" 
+                                    className="btn-profile-secondary-action"
+                                    onClick={() => setIsPasswordModalOpen(true)}
+                                >
+                                    <KeyRound size={16} />
+                                    <span>Đổi Mật Khẩu</span>
+                                </button>
+                            </div>
                         </form>
                     </div>
 
-                    {/* KHỐI 2: ĐỔI MẬT KHẨU */}
-                    <div className="profile-card-section">
-                        <div className="section-head">
-                            <div className="section-head-icon icon-gold-badge">
-                                <KeyRound size={18} />
+                    {/* KHU VỰC: LỊCH SỬ MÀN CHƠI CÁ NHÂN (CHẾ ĐỘ SOLO) */}
+                    <div className="profile-card-section profile-history-section">
+                        <div className="section-head" style={{ justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div className="section-head-icon icon-history-badge">
+                                    <History size={18} />
+                                </div>
+                                <div>
+                                    <h3>Lịch Sử Màn Chơi Cá Nhân</h3>
+                                    <span className="section-sub-desc">Ghi nhận các màn chơi đơn (Solo) và Thử thách Tuần đã hoàn thành</span>
+                                </div>
                             </div>
-                            <h3>Đổi Mật Khẩu</h3>
+                            <div className="history-count-badge">
+                                <span>{playHistory?.length || 0} trận solo</span>
+                            </div>
+                        </div>
+
+                        {playHistory && playHistory.length > 0 ? (
+                            <div className="profile-history-table-wrap">
+                                <table className="profile-history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Bộ Câu Hỏi</th>
+                                            <th>Chế Độ</th>
+                                            <th>Tổng Điểm</th>
+                                            <th>Thời Gian</th>
+                                            <th>Câu Hỏi</th>
+                                            <th>Thời Gian Chơi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {playHistory.map((item, idx) => (
+                                            <tr key={idx}>
+                                                <td className="history-title-cell">
+                                                    <strong>{item.setTitle || 'Màn Chơi Solo'}</strong>
+                                                </td>
+                                                <td>
+                                                    {item.mode === 'classroom' ? (
+                                                        <span className="badge-tag-classroom">
+                                                            <GraduationCap size={12} /> Phòng Lớp Học
+                                                        </span>
+                                                    ) : item.isWeekly ? (
+                                                        <span className="badge-tag-weekly">
+                                                            <Zap size={12} /> Thử Thách Tuần
+                                                        </span>
+                                                    ) : (
+                                                        <span className="badge-tag-solo">
+                                                            <Gamepad2 size={12} /> Chơi Đơn
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="history-score-cell">
+                                                    <strong>+{(item.score || 0).toLocaleString()}</strong> XP
+                                                </td>
+                                                <td className="history-time-cell">
+                                                    <Clock size={13} />
+                                                    <span>{item.timePlayed != null ? `${Number(item.timePlayed).toFixed(1)}s` : '--'}</span>
+                                                </td>
+                                                <td className="history-questions-cell">
+                                                    <HelpCircle size={13} />
+                                                    <span>{item.questionsAnswered != null ? `${item.questionsAnswered} câu` : '--'}</span>
+                                                </td>
+                                                <td className="history-date-cell">
+                                                    <Calendar size={13} />
+                                                    <span>{formatDate(item.playedAt)}</span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="profile-history-empty">
+                                <Gamepad2 size={38} className="empty-history-icon" />
+                                <h4>Chưa có lịch sử màn chơi solo nào</h4>
+                                <p>Hãy chọn một bộ câu hỏi hoặc tham gia Thử Thách Tuần để ghi nhận thành tích cá nhân của bạn!</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </main>
+
+            {/* 4. UI PHỤ: MODAL ĐỔI MẬT KHẨU */}
+            {isPasswordModalOpen && (
+                <div className="profile-modal-backdrop" onClick={() => setIsPasswordModalOpen(false)}>
+                    <div className="profile-modal-dialog" onClick={(e) => e.stopPropagation()}>
+                        <div className="profile-modal-header">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div className="section-head-icon icon-gold-badge">
+                                    <KeyRound size={18} />
+                                </div>
+                                <h3>Đổi Mật Khẩu</h3>
+                            </div>
+                            <button 
+                                type="button" 
+                                className="profile-modal-close-btn"
+                                onClick={() => setIsPasswordModalOpen(false)}
+                                aria-label="Đóng"
+                            >
+                                <X size={18} />
+                            </button>
                         </div>
 
                         {passwordMessage.text && (
                             <div className={`profile-alert-msg ${
                                 passwordMessage.type === 'success' ? 'msg-success' : 'msg-error'
-                            }`}>
+                            }`} style={{ margin: '18px 24px 0' }}>
                                 {passwordMessage.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
                                 <span>{passwordMessage.text}</span>
                             </div>
                         )}
 
-                        <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                        <form onSubmit={handleChangePassword} className="profile-modal-form">
                             <div className="profile-field-group">
-                                <label htmlFor="p-current-password">Mật khẩu hiện tại</label>
+                                <label htmlFor="p-modal-current-password">Mật khẩu hiện tại</label>
                                 <div className="field-input-wrap">
                                     <Lock size={16} className="field-lead-icon" />
                                     <input 
-                                        id="p-current-password"
+                                        id="p-modal-current-password"
                                         className="profile-input"
                                         type={showCurrentPassword ? 'text' : 'password'}
                                         placeholder="Nhập mật khẩu bạn đang dùng"
@@ -380,68 +452,75 @@ const ProfilePage = () => {
                                 </div>
                             </div>
 
-                            <div className="profile-form-grid">
-                                <div className="profile-field-group">
-                                    <label htmlFor="p-new-password">Mật khẩu mới</label>
-                                    <div className="field-input-wrap">
-                                        <Lock size={16} className="field-lead-icon" />
-                                        <input 
-                                            id="p-new-password"
-                                            className="profile-input"
-                                            type={showNewPassword ? 'text' : 'password'}
-                                            placeholder="Tối thiểu 6 ký tự"
-                                            value={passwordData.newPassword}
-                                            onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                                            required 
-                                        />
-                                        <button 
-                                            type="button" 
-                                            className="btn-toggle-eye"
-                                            onClick={() => setShowNewPassword(!showNewPassword)}
-                                            tabIndex="-1"
-                                        >
-                                            {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="profile-field-group">
-                                    <label htmlFor="p-confirm-password">Xác nhận mật khẩu mới</label>
-                                    <div className="field-input-wrap">
-                                        <Lock size={16} className="field-lead-icon" />
-                                        <input 
-                                            id="p-confirm-password"
-                                            className="profile-input"
-                                            type={showConfirmPassword ? 'text' : 'password'}
-                                            placeholder="Nhập lại mật khẩu mới"
-                                            value={passwordData.confirmPassword}
-                                            onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                                            required 
-                                        />
-                                        <button 
-                                            type="button" 
-                                            className="btn-toggle-eye"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            tabIndex="-1"
-                                        >
-                                            {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                        </button>
-                                    </div>
+                            <div className="profile-field-group">
+                                <label htmlFor="p-modal-new-password">Mật khẩu mới</label>
+                                <div className="field-input-wrap">
+                                    <Lock size={16} className="field-lead-icon" />
+                                    <input 
+                                        id="p-modal-new-password"
+                                        className="profile-input"
+                                        type={showNewPassword ? 'text' : 'password'}
+                                        placeholder="Tối thiểu 6 ký tự"
+                                        value={passwordData.newPassword}
+                                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                                        required 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        className="btn-toggle-eye"
+                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                        tabIndex="-1"
+                                    >
+                                        {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
                                 </div>
                             </div>
 
-                            <button 
-                                type="submit" 
-                                className="btn-profile-submit"
-                                disabled={isChangingPassword}
-                            >
-                                <KeyRound size={16} />
-                                <span>{isChangingPassword ? 'Đang cập nhật...' : 'Cập Nhật Mật Khẩu'}</span>
-                            </button>
+                            <div className="profile-field-group">
+                                <label htmlFor="p-modal-confirm-password">Xác nhận mật khẩu mới</label>
+                                <div className="field-input-wrap">
+                                    <Lock size={16} className="field-lead-icon" />
+                                    <input 
+                                        id="p-modal-confirm-password"
+                                        className="profile-input"
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        placeholder="Nhập lại mật khẩu mới"
+                                        value={passwordData.confirmPassword}
+                                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                                        required 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        className="btn-toggle-eye"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        tabIndex="-1"
+                                    >
+                                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="profile-modal-actions">
+                                <button 
+                                    type="button" 
+                                    className="btn-profile-cancel"
+                                    onClick={() => setIsPasswordModalOpen(false)}
+                                >
+                                    Hủy
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    className="btn-profile-submit-password"
+                                    disabled={isChangingPassword}
+                                >
+                                    <KeyRound size={16} />
+                                    <span>{isChangingPassword ? 'Đang cập nhật...' : 'Cập Nhật Mật Khẩu'}</span>
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
-            </main>
+            )}
         </div>
     );
 };

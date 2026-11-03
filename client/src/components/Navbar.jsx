@@ -32,9 +32,16 @@ const Navbar = ({ activePage }) => {
         return () => { isActive = false; };
     }, [user]);
 
+    useEffect(() => {
+        if (user && user.username && user.role !== 'guest') {
+            axios.post('http://localhost:5000/api/auth/web-session', { user }).catch(() => {});
+        }
+    }, [user]);
+
     const schoolActionLabel = schoolMemberships.length > 0 ? 'Trường của tôi' : 'Tham gia trường';
 
     const handleLogout = () => {
+        axios.delete('http://localhost:5000/api/auth/web-session').catch(() => {});
         localStorage.removeItem('user');
         setUser(null);
         setSchoolMemberships([]);

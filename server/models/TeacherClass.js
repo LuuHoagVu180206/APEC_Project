@@ -11,7 +11,35 @@ const TeacherClassSchema = new mongoose.Schema({
     teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     school: { type: mongoose.Schema.Types.ObjectId, ref: 'School', default: null },
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    questionSets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'QuestionSet' }]
+    questionSets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'QuestionSet' }],
+    gameSessions: [{
+        sessionId: { type: String, default: () => crypto.randomUUID() },
+        roomPin: { type: String, default: '' },
+        setTitle: { type: String, default: 'Màn chơi Lớp học' },
+        setId: { type: mongoose.Schema.Types.ObjectId, ref: 'QuestionSet', default: null },
+        playedAt: { type: Date, default: Date.now },
+        teacherParticipated: { type: Boolean, default: false },
+        players: [{
+            student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+            studentName: { type: String, required: true },
+            displayName: { type: String, default: '' },
+            role: { type: String, default: 'student' },
+            score: { type: Number, required: true },
+            timePlayed: { type: Number, default: 0 },
+            questionsAnswered: { type: Number, default: 0 },
+            rank: { type: Number, default: 1 }
+        }]
+    }],
+    gameScores: [{
+        student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+        studentName: { type: String, required: true },
+        score: { type: Number, required: true },
+        timePlayed: { type: Number, default: 0 },
+        questionsAnswered: { type: Number, default: 0 },
+        setId: { type: mongoose.Schema.Types.ObjectId, ref: 'QuestionSet', default: null },
+        setTitle: { type: String, default: '' },
+        playedAt: { type: Date, default: Date.now }
+    }]
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

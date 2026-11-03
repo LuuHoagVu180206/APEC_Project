@@ -17,6 +17,7 @@ export const LoginPageLogic = () => {
             });
             toast.success('Đăng nhập thành công! Chào mừng bạn trở lại.');
             localStorage.setItem('user', JSON.stringify(res.data));
+            axios.post('http://localhost:5000/api/auth/web-session', { user: res.data }).catch(() => {});
             setTimeout(() => {
                 navigate('/game');
             }, 600);

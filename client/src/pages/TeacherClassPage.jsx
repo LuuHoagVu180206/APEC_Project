@@ -20,7 +20,13 @@ import {
     Calendar,
     User,
     Sun,
-    Moon
+    Moon,
+    Gamepad2,
+    Trophy,
+    Clock,
+    HelpCircle,
+    Award,
+    Lock
 } from 'lucide-react';
 import { useDarkMode } from '../pages_logic/useDarkMode';
 import { TeacherClassPageLogic } from '../pages_logic/TeacherClassPageLogic';
@@ -50,8 +56,30 @@ const TeacherClassPage = () => {
         isLoading,
         error,
         handleAddQuestionSet,
+        gameSessions = [],
+        isTeacherOfClass = false,
+        isLoadingSessions = false,
         navigate
     } = TeacherClassPageLogic();
+
+    const [showGameSessions, setShowGameSessions] = useState(true);
+    const [expandedSessionId, setExpandedSessionId] = useState(null);
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '--';
+        try {
+            const d = new Date(dateStr);
+            return d.toLocaleString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch {
+            return String(dateStr);
+        }
+    };
 
     const [copiedCode, setCopiedCode] = useState(false);
 
@@ -226,6 +254,30 @@ const TeacherClassPage = () => {
                                     <>Đang mở danh sách <ChevronDown size={14} /></>
                                 ) : (
                                     <>Bấm để xem danh sách <ChevronRight size={14} /></>
+                                )}
+                            </span>
+                        </div>
+                    </button>
+
+                    
+                    {/* GAME SESSIONS TOGGLE */}
+                    <button
+                        type="button"
+                        className={`teacher-class-metric-card teacher-class-metric-btn ${showGameSessions ? 'metric-active' : ''}`}
+                        aria-expanded={showGameSessions}
+                        onClick={() => setShowGameSessions((val) => !val)}
+                    >
+                        <div className="teacher-class-metric-icon metric-icon-amber">
+                            <Gamepad2 size={24} />
+                        </div>
+                        <div className="teacher-class-metric-info">
+                            <div className="teacher-class-metric-num">{gameSessions.length}</div>
+                            <div className="teacher-class-metric-label">Màn chơi đã diễn ra</div>
+                            <span className="teacher-class-metric-toggle-hint">
+                                {showGameSessions ? (
+                                    <>Đang mở lịch sử <ChevronDown size={14} /></>
+                                ) : (
+                                    <>Bấm để xem lịch sử <ChevronRight size={14} /></>
                                 )}
                             </span>
                         </div>
@@ -467,6 +519,164 @@ const TeacherClassPage = () => {
                             <div className="teacher-class-empty">
                                 <FileText size={32} />
                                 <span>Chưa có bài tập (assignment) nào được giao trong lớp này.</span>
+                            </div>
+                        )}
+                    </section>
+                )}
+
+                
+                {/* SECTION: LỊCH SỬ CÁC MÀN CHƠI CỦA LỚP (GAME SESSIONS) */}
+                {showGameSessions && (
+                    <section className="teacher-class-section">
+                        <div className="teacher-class-section-header">
+                            <div className="teacher-class-section-title-group">
+                                <div className="teacher-class-section-tag" style={{ background: 'rgba(245, 158, 11, 0.14)', color: '#f59e0b' }}>
+                                    <Gamepad2 size={14} /> Đấu Trường Game Lớp Học
+                                </div>
+                                <h2>
+                                    Lịch sử các màn chơi của lớp
+                                    <span className="teacher-class-count-badge" style={{ borderColor: 'rgba(245, 158, 11, 0.4)', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)' }}>
+                                        {gameSessions.length}
+                                    </span>
+                                </h2>
+                            </div>
+
+                            {isTeacherOfClass ? (
+                                <div className="teacher-class-role-badge">
+                                    <ShieldCheck size={14} /> Chế độ Giáo viên (Xem toàn bộ điểm học sinh)
+                                </div>
+                            ) : (
+                                <div className="teacher-class-role-badge" style={{ borderColor: 'rgba(59, 130, 246, 0.3)', color: '#60a5fa' }}>
+                                    <Lock size={13} /> Chế độ Học sinh (Chỉ xem phiên chơi & kết quả của bạn)
+                                </div>
+                            )}
+                        </div>
+
+                        {gameSessions.length === 0 ? (
+                            <div className="teacher-class-empty">
+                                <Gamepad2 size={36} />
+                                <span>Chưa có phiên chơi nào diễn ra trong lớp này. Giáo viên có thể tạo phòng game gắn mã lớp <strong>{classInfo.classCode}</strong> để cùng học sinh tham gia!</span>
+                            </div>
+                        ) : (
+                            <div className="teacher-class-sessions-list">
+                                {gameSessions.map((session, sIdx) => {
+                                    const sessionIdKey = session.sessionId || String(sIdx);
+                                    const isExpanded = expandedSessionId === sessionIdKey;
+                                    return (
+                                        <div className="class-session-card" key={sessionIdKey}>
+                                            <div 
+                                                className="class-session-header"
+                                                onClick={() => {
+                                                    if (isTeacherOfClass) {
+                                                        setExpandedSessionId(isExpanded ? null : sessionIdKey);
+                                                    }
+                                                }}
+                                                role={isTeacherOfClass ? "button" : undefined}
+                                                tabIndex={isTeacherOfClass ? 0 : undefined}
+                                            >
+                                                <div className="class-session-header-left">
+                                                    <div className="class-session-icon">
+                                                        <Trophy size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="class-session-title-row">
+                                                            <strong className="class-session-title">{session.setTitle || 'Màn chơi Lớp học'}</strong>
+                                                            {session.roomPin && (
+                                                                <span className="session-pin-badge">PIN: {session.roomPin}</span>
+                                                            )}
+                                                            {session.teacherParticipated && (
+                                                                <span className="session-teacher-tag">🏅 Giáo viên cùng chơi</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="class-session-meta">
+                                                            <span><Calendar size={13} /> {formatDate(session.playedAt)}</span>
+                                                            <span>•</span>
+                                                            <span><Users size={13} /> {session.totalParticipants || session.players?.length || 0} người tham gia</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="class-session-header-right">
+                                                    {!isTeacherOfClass && session.myResult && (
+                                                        <div className="session-my-score-pill">
+                                                            <span>Hạng #{session.myResult.rank}</span>
+                                                            <strong>+{(session.myResult.score || 0).toLocaleString()} XP</strong>
+                                                        </div>
+                                                    )}
+
+                                                    {isTeacherOfClass && (
+                                                        <button 
+                                                            type="button" 
+                                                            className="btn-toggle-session-details"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setExpandedSessionId(isExpanded ? null : sessionIdKey);
+                                                            }}
+                                                        >
+                                                            {isExpanded ? (
+                                                                <>Thu gọn <ChevronDown size={14} /></>
+                                                            ) : (
+                                                                <>Xem danh sách điểm <ChevronRight size={14} /></>
+                                                            )}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* CHI TIẾT BẢNG ĐIỂM: CHỈ GIÁO VIÊN CỦA LỚP MỚI ĐƯỢC XEM */}
+                                            {isTeacherOfClass && isExpanded && (
+                                                <div className="class-session-details-table-wrap">
+                                                    {session.players && session.players.length > 0 ? (
+                                                        <table className="class-session-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Thứ Hạng</th>
+                                                                    <th>Người chơi</th>
+                                                                    <th>Vai trò</th>
+                                                                    <th>Tổng Điểm</th>
+                                                                    <th>Thời Gian</th>
+                                                                    <th>Câu Hỏi Đã Giải</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {session.players.map((player, pIdx) => (
+                                                                    <tr key={pIdx} className={player.role === 'teacher' ? 'row-teacher' : ''}>
+                                                                        <td className="rank-cell">
+                                                                            <span className={`rank-pill rank-${player.rank || (pIdx + 1)}`}>
+                                                                                {player.rank === 1 ? '🥇 #1' : player.rank === 2 ? '🥈 #2' : player.rank === 3 ? '🥉 #3' : `#${player.rank || (pIdx + 1)}`}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td className="player-name-cell">
+                                                                            <strong>{player.studentName || 'Học sinh'}</strong>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span className={`role-tag role-${player.role}`}>
+                                                                                {player.role === 'teacher' ? '👨‍🏫 Giáo viên' : '🎓 Học sinh'}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td className="score-cell">
+                                                                            <strong>+{(player.score || 0).toLocaleString()}</strong> XP
+                                                                        </td>
+                                                                        <td className="time-cell">
+                                                                            <Clock size={13} /> {player.timePlayed ? `${Number(player.timePlayed).toFixed(1)}s` : '--'}
+                                                                        </td>
+                                                                        <td className="questions-cell">
+                                                                            <HelpCircle size={13} /> {player.questionsAnswered != null ? `${player.questionsAnswered} câu` : '--'}
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    ) : (
+                                                        <div className="session-no-players">
+                                                            <span>Chưa ghi nhận danh sách người chơi chi tiết trong phiên này.</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </section>

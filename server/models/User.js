@@ -11,11 +11,22 @@ const UserSchema = new mongoose.Schema({
     highScore: { type: Number, default: 0 },
     weeklyScore: { type: Number, default: 0 },
     role: { type: String, enum: ['user', 'admin', 'teacher'], default: 'user' },
-    playHistory: [{ score: Number, playedAt: { type: Date, default: Date.now } }],
+    playHistory: [{
+        score: { type: Number, default: 0 },
+        timePlayed: { type: Number, default: 0 },
+        questionsAnswered: { type: Number, default: 0 },
+        setId: { type: String, default: "" },
+        setTitle: { type: String, default: "Màn chơi Solo" },
+        isWeekly: { type: Boolean, default: false },
+        mode: { type: String, default: "solo" },
+        playedAt: { type: Date, default: Date.now }
+    }],
     weeklyHistory: [{ 
-        score: Number, 
-        setId: String, 
-        setTitle: String, 
+        score: { type: Number, default: 0 }, 
+        timePlayed: { type: Number, default: 0 },
+        questionsAnswered: { type: Number, default: 0 },
+        setId: { type: String, default: "" }, 
+        setTitle: { type: String, default: "Thử thách Tuần" }, 
         playedAt: { type: Date, default: Date.now } 
     }],
     savedQuestions: { type: [String], default: []},

@@ -755,6 +755,49 @@ async function seedDefaultAndWeeklySets() {
         }
 
         console.log('🎉 Hoàn tất kiểm tra dữ liệu bộ câu hỏi APEC Group & Weekly!');
+
+        // 5. Khởi tạo 5 bộ câu hỏi tiểu học thân thiện nếu chưa có
+        try {
+            const { kidQuestionSetsData } = require('./seed_5_sets');
+            const teacherUser = await User.findOne({ username: 'toilagiaovien' }) 
+                             || await User.findOne({ role: 'teacher' }) 
+                             || apecUser;
+            if (teacherUser && kidQuestionSetsData) {
+                for (const item of kidQuestionSetsData) {
+                    const exists = await QuestionSet.findOne({ title: item.title });
+                    if (!exists) {
+                        const createdQuestionIds = [];
+                        for (const q of item.questions) {
+                            const createdQ = await Question.create({
+                                questionText: q.questionText,
+                                options: q.options,
+                                correctAnswer: q.correctAnswer,
+                                difficulty: q.difficulty,
+                                topic: item.topic,
+                                owner: teacherUser._id
+                            });
+                            createdQuestionIds.push(createdQ._id);
+                        }
+                        await QuestionSet.create({
+                            title: item.title,
+                            description: item.description,
+                            topic: item.topic,
+                            owner: teacherUser._id,
+                            authorName: item.authorName,
+                            questions: createdQuestionIds,
+                            isPublic: true,
+                            isDefault: false,
+                            isWeekly: false,
+                            badge: item.badge || '',
+                            likesCount: item.likesCount || 35
+                        });
+                        console.log(`🎈 Đã tự động khởi tạo bộ câu hỏi tiểu học: ${item.title}`);
+                    }
+                }
+            }
+        } catch (kErr) {
+            console.warn('Lưu ý khi nạp bộ đề tiểu học:', kErr.message);
+        }
     } catch (err) {
         console.error('❌ Lỗi khi khởi tạo seedData:', err);
     }

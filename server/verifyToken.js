@@ -2,12 +2,11 @@ const jwt = require('jsonwebtoken');
 
 const verifyToken = (req, res, next) => {
     // Lấy vé từ trong header gửi lên
-    const authHeader = req.headers.token;
-    
+    const authHeader = req.headers.token || req.headers.authorization;
     if (authHeader) {
-        // Token thường có dạng: "Bearer ahsdkjhaskj..." nên ta lấy phần sau dấu cách
-        // Nhưng ở bài này mình làm đơn giản, cứ gửi token thẳng lên là được
-        const token = authHeader; 
+        const token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+            ? authHeader.slice(7).trim()
+            : authHeader; 
 
         jwt.verify(token, process.env.JWT_SECRET || "mat_khau_bi_mat_cua_server", (err, user) => {
             if (err) return res.status(403).json("Token không hợp lệ!");
