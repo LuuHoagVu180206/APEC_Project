@@ -1,0 +1,23 @@
+{
+  "_id": "6a576b8a8b75f393d98f0bcf",
+  "username": "admin123",
+  "highScore": 0,
+  "role": "admin",
+  "playHistory": [],
+  "createdAt": "2026-07-15T11:14:18.602Z",
+  "updatedAt": "2026-11-02T14:22:31.148Z",
+  "__v": 15,
+  "savedSets": [
+    "6ae55bebf589e9d6143b6185"
+  ],
+  "savedQuestions": [],
+  "bio": "",
+  "email": "",
+  "fullName": "Lưu Hoàng Vũ",
+  "avatar": "",
+  "displayName": "",
+  "phone": "",
+  "weeklyHistory": [],
+  "weeklyScore": 0,
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTc2YjhhOGI3NWYzOTNkOThmMGJjZiIsInVzZXJuYW1lIjoiYWRtaW4xMjMiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3OTM2MzU3NjIsImV4cCI6MTc5NjIyNzc2Mn0.UT0yC086SQnxbcSDLXlf3x23ayTZmZBjx1Tm7mY_f1g"
+}
