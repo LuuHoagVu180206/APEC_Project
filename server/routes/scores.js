@@ -18,16 +18,36 @@ router.post('/score', verifyToken, async (req, res) => {
             // 1. MÀN CHƠI SOLO: Lưu vào lịch sử cá nhân và cập nhật kỷ lục cá nhân
             if (mode === 'solo') {
                 if (!user.playHistory) user.playHistory = [];
-                user.playHistory.push({
-                    score: numericScore,
-                    timePlayed: numericTime,
-                    questionsAnswered: numericQuestions,
-                    setId: setId || '',
-                    setTitle: setTitle || 'Màn chơi Solo',
-                    isWeekly: Boolean(isWeekly),
-                    mode: 'solo',
-                    playedAt: new Date()
+                const now = new Date();
+
+                // Chống trùng lặp (Deduplication): nếu phiên chơi này vừa được ghi nhận trong 15s qua
+                const recentDuplicateIndex = user.playHistory.findIndex(entry => {
+                    const timeDiff = Math.abs(now - new Date(entry.playedAt));
+                    return timeDiff < 15000 && 
+                           entry.score === numericScore && 
+                           (entry.setId === (setId || '') || !setId || !entry.setId) &&
+                           entry.mode === 'solo';
                 });
+
+                if (recentDuplicateIndex !== -1) {
+                    const existing = user.playHistory[recentDuplicateIndex];
+                    if (numericTime > 0 && existing.timePlayed === 0) {
+                        existing.timePlayed = numericTime;
+                        existing.questionsAnswered = numericQuestions;
+                    }
+                    console.log(`[Scores] Bỏ qua ghi nhận trùng lặp session solo cho ${user.username} (score: ${numericScore})`);
+                } else {
+                    user.playHistory.push({
+                        score: numericScore,
+                        timePlayed: numericTime,
+                        questionsAnswered: numericQuestions,
+                        setId: setId || '',
+                        setTitle: setTitle || 'Màn chơi Solo',
+                        isWeekly: Boolean(isWeekly),
+                        mode: 'solo',
+                        playedAt: now
+                    });
+                }
 
                 // Cập nhật kỷ lục cá nhân toàn thời gian cho solo
                 if (numericScore > (user.highScore || 0)) {
@@ -37,17 +57,33 @@ router.post('/score', verifyToken, async (req, res) => {
             // 2. MÀN CHƠI LỚP HỌC (CLASSROOM): Chỉ lưu vào lịch sử cá nhân, KHÔNG LƯU VÀO BXH WEEKLY HAY TOÀN THỜI GIAN
             else if (mode === 'classroom') {
                 if (!user.playHistory) user.playHistory = [];
-                user.playHistory.push({
-                    score: numericScore,
-                    timePlayed: numericTime,
-                    questionsAnswered: numericQuestions,
-                    setId: setId || '',
-                    setTitle: setTitle || 'Phòng Lớp Học',
-                    isWeekly: false,
-                    mode: 'classroom',
-                    playedAt: new Date()
+                const now = new Date();
+
+                const recentClassIndex = user.playHistory.findIndex(entry => {
+                    const timeDiff = Math.abs(now - new Date(entry.playedAt));
+                    return timeDiff < 15000 && 
+                           entry.score === numericScore && 
+                           entry.mode === 'classroom';
                 });
-                // Tuyệt đối không cập nhật user.highScore và user.weeklyScore ở chế độ lớp học
+
+                if (recentClassIndex !== -1) {
+                    const existing = user.playHistory[recentClassIndex];
+                    if (numericTime > 0 && existing.timePlayed === 0) {
+                        existing.timePlayed = numericTime;
+                        existing.questionsAnswered = numericQuestions;
+                    }
+                } else {
+                    user.playHistory.push({
+                        score: numericScore,
+                        timePlayed: numericTime,
+                        questionsAnswered: numericQuestions,
+                        setId: setId || '',
+                        setTitle: setTitle || 'Phòng Lớp Học',
+                        isWeekly: false,
+                        mode: 'classroom',
+                        playedAt: now
+                    });
+                }
             }
 
             // CHỈ KHI NÀO user chọn bộ câu hỏi weekly thì mới lưu vào điểm tuần và tính rank tuần
@@ -56,14 +92,32 @@ router.post('/score', verifyToken, async (req, res) => {
                 if (numericScore > (user.weeklyScore || 0)) {
                     user.weeklyScore = numericScore;
                 }
-                user.weeklyHistory.push({
-                    score: numericScore,
-                    timePlayed: numericTime,
-                    questionsAnswered: numericQuestions,
-                    setId: setId || '',
-                    setTitle: setTitle || 'Thử thách Tuần',
-                    playedAt: new Date()
+
+                const now = new Date();
+                const recentWeeklyIndex = user.weeklyHistory.findIndex(entry => {
+                    const timeDiff = Math.abs(now - new Date(entry.playedAt));
+                    return timeDiff < 15000 && 
+                           entry.score === numericScore && 
+                           (entry.setId === (setId || '') || !setId || !entry.setId);
                 });
+
+                if (recentWeeklyIndex !== -1) {
+                    const existing = user.weeklyHistory[recentWeeklyIndex];
+                    if (numericTime > 0 && existing.timePlayed === 0) {
+                        existing.timePlayed = numericTime;
+                        existing.questionsAnswered = numericQuestions;
+                    }
+                    console.log(`[Scores] Bỏ qua ghi nhận trùng lặp weeklyHistory cho ${user.username} (score: ${numericScore})`);
+                } else {
+                    user.weeklyHistory.push({
+                        score: numericScore,
+                        timePlayed: numericTime,
+                        questionsAnswered: numericQuestions,
+                        setId: setId || '',
+                        setTitle: setTitle || 'Thử thách Tuần',
+                        playedAt: now
+                    });
+                }
             }
             
             await user.save();

@@ -20,7 +20,7 @@ export const LoginPageLogic = () => {
             axios.post('http://localhost:5000/api/auth/web-session', { user: res.data }).catch(() => {});
             setTimeout(() => {
                 navigate('/game');
-            }, 600);
+            }, 400);
         } catch (err) {
             console.error(err);
             const msg = err.response?.data?.message || err.response?.data || 'Sai tài khoản hoặc mật khẩu! Vui lòng kiểm tra lại.';

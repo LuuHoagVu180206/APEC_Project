@@ -25,8 +25,7 @@ import {
     Zap,
     Clock,
     HelpCircle,
-    Calendar,
-    Trophy
+    Calendar
 } from 'lucide-react';
 
 const ProfilePage = () => {

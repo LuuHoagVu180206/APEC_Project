@@ -13,6 +13,7 @@ export const GamePageLogic = () => {
     const isWeeklyParam = searchParams.get('isWeekly') === 'true';
     const autoStartParam = searchParams.get('autoStart') === 'true';
     const modeParam = searchParams.get('mode') || 'solo';
+    const pinParam = searchParams.get('pin') || '';
 
     const [user, setUser] = useState(() => {
         try {
@@ -196,7 +197,9 @@ export const GamePageLogic = () => {
                 }
             }
 
-            if (data.type === 'GAME_OVER') {
+                        if (data.type === 'GAME_OVER') {
+                // Game Godot đã tự thực hiện lưu điểm trực tiếp qua API (đầy đủ timePlayed và questionsAnswered)
+                // Web chỉ cần đồng bộ lại user state (highScore, weeklyScore) để cập nhật tức thì trên navbar
                 const score = Number(data.score) || 0;
                 let currentUser = null;
                 try {
@@ -205,68 +208,21 @@ export const GamePageLogic = () => {
                     currentUser = null;
                 }
 
-                if (!currentUser || currentUser.role === 'guest' || !currentUser.accessToken) {
-                    alert(`🎉 Hoàn thành màn chơi! Bạn đạt được: ${score} điểm.\n💡 Hãy đăng nhập để lưu kỷ lục lên Bảng Xếp Hạng nhé!`);
+                if (!currentUser || currentUser.role === 'guest') {
                     return;
                 }
 
-                // Nếu là thi đấu trong lớp học -> Lưu vào bảng điểm lớp học
-                if (data.roomType === 'classroom' && data.classId) {
-                    try {
-                        await axios.post(`http://localhost:5000/api/classes/${data.classId}/scores`, {
-                            studentName: currentUser.displayName || currentUser.username,
-                            score: score,
-                            timePlayed: Number(data.timePlayed) || 0,
-                            questionsAnswered: Number(data.questionsAnswered) || 0,
-                            setId: activeSet?._id || '',
-                            setTitle: activeSet?.title || ''
-                        }, {
-                            headers: { token: currentUser.accessToken }
-                        });
-                        alert(`🏫 Đã ghi nhận điểm số lớp học: ${score} XP cho ${currentUser.username}!`);
-                    } catch (classErr) {
-                        console.error('Lỗi lưu điểm lớp học:', classErr);
-                    }
-                    return;
-                }
+                const isWeekly = Boolean(data.isWeekly !== undefined ? data.isWeekly : (activeSet?.isWeekly || isWeeklyParam));
+                const newHighScore = Math.max(currentUser.highScore || 0, score);
+                const newWeeklyScore = isWeekly ? Math.max(currentUser.weeklyScore || 0, score) : (currentUser.weeklyScore || 0);
 
-                try {
-                    const isWeekly = Boolean(data.isWeekly !== undefined ? data.isWeekly : (activeSet?.isWeekly || isWeeklyParam));
-                    const res = await axios.post('http://localhost:5000/api/scores/score', {
-                        username: currentUser.username,
-                        score: score,
-                        setId: activeSet?._id || '',
-                        setTitle: activeSet?.title || '',
-                        isWeekly: isWeekly
-                    }, {
-                        headers: { token: currentUser.accessToken } 
-                    });
-
-                    const newHighScore = res.data?.newHighScore !== undefined 
-                        ? res.data.newHighScore 
-                        : Math.max(currentUser.highScore || 0, score);
-                    
-                    const newWeeklyScore = res.data?.weeklyScore !== undefined
-                        ? res.data.weeklyScore
-                        : (isWeekly ? Math.max(currentUser.weeklyScore || 0, score) : currentUser.weeklyScore);
-
-                    const updatedUser = { 
-                        ...currentUser, 
-                        highScore: newHighScore,
-                        weeklyScore: newWeeklyScore 
-                    };
-                    setUser(updatedUser);
-                    localStorage.setItem('user', JSON.stringify(updatedUser));
-
-                    if (isWeekly) {
-                        alert(`🏆 [THỬ THÁCH TUẦN] Chúc mừng! Bạn đạt ${score} điểm.\nĐiểm Tuần của bạn: ${newWeeklyScore} XP! Điểm cao nhất: ${newHighScore} XP.`);
-                    } else {
-                        alert(`🏆 Chúc mừng! Bạn đạt ${score} điểm. Kỷ lục cao nhất của bạn: ${newHighScore} XP!`);
-                    }
-                } catch (err) {
-                    console.error("Lỗi lưu điểm số:", err);
-                    alert(`Hoàn thành màn chơi với ${score} điểm!`);
-                }
+                const updatedUser = { 
+                    ...currentUser, 
+                    highScore: newHighScore, 
+                    weeklyScore: newWeeklyScore 
+                };
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
             }
         };
 
