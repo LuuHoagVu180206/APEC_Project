@@ -64,6 +64,30 @@ const LandingPage = () => {
     });
     const [schoolMemberships, setSchoolMemberships] = useState([]);
     const [weeklySets, setWeeklySets] = useState([]);
+    const [activeProcessStep, setActiveProcessStep] = useState(0);
+
+    const processSteps = [
+        {
+            num: '01',
+            title: 'Khám phá thế giới trò chơi tương tác',
+            desc: 'Lựa chọn môn học yêu thích từ Toán học, Vật lí, Hóa học đến Lịch sử, Ngoại ngữ. Tương tác trực tiếp với bản đồ phiêu lưu RPG trực quan sinh động và cuốn hút.'
+        },
+        {
+            num: '02',
+            title: 'Vượt qua thử thách câu hỏi theo thời gian thực',
+            desc: 'Rèn luyện tốc độ xử lý và phản xạ tư duy qua từng câu hỏi trắc nghiệm tương tác với hệ thống tính giờ, âm thanh và phản hồi kết quả tức thì.'
+        },
+        {
+            num: '03',
+            title: 'Mở khóa huy hiệu & tích lũy điểm kinh nghiệm',
+            desc: 'Nhận phân tích đáp án chi tiết, tích lũy điểm EXP, thăng cấp thứ hạng hồ sơ cá nhân và sở hữu bộ sưu tập huy hiệu thành tích độc đáo.'
+        },
+        {
+            num: '04',
+            title: 'Xếp hạng & so tài cùng bạn bè trong trường lớp',
+            desc: 'Tham gia Thử thách tuần, tranh tài điểm số trên Bảng xếp hạng toàn quốc hoặc tham gia lớp học cùng thầy cô và bạn bè qua mã lớp.'
+        }
+    ];
 
     const splitTitleLines = (title) => {
         if (!title) return ['Sự Kiện Tuần'];
@@ -97,7 +121,9 @@ const LandingPage = () => {
         }).then((response) => {
             if (isActive) setSchoolMemberships(response.data);
         }).catch(() => {});
-        return () => { isActive = false; };
+        return () => {
+            isActive = false;
+        };
     }, [user]);
 
     const schoolActionLabel = schoolMemberships.length > 0 ? 'Trường của tôi' : 'Tham gia trường';
@@ -193,7 +219,7 @@ const LandingPage = () => {
     // Danh sách toàn bộ các bộ câu hỏi đồng bộ với Database / Thư viện
     const [publicQuestionSets, setPublicQuestionSets] = useState(defaultApecQuestionSets);
 
-        // Lấy bộ đề chuẩn từ Database (defaults hoặc library), loại trừ hoàn toàn các bộ đề weekly
+    // Lấy bộ đề chuẩn từ Database (defaults hoặc library), loại trừ hoàn toàn các bộ đề weekly
     useEffect(() => {
         axios.get('http://localhost:5000/api/sets/defaults')
             .then(res => {
@@ -226,7 +252,7 @@ const LandingPage = () => {
 
     return (
         <div className="landing-wrapper">
-            {/* 1. NAVBAR - THIẾT KẾ HIỆN ĐẠI THEO PHONG CÁCH CODEDEX */}
+            {/* 1. NAVBAR - POSITIVUS CLEAN MODERN HEADER */}
             <header className="navbar">
                 <div className="nav-container">
                     <div className="nav-left">
@@ -316,52 +342,84 @@ const LandingPage = () => {
                 </div>
             </header>
 
-            {/* 2. HERO SECTION - HÀNH TRÌNH CHINH PHỤC TRI THỨC */}
+            {/* 2. HERO SECTION - POSITIVUS 2-COLUMN HERO WITH CYAN ACCENT */}
             <section className="hero-section">
-                <div className="hero-backdrop-glow"></div>
+                <div className="section-container">
+                    <div className="hero-grid-two-col">
+                        <div className="hero-left-col">
+                            <h1 className="hero-title">
+                                Khởi đầu chuyến phiêu lưu chinh phục tri thức
+                            </h1>
+                            <p className="hero-subtitle">
+                                Nền tảng học tập kết hợp trò chơi hóa - Chinh phục tri thức qua từng màn chơi. Vừa chơi game, vừa rèn luyện tư duy, mở khóa huy hiệu và đồng hành cùng bạn bè trong lớp học!
+                            </p>
+                            <div className="hero-actions">
+                                <button className="btn-codedex-primary" onClick={() => navigate(user ? '/game' : '/login?mode=register')}>
+                                    <Gamepad2 size={20} />
+                                    <span>Bắt đầu chơi ngay</span>
+                                </button>
+                                <button className="btn-codedex-secondary" onClick={() => navigate('/register/teacher')}>
+                                    <GraduationCap size={20} />
+                                    <span>Dành cho Giáo viên</span>
+                                </button>
+                            </div>
+                        </div>
 
-                {/* HERO BANNER - BỐ CỤC KHÔNG KHUNG VỚI BACKGROUND ARTWORK MỚI */}
-                <div className="hero-banner-wrap">
-                    <div className="hero-banner-inner">
-                    <div className="hero-text-content">
-                        <h1 className="hero-title">
-                            <span className="hero-title-main">KHỞI ĐẦU CHUYẾN PHIÊU LƯU</span>
-                            <span className="hero-highlight">CHINH PHỤC TRI THỨC</span>
-                        </h1>
-
-                        <p className="hero-subtitle">
-                            Phương pháp ôn luyện và làm trắc nghiệm cuốn hút nhất. Vừa chơi game, vừa rèn luyện tư duy, mở khóa huy hiệu và đồng hành cùng bạn bè trong lớp học!
-                        </p>
-
-                        <div className="hero-actions">
-                            <button className="btn-codedex-primary" onClick={() => navigate(user ? '/game' : '/login?mode=register')}>
-                                <Gamepad2 size={20} />
-                                <span>Bắt đầu chơi ngay</span>
-                            </button>
-                            <button className="btn-codedex-secondary" onClick={() => navigate('/register/teacher')}>
-                                <GraduationCap size={20} />
-                                <span>Dành cho Giáo viên</span>
-                            </button>
+                        <div className="hero-right-col">
+                            <div className="hero-banner-artwork-card">
+                                <div className="hero-artwork-inner"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                </div>
-
-                {/* KHU VỰC THỬ THÁCH TUẦN TRONG HERO (BENTO-GRID HIỆN ĐẠI THEO ẢNH MẪU) */}
-                <div className="hero-weekly-section">
-                    <div className="hero-weekly-header">
-                        <div className="hero-weekly-left">
-                            <h3 className="hero-weekly-heading">Thử Thách Đấu Trí Hàng Tuần (Weekly Challenge)</h3>
+                {/* POSITIVUS SUBJECT TICKER BAR */}
+                <div className="positivus-ticker-wrap">
+                    <div className="section-container">
+                        <div className="ticker-inner">
+                            <span className="ticker-label">CHỦ ĐỀ HỌC TẬP:</span>
+                            <div className="ticker-chips-row">
+                                {[
+                                    { name: 'Toán học', icon: '📐' },
+                                    { name: 'Vật lí', icon: '⚡' },
+                                    { name: 'Hoá học', icon: '🧪' },
+                                    { name: 'Sinh học', icon: '🌱' },
+                                    { name: 'Lịch sử', icon: '📜' },
+                                    { name: 'Tiếng Anh', icon: '🌍' },
+                                    { name: 'Ngữ văn', icon: '📖' },
+                                    { name: 'Trí tuệ nhân tạo', icon: '🤖' }
+                                ].map((sub, idx) => (
+                                    <button 
+                                        key={idx} 
+                                        className="positivus-ticker-chip"
+                                        onClick={() => navigate(`/library?search=${encodeURIComponent(sub.name)}`)}
+                                    >
+                                        <span className="chip-icon">{sub.icon}</span>
+                                        <span>{sub.name}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        <Link to="/leaderboard" className="hero-weekly-link">
-                            <Trophy size={15} />
-                            <span>Xem Bảng Xếp Hạng Tuần</span>
+                    </div>
+                </div>
+            </section>
+
+            {/* 3. THỬ THÁCH ĐẤU TRÍ HÀNG TUẦN (POSITIVUS BENTO CARDS) */}
+            <section className="weekly-challenges-section" id="weekly">
+                <div className="section-container">
+                    <div className="positivus-section-header">
+                        <span className="positivus-section-badge">Thử Thách Tuần</span>
+                        <p className="positivus-section-desc">
+                            Các bộ đề thử thách được cập nhật định kỳ mỗi tuần để người chơi rèn luyện tư duy logic và tranh tài trên Bảng xếp hạng toàn quốc.
+                        </p>
+                        <Link to="/leaderboard" className="positivus-section-link">
+                            <Trophy size={16} />
+                            <span>Bảng xếp hạng</span>
                             <ArrowRight size={14} />
                         </Link>
                     </div>
 
-                                        <div className="hero-weekly-bento-grid">
+                    <div className="hero-weekly-bento-grid">
                         {(weeklySets.length >= 4 ? weeklySets.slice(0, 4) : [
                             ...weeklySets,
                             ...([
@@ -371,7 +429,7 @@ const LandingPage = () => {
                                 { _id: 'w4', weekNumber: 4, title: 'Thử Thách Tuần 04: Đấu Trường Logic & Toán Ứng Dụng', topic: 'Toán học & Logic', questionsCount: 8, authorName: 'APEC Group' }
                             ].slice(weeklySets.length))
                         ]).map((w, index) => {
-                            const variants = ['light', 'blue', 'dark', 'light', 'blue', 'dark'];
+                            const variants = ['blue', 'light', 'light', 'blue'];
                             const variant = variants[index % variants.length];
 
                             return (
@@ -422,19 +480,17 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* 3. KHÁM PHÁ BỘ CÂU HỎI (ĐỒNG BỘ CSDL & TÌM KIẾM TRUYỀN SANG THƯ VIỆN) */}
+            {/* 4. KHÁM PHÁ BỘ CÂU HỎI (POSITIVUS SERVICES STYLE) */}
             <section className="catalog-section" id="catalog">
                 <div className="section-container">
-                    <div className="section-header">
-                        <h2 className="section-title">
-                            Khám phá hàng trăm bộ câu hỏi tương tác miễn phí
-                        </h2>
-                        <p className="section-subtitle">
-                            Rèn luyện và tranh tài cùng cộng đồng qua các bộ đề chất lượng cao từ APEC Group và giáo viên trên cả nước.
+                    <div className="positivus-section-header">
+                        <span className="positivus-section-badge">Bộ Câu Hỏi</span>
+                        <p className="positivus-section-desc">
+                            Hàng trăm bộ đề trắc nghiệm tương tác miễn phí từ các môn học do APEC Group và các thầy cô giáo biên soạn chuẩn mực.
                         </p>
                     </div>
 
-                    {/* Toolbar tìm kiếm chuyển tiếp sang thư viện (không cần popover lọc) */}
+                    {/* Toolbar tìm kiếm */}
                     <div className="catalog-toolbar">
                         <form 
                             className="catalog-search-form"
@@ -451,7 +507,7 @@ const LandingPage = () => {
                                 <Search size={18} className="search-icon" />
                                 <input 
                                     type="text" 
-                                    placeholder="Tìm kiếm bộ câu hỏi trong Thư viện..." 
+                                    placeholder="Tìm kiếm bộ câu hỏi theo môn học, chủ đề..." 
                                     value={searchDev}
                                     onChange={(e) => setSearchDev(e.target.value)}
                                 />
@@ -468,15 +524,15 @@ const LandingPage = () => {
                             </div>
                             <button type="submit" className="btn-catalog-search-submit">
                                 <Search size={16} />
-                                <span>Tìm kiếm trong Thư viện</span>
+                                <span>Tìm kiếm</span>
                             </button>
                         </form>
                     </div>
 
-                    {/* Lưới Bento-Grid Thẻ Bộ Câu Hỏi (đồng bộ UI thẻ giống Weekly Challenge) */}
+                    {/* Lưới Bento-Grid Thẻ Bộ Câu Hỏi Positivus */}
                     <div className="hero-weekly-bento-grid">
                         {publicQuestionSets.map((item, index) => {
-                            const variants = ['light', 'blue', 'dark'];
+                            const variants = ['light', 'blue', 'blue', 'light'];
                             const variant = variants[index % variants.length];
                             const authorInfo = getAuthorInfo(item, user);
                             const author = authorInfo.name;
@@ -494,13 +550,11 @@ const LandingPage = () => {
                                         }
                                     }}
                                 >
-                                    {/* Metadata trên cùng: Topic badge & Số câu hỏi / Tác giả */}
                                     <div className="bento-card-top">
                                         <span className="bento-card-tag">{item.topic || 'Chủ đề'}</span>
                                         <span className="bento-card-topic">{questionsCount} câu hỏi • {author}</span>
                                     </div>
 
-                                    {/* Tiêu đề có hiệu ứng highlight */}
                                     <div className="bento-title-wrapper">
                                         <h4 className="bento-title-group">
                                             {splitTitleLines(item.title).map((line, lIdx) => (
@@ -511,7 +565,6 @@ const LandingPage = () => {
                                         </h4>
                                     </div>
 
-                                    {/* Hình ảnh minh họa môn học nhỏ gọn tại góc thẻ */}
                                     <div className="bento-art-container">
                                         <img 
                                             src={getSubjectAsset(item.topic)} 
@@ -521,7 +574,6 @@ const LandingPage = () => {
                                         />
                                     </div>
 
-                                    {/* Nút Luyện tập riêng biệt (bấm vào là chơi ngay, không mở trang bộ câu hỏi) */}
                                     <div className="bento-cta-wrapper">
                                         <button 
                                             type="button" 
@@ -552,11 +604,91 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            
+            {/* 5. POSITIVUS CTA BANNER: "LET'S MAKE THINGS HAPPEN" (DÀNH CHO GIÁO VIÊN & STUDIO) */}
+            <section className="positivus-cta-banner-section">
+                <div className="section-container">
+                    <div className="positivus-cta-banner">
+                        <div className="positivus-cta-banner-left">
+                            <h3 className="positivus-cta-banner-title">
+                                Sáng tạo bộ đề thi của riêng bạn
+                            </h3>
+                            <p className="positivus-cta-banner-desc">
+                                Dễ dàng tạo bộ câu hỏi trong Studio, xuất ra file PDF hoặc Excel chuyên nghiệp chỉ với 1 click, cấp mã lớp 8 ký tự cho học sinh tham gia và theo dõi tiến độ học tập toàn diện.
+                            </p>
+                            <div className="positivus-cta-banner-actions">
+                                <button className="btn-positivus-dark" onClick={() => navigate('/studio')}>
+                                    <FolderPlus size={18} />
+                                    <span>Vào Studio tạo bộ đề</span>
+                                </button>
+                                <button className="btn-positivus-outline" onClick={() => navigate('/register/teacher')}>
+                                    <Users size={18} />
+                                    <span>Đăng ký làm giáo viên</span>
+                                </button>
+                            </div>
+                        </div>
 
-            {/* 5. TÍNH NĂNG NỔI BẬT (TRÒ CHƠI HÓA HỌC TẬP TƯƠNG TÁC) */}
+                        <div className="positivus-cta-banner-right">
+                            <div className="positivus-floating-art">
+                                <div className="floating-star-main">✦</div>
+                                <div className="floating-star-small">★</div>
+                                <div className="floating-badge-ring">EasyLearn Studio</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 6. POSITIVUS WORKING PROCESS ACCORDION (QUY TRÌNH HỌC TẬP & RÈN LUYỆN) */}
+            <section className="positivus-process-section">
+                <div className="section-container">
+                    <div className="positivus-section-header">
+                        <span className="positivus-section-badge">Quy Trình</span>
+                        <p className="positivus-section-desc">
+                            4 bước đơn giản để rèn luyện tư duy phản xạ và chinh phục điểm số cao cùng EasyLearn.
+                        </p>
+                    </div>
+
+                    <div className="positivus-accordion-list">
+                        {processSteps.map((step, idx) => {
+                            const isOpen = activeProcessStep === idx;
+                            return (
+                                <div 
+                                    key={idx} 
+                                    className={`positivus-accordion-item ${isOpen ? 'active' : ''}`}
+                                    onClick={() => setActiveProcessStep(isOpen ? -1 : idx)}
+                                >
+                                    <div className="accordion-header">
+                                        <div className="accordion-title-wrap">
+                                            <span className="accordion-num">{step.num}</span>
+                                            <h4 className="accordion-title">{step.title}</h4>
+                                        </div>
+                                        <div className="accordion-icon-wrap">
+                                            <span className="accordion-toggle-icon">{isOpen ? '−' : '+'}</span>
+                                        </div>
+                                    </div>
+                                    {isOpen && (
+                                        <div className="accordion-body">
+                                            <div className="accordion-divider"></div>
+                                            <p className="accordion-desc">{step.desc}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            {/* 7. TÍNH NĂNG NỔI BẬT (TRÒ CHƠI HÓA HỌC TẬP TƯƠNG TÁC) */}
             <section className="features-spotlight-section">
                 <div className="section-container">
+                    <div className="positivus-section-header">
+                        <span className="positivus-section-badge">Trò Chơi Hóa</span>
+                        <p className="positivus-section-desc">
+                            Biến bài học trắc nghiệm truyền thống thành chuyến phiêu lưu sinh động với bản đồ tương tác và đồ họa pixel cuốn hút.
+                        </p>
+                    </div>
+
                     <div className="feature-row">
                         <div className="feature-visual">
                             <div className="feature-game-showcase">
@@ -569,12 +701,11 @@ const LandingPage = () => {
                         </div>
 
                         <div className="feature-text">
-                            <span className="feature-eyebrow">TRÒ CHƠI HÓA HỌC TẬP</span>
-                            <h2 className="feature-heading">
+                            <h3 className="feature-heading">
                                 Rèn luyện phản xạ với thế giới trò chơi học tập sinh động
-                            </h2>
+                            </h3>
                             <p className="feature-description">
-                                Biến những bài học trắc nghiệm truyền thống thành chuyến phiêu lưu khám phá đầy màu sắc. Học sinh tương tác trực tiếp với thế giới trò chơi, vượt qua các thử thách câu hỏi theo thời gian thực để rèn luyện phản xạ tư duy nhanh nhạy và ghi nhớ kiến thức tự nhiên, sâu sắc.
+                                Học sinh tương tác trực tiếp với thế giới trò chơi, vượt qua các thử thách câu hỏi theo thời gian thực để rèn luyện phản xạ tư duy nhanh nhạy và ghi nhớ kiến thức tự nhiên, sâu sắc.
                             </p>
                             <ul className="feature-perks">
                                 <li>
@@ -595,34 +726,7 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* 6. DÀNH CHO GIÁO VIÊN & NHÀ TRƯỜNG (STUDIO & CLASSROOM CALL TO ACTION) */}
-            <section className="teacher-cta-section">
-                <div className="section-container">
-                    <div className="teacher-cta-card">
-                        <div className="teacher-cta-content">
-                            <span className="teacher-tag">HỆ SINH THÁI GIÁO VIÊN & LỚP HỌC</span>
-                            <h2 className="teacher-cta-title">
-                                Sáng tạo bộ đề thi của riêng bạn và quản lý lớp học dễ dàng
-                            </h2>
-                            <p className="teacher-cta-desc">
-                                Dễ dàng tạo bộ câu hỏi trong Studio, xuất ra file PDF hoặc Excel chuyên nghiệp chỉ với 1 click, cấp mã lớp 8 ký tự cho học sinh tham gia và theo dõi tiến độ học tập toàn diện.
-                            </p>
-                            <div className="teacher-actions">
-                                <button className="btn-teacher-primary" onClick={() => navigate('/studio')}>
-                                    <FolderPlus size={18} />
-                                    <span>Vào Studio tạo bộ đề</span>
-                                </button>
-                                <button className="btn-teacher-outline" onClick={() => navigate('/register/teacher')}>
-                                    <Users size={18} />
-                                    <span>Đăng ký làm giáo viên</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* 7. FOOTER HIỆN ĐẠI THEO PHONG CÁCH CODEDEX */}
+            {/* 8. POSITIVUS FOOTER */}
             <footer className="footer">
                 <div className="footer-container">
                     <div className="footer-top">
