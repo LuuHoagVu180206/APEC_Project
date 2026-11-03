@@ -91,6 +91,47 @@ const LibraryPage = () => {
         if (t.includes('hoá') || t.includes('vật lý') || t.includes('sinh')) return 'badge-science';
         return 'badge-other';
     };
+    // Khởi động trực tiếp vào chế độ Solo - Thử thách tuần (Weekly Challenge)
+    const handlePlayWeekly = (wSet, e) => {
+        if (e) e.stopPropagation();
+        const targetId = wSet?._id || '';
+        const targetTitle = wSet?.title || 'Thử Thách Tuần';
+        try {
+            localStorage.setItem('apec_solo_launch', JSON.stringify({
+                setId: targetId,
+                setTitle: targetTitle,
+                isWeekly: true,
+                mode: 'solo',
+                autoStart: true,
+                timestamp: Date.now()
+            }));
+        } catch (err) {
+            console.warn('Lỗi lưu apec_solo_launch:', err);
+        }
+        navigate(`/game?setId=${encodeURIComponent(targetId)}&isWeekly=true&mode=solo&autoStart=true`);
+    };
+
+    // Khởi động trực tiếp vào chế độ Solo - Bộ đề thông thường trong Thư viện
+    const handlePlayRegular = (qSet, e) => {
+        if (e) e.stopPropagation();
+        const targetId = qSet?._id || '';
+        const targetTitle = qSet?.title || 'Bộ Đề Tự Luyện';
+        try {
+            localStorage.setItem('apec_solo_launch', JSON.stringify({
+                setId: targetId,
+                setTitle: targetTitle,
+                isWeekly: false,
+                mode: 'solo',
+                autoStart: true,
+                timestamp: Date.now()
+            }));
+        } catch (err) {
+            console.warn('Lỗi lưu apec_solo_launch:', err);
+        }
+        navigate(`/game?setId=${encodeURIComponent(targetId)}&isWeekly=false&mode=solo&autoStart=true`);
+    };
+
+
 
     return (
         <div className="library-wrapper">
@@ -294,10 +335,7 @@ const LibraryPage = () => {
                                         <button 
                                             type="button" 
                                             className="btn-bento-play-now"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                navigate(wSet._id ? `/game?setId=${wSet._id}` : '/game');
-                                            }}
+                                            onClick={(e) => handlePlayWeekly(wSet, e)}
                                             title="Luyện tập ngay"
                                         >
                                             <div className="bento-cta-circle">
@@ -460,7 +498,7 @@ const LibraryPage = () => {
 
                                             <button 
                                                 className="btn-card-icon btn-card-play-now"
-                                                onClick={() => navigate(`/game?setId=${qSet._id}`)}
+                                                onClick={(e) => handlePlayRegular(qSet, e)}
                                                 title="Chơi ngay bộ đề này trong game"
                                             >
                                                 <Play size={13} fill="currentColor" />

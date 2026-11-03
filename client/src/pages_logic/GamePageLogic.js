@@ -8,6 +8,12 @@ export const GamePageLogic = () => {
     const iframeRef = useRef(null);
     const gameContainerRef = useRef(null);
 
+    const searchParams = new URLSearchParams(location.search);
+    const initialSetId = searchParams.get('setId') || '';
+    const isWeeklyParam = searchParams.get('isWeekly') === 'true';
+    const autoStartParam = searchParams.get('autoStart') === 'true';
+    const modeParam = searchParams.get('mode') || 'solo';
+
     const [user, setUser] = useState(() => {
         try {
             const savedUser = JSON.parse(localStorage.getItem('user'));
@@ -86,7 +92,6 @@ export const GamePageLogic = () => {
 
     // 3. Tải câu hỏi theo setId từ URL hoặc mặc định
     useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
         const setId = searchParams.get('setId');
 
         const loadQuestionsForGame = async () => {
@@ -95,7 +100,11 @@ export const GamePageLogic = () => {
                     const res = await axios.get(`http://localhost:5000/api/sets/${setId}`);
                     if (res.data?.questions && res.data.questions.length > 0) {
                         setQuestions(res.data.questions);
-                        setActiveSet(res.data.set);
+                        const sData = res.data.set || {};
+                        if (isWeeklyParam) {
+                            sData.isWeekly = true;
+                        }
+                        setActiveSet(sData);
                         return;
                     }
                 } catch (err) {
@@ -222,7 +231,7 @@ export const GamePageLogic = () => {
                 }
 
                 try {
-                    const isWeekly = Boolean(activeSet?.isWeekly);
+                    const isWeekly = Boolean(data.isWeekly !== undefined ? data.isWeekly : (activeSet?.isWeekly || isWeeklyParam));
                     const res = await axios.post('http://localhost:5000/api/scores/score', {
                         username: currentUser.username,
                         score: score,
@@ -332,6 +341,10 @@ export const GamePageLogic = () => {
         navigate,
         handleReloadGame,
         toggleFullscreen,
-        handleLogout
+        handleLogout,
+        currentSetId: activeSet?._id || initialSetId || '',
+        isWeekly: Boolean(activeSet?.isWeekly !== undefined ? activeSet.isWeekly : isWeeklyParam),
+        autoStart: autoStartParam,
+        mode: modeParam
     };
 };
