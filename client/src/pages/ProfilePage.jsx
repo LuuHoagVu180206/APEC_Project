@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ProfilePageLogic } from '../pages_logic/ProfilePageLogic';
 import Navbar from '../components/Navbar';
 import '../pages_styling/ProfilePageStyling.css';

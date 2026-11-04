@@ -1,7 +1,29 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 
 const GamePlayer = ({ username }) => {
   const iframeRef = useRef(null);
+
+  const saveScoreToBackend = useCallback(async (score) => {
+    await fetch('http://localhost:5000/api/save-score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, score })
+    });
+    alert("Đã lưu điểm số của bạn!");
+  }, [username]);
+  
+  const fetchQuestionsAndSendToGame = useCallback(async () => {
+    const res = await fetch('http://localhost:5000/api/questions');
+    const questions = await res.json();
+    
+    // Gửi dữ liệu vào trong Iframe (cho Godot nhận)
+    if (iframeRef.current) {
+        iframeRef.current.contentWindow.postMessage({
+            type: 'LOAD_QUESTIONS',
+            data: questions
+        }, '*');
+    }
+  }, []);
 
   useEffect(() => {
     // Lắng nghe tin nhắn từ Game (Godot) gửi ra
@@ -22,35 +44,13 @@ const GamePlayer = ({ username }) => {
 
     window.addEventListener('message', handleGameMessage);
     return () => window.removeEventListener('message', handleGameMessage);
-  }, []);
-
-  const saveScoreToBackend = async (score) => {
-    await fetch('http://localhost:5000/api/save-score', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, score })
-    });
-    alert("Đã lưu điểm số của bạn!");
-  };
-  
-  const fetchQuestionsAndSendToGame = async () => {
-      const res = await fetch('http://localhost:5000/api/questions');
-      const questions = await res.json();
-      
-      // Gửi dữ liệu vào trong Iframe (cho Godot nhận)
-      if(iframeRef.current) {
-          iframeRef.current.contentWindow.postMessage({
-              type: 'LOAD_QUESTIONS',
-              data: questions
-          }, '*');
-      }
-  }
+  }, [saveScoreToBackend, fetchQuestionsAndSendToGame]);
 
   return (
-    <div style={{ width: '100%', height: '600px', border: '2px solid #333' }}>
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
       {/* Nhúng game vào đây */}
       <iframe 
-        ref={iframeRef}
+        ref={iframeRef} 
         src="/game/v3.0/index.html" // Đường dẫn tới file HTML bạn đã chép vào public
         width="100%" 
         height="100%" 

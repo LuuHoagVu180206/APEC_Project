@@ -1,7 +1,7 @@
 import {GamePageLogic} from '../pages_logic/GamePageLogic';
 
 const GamePage = () => {
-  const { user, gameVersion, iframeRef, navigate, handleLogout } = GamePageLogic();
+  const { user, gameVersion, iframeRef, navigate } = GamePageLogic();
   
   if (!user) return <div>Đang tải...</div>;
   if (!user || !gameVersion) return <div>Đang tải Game...</div>;

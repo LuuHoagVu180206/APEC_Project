@@ -25,7 +25,6 @@ import {
     Trophy,
     Clock,
     HelpCircle,
-    Award,
     Lock
 } from 'lucide-react';
 import { useDarkMode } from '../pages_logic/useDarkMode';
@@ -59,7 +58,6 @@ const TeacherClassPage = () => {
         handleAddQuestionSet,
         gameSessions = [],
         isTeacherOfClass = false,
-        isLoadingSessions = false,
         navigate
     } = TeacherClassPageLogic();
 

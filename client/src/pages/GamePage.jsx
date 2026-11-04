@@ -37,7 +37,6 @@ const GamePage = () => {
         gameContainerRef,
         handleReloadGame,
         toggleFullscreen,
-        handleLogout,
         currentSetId,
         isWeekly,
         autoStart,

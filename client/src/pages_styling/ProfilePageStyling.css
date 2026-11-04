@@ -21,9 +21,9 @@
     --text-inverse: #ffffff;
 
     --border-main: #191a23;
-    --border-subtle: #e2e8f0;
-    --border-strong: #cbd5e1;
-    --border-focus: #3b82f6;
+    --border-subtle: #cbd5e1;
+    --border-strong: #191a23;
+    --border-focus: #0284c7;
 
     --accent-cyan: #7dd3fc;
     --accent-cyan-hover: #38bdf8;
@@ -626,27 +626,66 @@
     color: var(--accent-blue);
 }
 
-/* Nút mở đổi mật khẩu trong component Thông tin cá nhân */
+[data-theme='dark'] .msg-success {
+    background-color: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border-color: #22c55e;
+}
+
+[data-theme='dark'] .msg-error {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border-color: #ef4444;
+}
+
+[data-theme='dark'] .msg-info {
+    background-color: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border-color: #38bdf8;
+}
+
+
+
+/* Nút mở đổi mật khẩu trong component Thông tin cá nhân (Positivus Neo-Brutalist) */
 .btn-open-password-sub {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    border-radius: 9px;
-    background: rgba(245, 158, 11, 0.12);
-    border: 1.5px solid rgba(245, 158, 11, 0.35);
-    color: var(--accent-gold);
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    background: var(--accent-cyan);
+    border: 2px solid #191a23;
+    box-shadow: 0 3px 0 #191a23;
+    color: #191a23;
+    font-family: var(--font-main);
     font-size: 13.5px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
 }
 
 .btn-open-password-sub:hover {
-    background: var(--accent-gold);
-    color: #0f172a;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    background: var(--accent-cyan-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #191a23;
+}
+
+.btn-open-password-sub:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #191a23;
+}
+
+[data-theme='dark'] .btn-open-password-sub {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #38bdf8;
+    box-shadow: 0 3px 0 #0369a1;
+}
+
+[data-theme='dark'] .btn-open-password-sub:hover {
+    background: #0ea5e9;
+    box-shadow: 0 5px 0 #0369a1;
 }
 
 .profile-form-actions-row {
@@ -659,9 +698,10 @@
 
 .btn-profile-secondary-action {
     padding: 12px 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--bg-surface-elevated);
-    border: 1.5px solid var(--border-strong);
+    border: 2px solid #191a23;
+    box-shadow: 0 3px 0 #191a23;
     color: var(--text-primary);
     font-family: var(--font-main);
     font-size: 14px;
@@ -674,13 +714,18 @@
 }
 
 .btn-profile-secondary-action:hover {
-    border-color: var(--accent-gold);
-    color: var(--accent-gold);
-    background: var(--bg-surface-hover);
-    transform: translateY(-1px);
+    background: var(--accent-cyan);
+    color: #191a23;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #191a23;
 }
 
-/* UI PHỤ: MODAL ĐỔI MẬT KHẨU */
+[data-theme='dark'] .btn-profile-secondary-action {
+    border-color: #2d3b55;
+    box-shadow: 0 3px 0 #050811;
+}
+
+/* UI PHỤ: MODAL ĐỔI MẬT KHẨU (POSITIVUS BRUTALIST DIALOG) */
 .profile-modal-backdrop {
     position: fixed;
     top: 0;
@@ -688,7 +733,7 @@
     right: 0;
     bottom: 0;
     z-index: 99999;
-    background-color: rgba(0, 0, 0, 0.72);
+    background-color: rgba(15, 23, 42, 0.72);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     display: flex;
@@ -701,16 +746,21 @@
 
 .profile-modal-dialog {
     background: var(--bg-surface);
-    border: 2px solid var(--border-strong);
-    border-radius: 20px;
+    border: 2.5px solid #191a23;
+    border-radius: 26px;
     width: 100%;
     max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 0 #191a23;
     animation: profileScaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     box-sizing: border-box;
     color: var(--text-primary);
+}
+
+[data-theme='dark'] .profile-modal-dialog {
+    border-color: #38bdf8;
+    box-shadow: 0 10px 0 #0369a1;
 }
 
 @keyframes profileFadeIn {
@@ -719,8 +769,8 @@
 }
 
 @keyframes profileScaleIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .profile-modal-header {
@@ -728,7 +778,14 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 24px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 2px solid #191a23;
+    background: var(--bg-surface-elevated);
+    border-radius: 23px 23px 0 0;
+}
+
+[data-theme='dark'] .profile-modal-header {
+    border-bottom-color: #2d3b55;
+    background: #151d30;
 }
 
 .profile-modal-header h3 {
@@ -740,11 +797,11 @@
 
 .profile-modal-close-btn {
     background: transparent;
-    border: none;
+    border: 2px solid transparent;
     color: var(--text-muted);
     cursor: pointer;
     padding: 6px;
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -752,8 +809,10 @@
 }
 
 .profile-modal-close-btn:hover {
-    color: var(--text-primary);
-    background: var(--bg-surface-elevated);
+    color: #191a23;
+    border-color: #191a23;
+    background: #ef4444;
+    color: #ffffff;
 }
 
 .profile-modal-form {
@@ -767,18 +826,20 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 12px;
+    gap: 14px;
     margin-top: 8px;
-    padding-top: 18px;
-    border-top: 1px solid var(--border-subtle);
+    padding-top: 20px;
+    border-top: 2px solid var(--border-subtle);
 }
 
 .btn-profile-cancel {
-    padding: 10px 18px;
-    border-radius: 10px;
-    background: transparent;
-    border: 1.5px solid var(--border-subtle);
-    color: var(--text-muted);
+    padding: 11px 20px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 2px solid #191a23;
+    box-shadow: 0 3px 0 #191a23;
+    color: #191a23;
+    font-family: var(--font-main);
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
@@ -786,71 +847,103 @@
 }
 
 .btn-profile-cancel:hover {
-    color: var(--text-primary);
-    background: var(--bg-surface-elevated);
+    background: #f3f3f3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #191a23;
+}
+
+[data-theme='dark'] .btn-profile-cancel {
+    background: #151d30;
+    border-color: #2d3b55;
+    box-shadow: 0 3px 0 #050811;
+    color: #f1f5f9;
 }
 
 .btn-profile-submit-password {
-    padding: 11px 22px;
-    border-radius: 10px;
-    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
-    border: none;
-    color: #0f172a;
+    padding: 12px 24px;
+    border-radius: 12px;
+    background: var(--accent-cyan);
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 #191a23;
+    color: #191a23;
+    font-family: var(--font-main);
     font-size: 14.5px;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 3px 0 var(--accent-gold-shadow);
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.15s ease;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-profile-submit-password:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 0 var(--accent-gold-shadow);
+    background: var(--accent-cyan-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #191a23;
+}
+
+.btn-profile-submit-password:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #191a23;
 }
 
 .btn-profile-submit-password:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+    box-shadow: 0 2px 0 #191a23;
 }
 
-/* --- 5.1 SOLO PLAY HISTORY SECTION --- */
+[data-theme='dark'] .btn-profile-submit-password {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #38bdf8;
+    box-shadow: 0 4px 0 #0369a1;
+}
+
+/* --- 5.1 SOLO PLAY HISTORY SECTION (POSITIVUS BRUTALIST TABLE) --- */
 .profile-history-section {
-    margin-top: 12px;
+    margin-top: 14px;
 }
 
 .section-sub-desc {
     display: block;
     font-size: 13px;
     color: var(--text-muted);
-    margin-top: 2px;
+    margin-top: 3px;
     font-weight: 500;
 }
 
 .icon-history-badge {
-    background: rgba(16, 185, 129, 0.12);
-    color: var(--accent-emerald);
+    background: var(--accent-cyan) !important;
+    color: #191a23 !important;
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 #191a23;
 }
 
 .history-count-badge {
-    padding: 4px 12px;
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border-subtle);
+    padding: 5px 14px;
+    background: var(--accent-gold);
+    border: 1.5px solid #191a23;
+    box-shadow: 0 3px 0 #191a23;
     border-radius: 20px;
     font-size: 12.5px;
-    font-weight: 700;
-    color: var(--text-secondary);
+    font-weight: 800;
+    color: #191a23;
 }
 
 .profile-history-table-wrap {
     width: 100%;
     overflow-x: auto;
-    border-radius: 12px;
-    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 #191a23;
     background: var(--bg-surface);
+}
+
+[data-theme='dark'] .profile-history-table-wrap {
+    border-color: #2d3b55;
+    box-shadow: 0 4px 0 #050811;
 }
 
 .profile-history-table {
@@ -861,20 +954,26 @@
 }
 
 .profile-history-table th {
-    background: var(--bg-surface-elevated);
-    padding: 12px 14px;
-    font-weight: 700;
-    color: var(--text-secondary);
+    background: #191a23;
+    color: #ffffff;
+    padding: 13px 16px;
+    font-weight: 800;
     font-size: 12.5px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 1.5px solid var(--border-subtle);
+    border-bottom: 2px solid #191a23;
     white-space: nowrap;
 }
 
+[data-theme='dark'] .profile-history-table th {
+    background: #151d30;
+    color: #7dd3fc;
+    border-bottom-color: #2d3b55;
+}
+
 .profile-history-table td {
-    padding: 13px 14px;
-    border-bottom: 1px solid var(--border-subtle);
+    padding: 14px 16px;
+    border-bottom: 1.5px solid var(--border-subtle);
     color: var(--text-primary);
     vertical-align: middle;
 }
@@ -896,17 +995,21 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 9px;
-    border-radius: 6px;
-    font-size: 11.5px;
-    font-weight: 700;
-    background: rgba(245, 158, 11, 0.14);
-    color: #d97706;
-    border: 1px solid rgba(245, 158, 11, 0.28);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 #191a23;
     white-space: nowrap;
 }
 
 [data-theme='dark'] .badge-tag-weekly {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #f59e0b;
+    box-shadow: 0 2px 0 #b45309;
     color: #fbbf24;
 }
 
@@ -914,35 +1017,43 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 9px;
-    border-radius: 6px;
-    font-size: 11.5px;
-    font-weight: 700;
-    background: rgba(59, 130, 246, 0.1);
-    color: #2563eb;
-    border: 1px solid rgba(59, 130, 246, 0.22);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 #191a23;
     white-space: nowrap;
 }
 
 [data-theme='dark'] .badge-tag-solo {
-    color: #60a5fa;
+    background: rgba(14, 165, 233, 0.15);
+    border-color: #38bdf8;
+    box-shadow: 0 2px 0 #0369a1;
+    color: #7dd3fc;
 }
 
 .badge-tag-classroom {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 9px;
-    border-radius: 6px;
-    font-size: 11.5px;
-    font-weight: 700;
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
-    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    background: #dcfce7;
+    color: #166534;
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 #191a23;
     white-space: nowrap;
 }
 
 [data-theme='dark'] .badge-tag-classroom {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #34d399;
+    box-shadow: 0 2px 0 #047857;
     color: #34d399;
 }
 
@@ -979,19 +1090,25 @@
     padding: 40px 20px;
     text-align: center;
     background: var(--bg-surface-elevated);
-    border-radius: 12px;
-    border: 1.5px dashed var(--border-strong);
+    border-radius: 20px;
+    border: 2px dashed #191a23;
+    box-shadow: 0 4px 0 #191a23;
+}
+
+[data-theme='dark'] .profile-history-empty {
+    border-color: #2d3b55;
+    box-shadow: 0 4px 0 #050811;
 }
 
 .empty-history-icon {
     color: var(--text-muted);
     margin-bottom: 12px;
-    opacity: 0.6;
+    opacity: 0.7;
 }
 
 .profile-history-empty h4 {
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text-primary);
     margin-bottom: 6px;
 }
@@ -1001,6 +1118,7 @@
     color: var(--text-muted);
     max-width: 420px;
 }
+
 
 /* --- 5. RESPONSIVE --- */
 @media (max-width: 860px) {

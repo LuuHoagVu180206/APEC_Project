@@ -1107,13 +1107,14 @@
 
 
 /* ==========================================================================
-   CLASS GAME SESSIONS & LIVE RANKING TABLE STYLING
+   CLASS GAME SESSIONS & LIVE RANKING TABLE STYLING (POSITIVUS NEO-BRUTALIST)
    ========================================================================== */
 
 .metric-icon-amber {
     background: rgba(245, 158, 11, 0.15);
     color: #f59e0b;
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    border: 1.5px solid #f59e0b;
+    box-shadow: 0 2px 0 #b45309;
 }
 
 .teacher-class-role-badge {
@@ -1125,7 +1126,7 @@
     font-size: 12.5px;
     font-weight: 700;
     background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    border: 1.5px solid rgba(16, 185, 129, 0.4);
     color: #10b981;
 }
 
@@ -1138,22 +1139,24 @@
 
 .class-session-card {
     background: var(--tc-surface-card);
-    border: 1.5px solid var(--tc-border);
-    border-radius: 14px;
+    border: 2px solid var(--tc-border);
+    border-radius: 20px;
     overflow: hidden;
-    transition: all 0.2s ease;
+    box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.4);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .class-session-card:hover {
-    border-color: rgba(245, 158, 11, 0.4);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 0 rgba(0, 0, 0, 0.5);
+    border-color: #f59e0b;
 }
 
 .class-session-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
+    padding: 18px 22px;
     cursor: pointer;
     gap: 16px;
     user-select: none;
@@ -1167,16 +1170,17 @@
 }
 
 .class-session-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
     background: rgba(245, 158, 11, 0.15);
     color: #f59e0b;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    border: 2px solid #f59e0b;
+    box-shadow: 0 2px 0 #b45309;
 }
 
 .class-session-title-row {
@@ -1188,36 +1192,38 @@
 }
 
 .class-session-title {
-    font-size: 16px;
+    font-size: 16.5px;
     font-weight: 800;
     color: var(--tc-text);
 }
 
 .session-pin-badge {
-    padding: 2px 8px;
-    border-radius: 6px;
+    padding: 3px 9px;
+    border-radius: 8px;
     font-size: 11.5px;
     font-weight: 800;
     background: rgba(14, 165, 233, 0.15);
     color: #38bdf8;
-    border: 1px solid rgba(14, 165, 233, 0.3);
+    border: 1.5px solid #38bdf8;
+    box-shadow: 0 2px 0 #0369a1;
     letter-spacing: 0.5px;
 }
 
 .session-teacher-tag {
-    padding: 2px 8px;
-    border-radius: 6px;
+    padding: 3px 9px;
+    border-radius: 8px;
     font-size: 11.5px;
     font-weight: 700;
     background: rgba(139, 92, 246, 0.15);
     color: #a78bfa;
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    border: 1.5px solid #8b5cf6;
+    box-shadow: 0 2px 0 #6d28d9;
 }
 
 .class-session-meta {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-size: 12.5px;
     color: var(--tc-text-muted);
 }
@@ -1238,10 +1244,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 7px 14px;
+    border-radius: 10px;
     background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.28);
+    border: 1.5px solid #10b981;
+    box-shadow: 0 2px 0 #047857;
     font-size: 13px;
 }
 
@@ -1259,13 +1266,14 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 14px;
-    border-radius: 8px;
+    padding: 9px 16px;
+    border-radius: 10px;
     background: var(--tc-surface);
-    border: 1px solid var(--tc-border);
+    border: 2px solid var(--tc-border);
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.4);
     color: var(--tc-text);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -1274,6 +1282,8 @@
     background: var(--tc-surface-hover);
     border-color: #f59e0b;
     color: #f59e0b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.5);
 }
 
 .class-session-details-table-wrap {
@@ -1287,25 +1297,26 @@
     font-size: 13.5px;
     text-align: left;
     background: var(--tc-surface);
-    border-radius: 10px;
+    border-radius: 14px;
     overflow: hidden;
-    border: 1px solid var(--tc-border);
+    border: 2px solid var(--tc-border);
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.3);
 }
 
 .class-session-table th {
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.35);
     padding: 12px 14px;
     font-weight: 800;
     color: var(--tc-text-muted);
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 1.5px solid var(--tc-border);
+    border-bottom: 2px solid var(--tc-border);
 }
 
 .class-session-table td {
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--tc-border);
+    padding: 13px 14px;
+    border-bottom: 1.5px solid var(--tc-border);
     color: var(--tc-text);
     vertical-align: middle;
 }
@@ -1324,30 +1335,31 @@
 
 .rank-pill {
     display: inline-block;
-    padding: 3px 8px;
+    padding: 3px 9px;
     border-radius: 6px;
     font-weight: 800;
     font-size: 12px;
     background: var(--tc-surface-card);
-    border: 1px solid var(--tc-border);
+    border: 1.5px solid var(--tc-border);
+    box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.3);
 }
 
 .rank-pill.rank-1 {
     background: rgba(245, 158, 11, 0.2);
     color: #fbbf24;
-    border-color: rgba(245, 158, 11, 0.5);
+    border-color: #f59e0b;
 }
 
 .rank-pill.rank-2 {
     background: rgba(148, 163, 184, 0.2);
     color: #e2e8f0;
-    border-color: rgba(148, 163, 184, 0.4);
+    border-color: #cbd5e1;
 }
 
 .rank-pill.rank-3 {
     background: rgba(217, 119, 6, 0.2);
     color: #f97316;
-    border-color: rgba(217, 119, 6, 0.4);
+    border-color: #f97316;
 }
 
 .player-name-cell strong {
@@ -1356,7 +1368,7 @@
 }
 
 .role-tag {
-    padding: 2px 8px;
+    padding: 3px 9px;
     border-radius: 6px;
     font-size: 11.5px;
     font-weight: 700;
@@ -1365,13 +1377,13 @@
 .role-tag.role-teacher {
     background: rgba(139, 92, 246, 0.15);
     color: #c4b5fd;
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    border: 1.5px solid #8b5cf6;
 }
 
 .role-tag.role-student {
     background: rgba(14, 165, 233, 0.12);
     color: #7dd3fc;
-    border: 1px solid rgba(14, 165, 233, 0.25);
+    border: 1.5px solid #0ea5e9;
 }
 
 .score-cell {
@@ -1395,4 +1407,113 @@
     text-align: center;
     color: var(--tc-text-muted);
     font-size: 13.5px;
+}
+
+/* ================= LIGHT MODE OVERRIDES FOR CLASS GAME SESSIONS ================= */
+[data-theme='light'] .class-session-card {
+    background: #ffffff;
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 0 #191a23;
+}
+
+[data-theme='light'] .class-session-card:hover {
+    border-color: #0284c7;
+    box-shadow: 0 6px 0 0 #191a23;
+}
+
+[data-theme='light'] .class-session-title {
+    color: #0f172a;
+}
+
+[data-theme='light'] .class-session-meta {
+    color: #475569;
+}
+
+[data-theme='light'] .class-session-icon {
+    background: rgba(245, 158, 11, 0.15);
+    border: 2px solid #191a23;
+    color: #b45309;
+    box-shadow: 0 2px 0 0 #191a23;
+}
+
+[data-theme='light'] .session-pin-badge {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 0 #191a23;
+}
+
+[data-theme='light'] .session-teacher-tag {
+    background: #ede9fe;
+    color: #6d28d9;
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 0 #191a23;
+}
+
+[data-theme='light'] .session-my-score-pill {
+    background: #dcfce7;
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 0 #191a23;
+    color: #166534;
+}
+
+[data-theme='light'] .btn-toggle-session-details {
+    background: #f8fafc;
+    border: 2px solid #191a23;
+    box-shadow: 0 3px 0 0 #191a23;
+    color: #191a23;
+}
+
+[data-theme='light'] .btn-toggle-session-details:hover {
+    background: #ffffff;
+    border-color: #0284c7;
+    color: #0284c7;
+    box-shadow: 0 5px 0 0 #191a23;
+}
+
+[data-theme='light'] .class-session-table {
+    background: #ffffff;
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 0 #191a23;
+}
+
+[data-theme='light'] .class-session-table th {
+    background: #191a23;
+    color: #ffffff;
+    border-bottom: 2px solid #191a23;
+}
+
+[data-theme='light'] .class-session-table td {
+    border-bottom: 1.5px solid #e2e8f0;
+    color: #0f172a;
+}
+
+[data-theme='light'] .player-name-cell strong {
+    color: #0f172a;
+}
+
+[data-theme='light'] .rank-pill {
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 0 #191a23;
+}
+
+[data-theme='light'] .role-tag.role-teacher {
+    background: #ede9fe;
+    color: #6d28d9;
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 0 #191a23;
+}
+
+[data-theme='light'] .role-tag.role-student {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1.5px solid #191a23;
+    box-shadow: 0 2px 0 0 #191a23;
+}
+
+[data-theme='light'] .session-no-players {
+    color: #64748b;
+    background: #f8fafc;
+    border: 1.5px dashed #191a23;
+    border-radius: 12px;
 }

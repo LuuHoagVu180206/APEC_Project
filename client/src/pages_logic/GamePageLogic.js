@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
@@ -8,12 +8,11 @@ export const GamePageLogic = () => {
     const iframeRef = useRef(null);
     const gameContainerRef = useRef(null);
 
-    const searchParams = new URLSearchParams(location.search);
+    const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
     const initialSetId = searchParams.get('setId') || '';
     const isWeeklyParam = searchParams.get('isWeekly') === 'true';
     const autoStartParam = searchParams.get('autoStart') === 'true';
     const modeParam = searchParams.get('mode') || 'solo';
-    const pinParam = searchParams.get('pin') || '';
 
     const [user, setUser] = useState(() => {
         try {
@@ -96,6 +95,7 @@ export const GamePageLogic = () => {
     // 3. Tải câu hỏi theo setId từ URL hoặc mặc định
     useEffect(() => {
         const setId = searchParams.get('setId');
+        const isWeekly = searchParams.get('isWeekly') === 'true';
 
         const loadQuestionsForGame = async () => {
             if (setId) {
@@ -104,7 +104,7 @@ export const GamePageLogic = () => {
                     if (res.data?.questions && res.data.questions.length > 0) {
                         setQuestions(res.data.questions);
                         const sData = res.data.set || {};
-                        if (isWeeklyParam) {
+                        if (isWeekly) {
                             sData.isWeekly = true;
                         }
                         setActiveSet(sData);
@@ -142,7 +142,7 @@ export const GamePageLogic = () => {
         };
 
         loadQuestionsForGame();
-    }, [location.search]);
+    }, [searchParams]);
 
     // 4. Chọn một bộ câu hỏi khác
     const handleSelectSet = async (selectedSet) => {
@@ -230,7 +230,7 @@ export const GamePageLogic = () => {
 
         window.addEventListener('message', handleGameMessage);
         return () => window.removeEventListener('message', handleGameMessage);
-    }, [questions, activeSet]);
+    }, [questions, activeSet, isWeeklyParam]);
 
     // 7. Các tiện ích điều khiển Game
     const handleReloadGame = useCallback(() => {

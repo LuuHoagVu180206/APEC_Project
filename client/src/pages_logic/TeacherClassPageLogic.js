@@ -97,7 +97,7 @@ export const TeacherClassPageLogic = () => {
         });
 
         return () => { isActive = false; };
-    }, [currentUser, id, loadMembers, navigate]);
+    }, [currentUser, id, loadMembers, navigate, loadGameSessions]);
 
     const availableSets = mySets.filter((set) =>
         !classInfo?.questionSets?.some((classSet) => classSet._id === set._id)

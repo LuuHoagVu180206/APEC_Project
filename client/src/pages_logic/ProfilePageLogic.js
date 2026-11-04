@@ -34,7 +34,6 @@ export const ProfilePageLogic = () => {
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [schoolMemberships, setSchoolMemberships] = useState([]);
     const [playHistory, setPlayHistory] = useState([]);
-    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
     // 1. Kiểm tra đăng nhập và tải dữ liệu người dùng mới nhất
     useEffect(() => {
@@ -238,7 +237,6 @@ export const ProfilePageLogic = () => {
         isChangingPassword,
         schoolActionLabel,
         playHistory,
-        isLoadingHistory,
         handleAvatarUpload,
         handleRemoveAvatar,
         handleUpdateProfile,

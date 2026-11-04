@@ -20,7 +20,7 @@ export const AdminPageLogic = () => {
         }
         fetchAllQuestions();
         fetchVersion();
-    }, [navigate]);
+    }, [currentUser, navigate]);
 
     const fetchAllQuestions = async () => {
         try {
