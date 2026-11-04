@@ -33,6 +33,8 @@ export const ProfilePageLogic = () => {
     const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [schoolMemberships, setSchoolMemberships] = useState([]);
+    const [playHistory, setPlayHistory] = useState([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
     // 1. Kiểm tra đăng nhập và tải dữ liệu người dùng mới nhất
     useEffect(() => {
@@ -51,6 +53,12 @@ export const ProfilePageLogic = () => {
                 const defaultDisplayName = (userData.displayName && userData.displayName.trim())
                     ? userData.displayName.trim()
                     : (userData.username || currentUser.username);
+
+                // Cập nhật danh sách lịch sử màn chơi cá nhân (Solo & Lớp học)
+                const rawHistory = userData.playHistory || [];
+                const sortedHistory = [...rawHistory]
+                    .sort((a, b) => new Date(b.playedAt) - new Date(a.playedAt));
+                setPlayHistory(sortedHistory);
 
                 setFormData({
                     displayName: defaultDisplayName,
@@ -229,6 +237,8 @@ export const ProfilePageLogic = () => {
         isUpdatingProfile,
         isChangingPassword,
         schoolActionLabel,
+        playHistory,
+        isLoadingHistory,
         handleAvatarUpload,
         handleRemoveAvatar,
         handleUpdateProfile,

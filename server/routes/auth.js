@@ -3,7 +3,48 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs'); // Thư viện mã hóa
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const mongoose = require('mongoose');
 const { verifyToken } = require('../verifyToken');
+
+// Lưu session vào thư mục tạm của hệ điều hành để hoàn toàn không kích hoạt nodemon restart khi người dùng F5 web
+const SESSION_FILE = path.join(os.tmpdir(), 'apec_edugame_active_session.json');
+
+function loadPersistedSession() {
+    try {
+        if (fs.existsSync(SESSION_FILE)) {
+            const data = fs.readFileSync(SESSION_FILE, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (e) {
+        console.error('Lỗi nạp session file:', e.message);
+    }
+    return null;
+}
+
+let lastSavedSessionString = '';
+function savePersistedSession(session) {
+    try {
+        const currentString = (session && session.username && session.role !== 'guest')
+            ? JSON.stringify(session)
+            : '';
+        if (currentString === lastSavedSessionString) {
+            return; // Dữ liệu phiên không đổi, không ghi file để tránh kích hoạt reload
+        }
+        lastSavedSessionString = currentString;
+        if (currentString) {
+            fs.writeFileSync(SESSION_FILE, JSON.stringify(session, null, 2), 'utf8');
+        } else if (fs.existsSync(SESSION_FILE)) {
+            fs.unlinkSync(SESSION_FILE);
+        }
+    } catch (e) {
+        console.error('Lỗi lưu session file:', e.message);
+    }
+}
+
+let latestWebSession = loadPersistedSession();
 const PasswordResetOTP = require('../models/PasswordResetOTP');
 const { sendPasswordResetEmail } = require('../sendPasswordResetEmail');
 
@@ -173,12 +214,9 @@ router.post('/login', async (req, res) => {
         const user = await User.findOne({ username: req.body.username });
         if (!user) return res.status(404).json("User not found");
 
-        // So sánh mật khẩu nhập vào với mật khẩu đã băm trong DB
         const validPassword = await bcrypt.compare(req.body.password, user.password);
         if (!validPassword) return res.status(400).json("Wrong password");
 
-        // Nếu đúng -> Tạo vé (Token)
-        // Vé này chứa ID của user và hạn sử dụng (ví dụ 30 ngày)
         const accessToken = jwt.sign(
             { id: user._id,
               username: user.username,
@@ -187,12 +225,108 @@ router.post('/login', async (req, res) => {
             { expiresIn: "30d" }
         );
 
-        // Trả về thông tin user kèm theo cái vé (accessToken)
-        const { password, ...others } = user._doc; // Giấu mật khẩu đi không trả về
-        res.status(200).json({ ...others, accessToken });
+        const { password, ...others } = user._doc;
+        const sessionData = { ...others, accessToken };
+        latestWebSession = sessionData;
+        savePersistedSession(latestWebSession);
+        console.log('[Auth] Đăng nhập thành công trên web:', sessionData.username);
+        res.status(200).json(sessionData);
         
     } catch (err) {
         res.status(500).json(err);
+    }
+});
+
+// POST: Web client đồng bộ trạng thái đăng nhập
+router.post('/web-session', (req, res) => {
+    const user = req.body.user;
+    if (user && user.username && user.role !== 'guest') {
+        latestWebSession = user;
+        savePersistedSession(latestWebSession);
+        console.log('[WebSession] Đồng bộ tài khoản web: ' + user.username);
+    } else {
+        latestWebSession = null;
+        savePersistedSession(null);
+        console.log('[WebSession] Web hiện chưa đăng nhập (khách)');
+    }
+    res.status(200).json({ success: true, session: latestWebSession });
+});
+
+// DELETE: Web client đăng xuất
+router.delete('/web-session', (req, res) => {
+    latestWebSession = null;
+    savePersistedSession(null);
+    console.log('[WebSession] Web đã đăng xuất');
+    res.status(200).json({ success: true });
+});
+
+// GET: Game / Web gọi API kiểm tra xem trên web có đang đăng nhập không
+router.get('/current-session', async (req, res) => {
+    try {
+        let token = req.headers['authorization'] || req.headers['token'];
+        if (token && token.startsWith('Bearer ')) {
+            token = token.slice(7);
+        }
+
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'mat_khau_bi_mat_cua_server');
+                const user = await User.findById(decoded.id).select('-password');
+                if (user) {
+                    return res.status(200).json({
+                        isLoggedIn: true,
+                        username: user.username,
+                        displayName: user.displayName || user.username,
+                        userId: user._id,
+                        role: user.role,
+                        accessToken: token,
+                        highScore: user.highScore || 0,
+                        weeklyScore: user.weeklyScore || 0
+                    });
+                }
+            } catch (tokenErr) {}
+        }
+
+        if (latestWebSession && latestWebSession.username && latestWebSession.role !== 'guest') {
+            const userId = latestWebSession._id || latestWebSession.id;
+            try {
+                if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+                    const user = await User.findById(userId).select('-password');
+                    if (user) {
+                        return res.status(200).json({
+                            isLoggedIn: true,
+                            username: user.username,
+                            displayName: user.displayName || user.username,
+                            userId: user._id,
+                            role: user.role,
+                            accessToken: latestWebSession.accessToken || null,
+                            highScore: user.highScore || 0,
+                            weeklyScore: user.weeklyScore || 0
+                        });
+                    }
+                }
+            } catch (_) {}
+
+            return res.status(200).json({
+                isLoggedIn: true,
+                username: latestWebSession.username,
+                displayName: latestWebSession.displayName || latestWebSession.username,
+                userId: latestWebSession._id || latestWebSession.id,
+                role: latestWebSession.role || 'user',
+                accessToken: latestWebSession.accessToken || null,
+                highScore: latestWebSession.highScore || 0,
+                weeklyScore: latestWebSession.weeklyScore || 0
+            });
+        }
+
+        return res.status(200).json({
+            isLoggedIn: false,
+            username: '',
+            message: 'Chưa đăng nhập'
+        });
+    } catch (err) {
+        console.error('Lỗi kiểm tra current-session:', err);
+        res.status(200).json({ isLoggedIn: false, username: '', message: 'Chưa đăng nhập' });
     }
 });
 

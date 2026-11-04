@@ -25,6 +25,25 @@ export const TeacherClassPageLogic = () => {
     const [showAssignments, setShowAssignments] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [gameSessions, setGameSessions] = useState([]);
+    const [isTeacherOfClass, setIsTeacherOfClass] = useState(false);
+    const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+
+        const loadGameSessions = useCallback(async () => {
+        if (!currentUser?.accessToken) return;
+        setIsLoadingSessions(true);
+        try {
+            const res = await axios.get(`http://localhost:5000/api/classes/${id}/game-sessions`, {
+                headers: { token: currentUser.accessToken }
+            });
+            setGameSessions(res.data.sessions || []);
+            setIsTeacherOfClass(Boolean(res.data.isTeacher));
+        } catch (e) {
+            console.error('Lỗi tải lịch sử phiên chơi:', e);
+        } finally {
+            setIsLoadingSessions(false);
+        }
+    }, [currentUser, id]);
 
     const loadClass = useCallback(async () => {
         const response = await axios.get(`http://localhost:5000/api/classes/${id}`, {
@@ -57,6 +76,7 @@ export const TeacherClassPageLogic = () => {
                 headers: { token: currentUser.accessToken }
             });
             if (!isActive) return;
+            await loadGameSessions();
             setClassInfo(classResponse.data);
             setMySets(setsResponse.data);
             if (classResponse.data.isPrimaryTeacher) {
@@ -157,6 +177,10 @@ export const TeacherClassPageLogic = () => {
         isLoading,
         error,
         handleAddQuestionSet,
+        gameSessions,
+        isTeacherOfClass,
+        isLoadingSessions,
+        loadGameSessions,
         navigate
     };
 };

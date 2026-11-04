@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import GamePage from './pages/GamePage';
@@ -23,6 +24,33 @@ import AdminSchoolDetailPage from './pages/AdminSchoolDetailPage';
 import ToastContainer from './components/ToastContainer';
 
 function App() {
+  useEffect(() => {
+    const syncSession = async () => {
+      try {
+        const stored = localStorage.getItem('user');
+        const userData = stored ? JSON.parse(stored) : null;
+        if (userData && userData.username && userData.role !== 'guest') {
+          await axios.post('http://localhost:5000/api/auth/web-session', { user: userData });
+        } else {
+          await axios.delete('http://localhost:5000/api/auth/web-session');
+        }
+      } catch (e) {
+        // Ignored
+      }
+    };
+
+    syncSession();
+
+    const handleStorage = (e) => {
+      if (e.key === 'user') {
+        syncSession();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   return (
     <Router>
       <ToastContainer />

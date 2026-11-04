@@ -1,12 +1,24 @@
 /* ==========================================================================
-   MODERN EDTECH & CLEAN NEO-BRUTALIST STYLING FOR STUDENT CLASSES PAGE
-   Strictly scoped to .student-classes-root
-   No pixel art font or pixel images - 100% Vietnamese Unicode compatible
+   POSITIVUS DESIGN SYSTEM FOR STUDENT CLASSES PAGE
+   Inspired by Olga Averchenko's Iconic "Positivus Landing Page Design"
+   Theme: Bold Modern Neo-Brutalism
+   Colors: Lime Green (#B9FF66), Dark Charcoal (#191A23), Light Grey (#F3F3F3), White (#FFFFFF)
+   Typography: Space Grotesk (Headings, badges, buttons) + Plus Jakarta Sans (Body)
+   Tactile hard shadows (0px 5px 0px #191A23), large curved corners (45px/35px/14px/7px)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
+/* --- 1. POSITIVUS DESIGN TOKENS --- */
 .student-classes-root {
+    --pos-lime: #B9FF66;
+    --pos-lime-hover: #a3f04f;
+    --pos-dark: #191A23;
+    --pos-dark-surface: #22232E;
+    --pos-grey: #F3F3F3;
+    --pos-grey-hover: #EBEBEB;
+    --pos-white: #FFFFFF;
+
     --sc-bg: #070a13;
     --sc-surface: #0f172a;
     --sc-surface-hover: #1f2937;
@@ -35,452 +47,685 @@
     --sc-emerald-shadow: #047857;
     
     --sc-font: "Iosevka Charon Mono", monospace;
-    
+
     min-height: 100vh;
     background-color: var(--sc-bg);
-    background-image: 
-        radial-gradient(circle at 12% 15%, rgba(14, 165, 233, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 88% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 45%),
-        radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.04) 0%, transparent 60%);
     color: var(--sc-text);
-    font-family: var(--sc-font);
-    padding: 32px 24px 80px;
+    font-family: var(--font-body);
+    padding: 36px 24px 90px;
     box-sizing: border-box;
     -webkit-font-smoothing: antialiased;
 }
 
+/* Dark Mode (High-Contrast Positivus Night) */
+[data-theme='dark'] .student-classes-root {
+    --sc-bg: #0D0E15;
+    --sc-surface: #191A23;
+    --sc-border: #B9FF66;
+    --sc-text: #FFFFFF;
+    --sc-text-muted: #E5E7EB;
+    --sc-text-subtle: #9CA3AF;
+    --pos-grey: #191A23;
+}
+
 .student-classes-inner {
-    width: min(100%, 1160px);
+    width: min(100%, 1200px);
     margin: 0 auto;
 }
 
-/* ================= TOP NAVIGATION / HUD ================= */
+/* --- 2. TOP HUD / NAVIGATION --- */
 .student-classes-top-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 30px;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 14px;
 }
 
 .student-classes-back-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--sc-surface);
-    color: var(--sc-text-muted);
-    border: 1.5px solid var(--sc-border-light);
-    border-radius: 12px;
-    padding: 10px 18px;
-    font-size: 13.5px;
+    background: var(--pos-white);
+    color: var(--pos-dark);
+    border: 1.5px solid var(--pos-dark);
+    border-radius: 14px;
+    padding: 10px 20px;
+    font-family: var(--font-heading);
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.6);
-    transition: all 0.15s ease;
+    box-shadow: 0px 4px 0px var(--pos-dark);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
 }
 
 .student-classes-back-btn:hover {
-    color: var(--sc-cyan);
-    border-color: var(--sc-cyan);
-    background: var(--sc-surface-hover);
+    background: var(--pos-lime);
+    color: var(--pos-dark);
     transform: translateY(-2px);
-    box-shadow: 0 5px 0 0 rgba(0, 0, 0, 0.6);
+    box-shadow: 0px 6px 0px var(--pos-dark);
 }
 
 .student-classes-back-btn:active {
     transform: translateY(2px);
-    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
+    box-shadow: 0px 2px 0px var(--pos-dark);
 }
 
 .student-classes-role-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 16px;
-    border-radius: 9999px;
-    background: rgba(14, 165, 233, 0.12);
-    border: 1.5px solid rgba(14, 165, 233, 0.35);
-    color: var(--sc-cyan-hover);
-    font-size: 12px;
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+    border: 1.5px solid var(--pos-dark);
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-family: var(--font-heading);
+    font-size: 13.5px;
     font-weight: 800;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
+    box-shadow: 0px 4px 0px var(--pos-dark);
+    letter-spacing: 0.2px;
 }
 
-/* ================= HERO HEADER ================= */
+/* --- 3. HERO HEADER --- */
 .student-classes-hero {
-    background: linear-gradient(135deg, #131c31 0%, #0e1526 100%);
-    border: 1.5px solid var(--sc-border-light);
-    border-radius: 20px;
-    padding: 32px 36px;
-    margin-bottom: 32px;
-    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 4px 0 0 #050811;
-    position: relative;
-    overflow: hidden;
+    margin-bottom: 40px;
 }
 
-.student-classes-hero::before {
-    content: '';
-    position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 260px;
-    height: 260px;
-    background: radial-gradient(circle, rgba(14, 165, 233, 0.12) 0%, transparent 70%);
-    pointer-events: none;
-}
-
+/* Signature Positivus Pill Badge */
 .student-classes-hero-tag {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 8px;
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+    border-radius: 7px;
+    padding: 6px 14px;
+    font-family: var(--font-heading);
+    font-size: 14px;
     font-weight: 800;
-    color: var(--sc-cyan);
+    letter-spacing: 0.3px;
+    margin-bottom: 16px;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 10px;
 }
 
 .student-classes-hero h1 {
-    font-size: 32px;
+    font-family: var(--font-heading);
+    font-size: clamp(32px, 5vw, 48px);
     font-weight: 800;
-    margin: 0 0 10px;
-    letter-spacing: -0.6px;
-    color: #ffffff;
-    line-height: 1.25;
+    color: var(--sc-text);
+    margin: 0 0 14px;
+    letter-spacing: -1.2px;
+    line-height: 1.15;
 }
 
 .student-classes-hero-sub {
-    margin: 0;
+    font-size: 16.5px;
     color: var(--sc-text-muted);
-    font-size: 15px;
     line-height: 1.6;
+    margin: 0;
     max-width: 680px;
 }
 
-/* ================= JOIN CLASS CARD / FORM ================= */
+/* --- 4. JOIN CLASS CARD (POSITIVUS CTA BANNER "LET'S MAKE THINGS HAPPEN") --- */
 .student-classes-join-card {
-    background: var(--sc-surface-card);
-    border: 1.5px solid var(--sc-border-light);
-    border-radius: 20px;
-    padding: 28px 32px;
-    margin-bottom: 36px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 4px 0 0 #050811;
+    background: var(--pos-grey);
+    border: 1.5px solid var(--pos-dark);
+    border-radius: 45px;
+    padding: 38px 44px;
+    margin-bottom: 54px;
+    box-shadow: 0px 5px 0px var(--pos-dark);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
 }
 
 .student-classes-join-title-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.positivus-mini-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--pos-lime);
+    border: 1.5px solid var(--pos-dark);
+    color: var(--pos-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 3px 0px var(--pos-dark);
 }
 
 .student-classes-join-title-row h2 {
-    font-size: 19px;
-    font-weight: 800;
+    font-family: var(--font-heading);
     margin: 0;
-    color: #ffffff;
-    letter-spacing: -0.3px;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--sc-text);
+    letter-spacing: -0.5px;
 }
 
 .student-classes-join-form {
     display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
     align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .student-classes-input-wrap {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--sc-surface);
-    border: 1.5px solid var(--sc-border-light);
-    border-radius: 14px;
-    padding: 10px 18px;
     flex: 1;
     min-width: 260px;
-    box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.4);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.student-classes-input-wrap:focus-within {
-    border-color: var(--sc-cyan);
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+.student-classes-input-wrap .join-lead-icon {
+    position: absolute;
+    left: 18px;
+    color: var(--pos-dark);
+    pointer-events: none;
 }
 
 .student-classes-input-wrap input {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #ffffff;
-    font-family: var(--sc-font);
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 2px;
     width: 100%;
-    text-transform: lowercase;
+    background: var(--pos-white);
+    border: 1.5px solid var(--pos-dark);
+    border-radius: 14px;
+    padding: 16px 20px 16px 48px;
+    font-family: var(--font-heading);
+    font-size: 15.5px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--pos-dark);
+    outline: none;
+    box-shadow: 0px 3px 0px var(--pos-dark);
+    box-sizing: border-box;
+    transition: all 0.15s ease;
 }
 
 .student-classes-input-wrap input::placeholder {
+    font-family: var(--font-body);
+    font-weight: 500;
     letter-spacing: normal;
     color: var(--sc-text-subtle);
-    font-weight: 500;
-    font-size: 14px;
+}
+
+.student-classes-input-wrap input:focus {
+    border-color: var(--pos-dark);
+    box-shadow: 0px 5px 0px var(--pos-dark);
+    transform: translateY(-1px);
 }
 
 .student-classes-btn-join {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-    color: #ffffff;
-    border: 1px solid var(--sc-cyan-shadow);
-    border-radius: 14px;
-    padding: 12px 26px;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 4px 0 0 var(--sc-cyan-shadow);
-    transition: all 0.15s ease;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 10px;
+    background: var(--pos-dark);
+    color: var(--pos-white);
+    border: 1.5px solid var(--pos-dark);
+    border-radius: 14px;
+    padding: 16px 32px;
+    font-family: var(--font-heading);
+    font-size: 15.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0px 4px 0px var(--pos-dark);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
     user-select: none;
 }
 
 .student-classes-btn-join:hover:not(:disabled) {
-    filter: brightness(1.1);
+    background: var(--pos-lime);
+    color: var(--pos-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 0 0 var(--sc-cyan-shadow);
+    box-shadow: 0px 6px 0px var(--pos-dark);
 }
 
 .student-classes-btn-join:active:not(:disabled) {
     transform: translateY(2px);
-    box-shadow: 0 1px 0 0 var(--sc-cyan-shadow);
+    box-shadow: 0px 2px 0px var(--pos-dark);
 }
 
 .student-classes-btn-join:disabled {
     opacity: 0.55;
     cursor: not-allowed;
+    box-shadow: none;
 }
 
 .student-classes-teacher-toggle {
+    margin-top: 18px;
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 14px;
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--sc-text-muted);
     cursor: pointer;
     user-select: none;
 }
 
 .student-classes-teacher-toggle input[type="checkbox"] {
-    width: 17px;
-    height: 17px;
-    accent-color: var(--sc-cyan);
+    width: 20px;
+    height: 20px;
+    accent-color: var(--pos-lime);
     cursor: pointer;
 }
 
 .student-classes-alert-success {
-    background: rgba(16, 185, 129, 0.12);
-    border: 1.5px solid rgba(16, 185, 129, 0.4);
-    color: #6ee7b7;
+    margin-top: 18px;
     padding: 12px 18px;
     border-radius: 12px;
-    margin-top: 16px;
-    font-size: 13.5px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.student-classes-alert-error {
-    background: rgba(239, 68, 68, 0.12);
-    border: 1.5px solid rgba(239, 68, 68, 0.4);
-    color: #fca5a5;
-    padding: 12px 18px;
-    border-radius: 12px;
-    margin-top: 16px;
-    font-size: 13.5px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* ================= CLASSES SECTION & GRID ================= */
-.student-classes-section {
-    margin-top: 36px;
-}
-
-.student-classes-section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 22px;
-    flex-wrap: wrap;
-    gap: 14px;
-}
-
-.student-classes-section-header h2 {
-    font-size: 22px;
-    font-weight: 800;
-    margin: 0;
-    color: #ffffff;
+    background: #E8FDE8;
+    border: 1.5px solid var(--pos-dark);
+    color: #065F46;
     display: flex;
     align-items: center;
     gap: 10px;
-    letter-spacing: -0.4px;
+    font-weight: 700;
+    box-shadow: 0px 3px 0px var(--pos-dark);
+}
+
+.student-classes-alert-error {
+    margin-top: 18px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: #FEE2E2;
+    border: 1.5px solid var(--pos-dark);
+    color: #991B1B;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    box-shadow: 0px 3px 0px var(--pos-dark);
+}
+
+/* --- 5. SECTION HEADER (POSITIVUS HIGHLIGHTED HEADING BADGE) --- */
+.student-classes-section {
+    margin-bottom: 60px;
+}
+
+.student-classes-section-header {
+    margin-bottom: 34px;
+}
+
+.positivus-heading-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+/* Positivus Section Heading Highlight Badge */
+.positivus-section-badge {
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+    border-radius: 7px;
+    padding: 4px 14px;
+    font-family: var(--font-heading);
+    font-size: clamp(26px, 3.8vw, 34px);
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    display: inline-block;
 }
 
 .student-classes-count-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12.5px;
-    font-weight: 800;
-    background: rgba(14, 165, 233, 0.15);
-    border: 1.5px solid rgba(14, 165, 233, 0.4);
-    color: var(--sc-cyan-hover);
-    padding: 2px 10px;
-    border-radius: 9999px;
+    background: var(--pos-dark);
+    color: var(--pos-white);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: var(--font-heading);
+    font-size: 13.5px;
+    font-weight: 700;
 }
 
+/* --- 6. POSITIVUS CARDS GRID (ALTERNATING CARDS) --- */
 .student-classes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 30px;
 }
 
+/* Base Positivus Card */
 .student-classes-card {
-    background: var(--sc-surface-card);
-    border: 1.5px solid var(--sc-border-light);
-    border-radius: 18px;
-    padding: 22px 24px;
+    border: 1.5px solid var(--pos-dark);
+    border-radius: 36px;
+    padding: 34px 30px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 16px;
+    min-height: 230px;
+    box-shadow: 0px 5px 0px var(--pos-dark);
     cursor: pointer;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), 0 4px 0 0 #050811;
-    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-    text-align: left;
-    color: inherit;
-    user-select: none;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
 }
 
 .student-classes-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 6px 0 0 #050811;
-    border-color: var(--sc-cyan);
+    box-shadow: 0px 8px 0px var(--pos-dark);
 }
 
 .student-classes-card:active {
     transform: translateY(2px);
-    box-shadow: 0 1px 0 0 #050811;
+    box-shadow: 0px 2px 0px var(--pos-dark);
 }
 
+/* VARIANT 1: Light Grey Card (Classic Positivus) */
+.student-classes-card.card-positivus-light {
+    background: var(--pos-grey);
+    color: var(--pos-dark);
+}
+
+.card-positivus-light .student-classes-card-avatar {
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+    border: 1.5px solid var(--pos-dark);
+}
+
+.card-positivus-light h3 {
+    color: var(--pos-dark);
+}
+
+.card-positivus-light .meta-code-pill {
+    background: var(--pos-white);
+    border: 1px solid var(--pos-dark);
+    color: var(--pos-dark);
+}
+
+.card-positivus-light .student-classes-count-item {
+    background: var(--pos-white);
+    border: 1px solid var(--pos-dark);
+    color: var(--pos-dark);
+}
+
+.card-positivus-light .positivus-circle-arrow {
+    background: var(--pos-dark);
+    color: var(--pos-lime);
+}
+
+.card-positivus-light:hover .positivus-circle-arrow {
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+}
+
+/* VARIANT 2: Lime Green Card (Signature Positivus Hero) */
+.student-classes-card.card-positivus-lime {
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+}
+
+.card-positivus-lime .student-classes-card-avatar {
+    background: var(--pos-white);
+    color: var(--pos-dark);
+    border: 1.5px solid var(--pos-dark);
+}
+
+.card-positivus-lime h3 {
+    color: var(--pos-dark);
+}
+
+.card-positivus-lime .meta-code-pill {
+    background: var(--pos-dark);
+    color: var(--pos-lime);
+}
+
+.card-positivus-lime .student-classes-count-item {
+    background: var(--pos-white);
+    border: 1px solid var(--pos-dark);
+    color: var(--pos-dark);
+}
+
+.card-positivus-lime .positivus-circle-arrow {
+    background: var(--pos-dark);
+    color: var(--pos-lime);
+}
+
+.card-positivus-lime:hover .positivus-circle-arrow {
+    background: var(--pos-white);
+    color: var(--pos-dark);
+}
+
+/* VARIANT 3: Dark Charcoal Card (High-Contrast Bold) */
+.student-classes-card.card-positivus-dark {
+    background: var(--pos-dark);
+    color: var(--pos-white);
+}
+
+.card-positivus-dark .student-classes-card-avatar {
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+    border: 1.5px solid var(--pos-lime);
+}
+
+.card-positivus-dark h3 {
+    color: var(--pos-white);
+}
+
+.card-positivus-dark .student-classes-badge-semester {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--pos-white);
+}
+
+.card-positivus-dark .student-classes-card-meta {
+    color: #D1D5DB;
+}
+
+.card-positivus-dark .student-classes-card-meta strong {
+    color: var(--pos-white);
+}
+
+.card-positivus-dark .meta-code-pill {
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+}
+
+.card-positivus-dark .student-classes-count-item {
+    background: #282936;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--pos-white);
+}
+
+.card-positivus-dark .student-classes-enter-arrow span {
+    color: var(--pos-white);
+}
+
+.card-positivus-dark .positivus-circle-arrow {
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+}
+
+.card-positivus-dark:hover .positivus-circle-arrow {
+    background: var(--pos-white);
+    color: var(--pos-dark);
+}
+
+/* Card Elements */
 .student-classes-card-top {
     display: flex;
-    align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
 .student-classes-card-avatar {
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: rgba(14, 165, 233, 0.15);
-    border: 1.5px solid rgba(14, 165, 233, 0.35);
-    color: var(--sc-cyan-hover);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-family: var(--font-heading);
+    font-size: 20px;
     font-weight: 800;
-    flex-shrink: 0;
+    box-shadow: 0px 3px 0px var(--pos-dark);
 }
 
 .student-classes-badge-role {
-    font-size: 11px;
-    font-weight: 800;
+    background: var(--pos-dark);
+    color: var(--pos-white);
+    border-radius: 8px;
     padding: 4px 10px;
-    border-radius: 9999px;
-    background: rgba(245, 158, 11, 0.15);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    color: var(--sc-gold-hover);
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 800;
     text-transform: uppercase;
 }
 
+.student-classes-badge-semester {
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    color: inherit;
+}
+
+.student-classes-card-body {
+    margin-bottom: 22px;
+}
+
 .student-classes-card-body h3 {
-    margin: 10px 0 6px;
-    font-size: 18px;
+    font-family: var(--font-heading);
+    margin: 0 0 10px;
+    font-size: 22px;
     font-weight: 800;
-    color: #ffffff;
-    line-height: 1.35;
-    letter-spacing: -0.3px;
-    overflow-wrap: anywhere;
+    letter-spacing: -0.5px;
+    line-height: 1.25;
 }
 
 .student-classes-card-meta {
-    font-size: 13px;
-    color: var(--sc-text-muted);
-    line-height: 1.5;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    font-size: 13.5px;
+    color: var(--sc-text-muted);
+}
+
+.meta-code-pill {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 6px;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
 }
 
 .student-classes-card-footer {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding-top: 14px;
-    border-top: 1px solid var(--sc-border);
-    font-size: 12.5px;
-    color: var(--sc-text-muted);
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.card-positivus-dark .student-classes-card-footer {
+    border-top-color: rgba(255, 255, 255, 0.15);
 }
 
 .student-classes-card-counts {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .student-classes-count-item {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-}
-
-.student-classes-enter-arrow {
-    color: var(--sc-cyan);
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 8px;
     font-size: 12.5px;
-    transition: gap 0.15s ease;
+    font-weight: 700;
 }
 
-.student-classes-card:hover .student-classes-enter-arrow {
-    color: #ffffff;
-    gap: 6px;
+/* Positivus Signature Circular Action Arrow Button */
+.student-classes-enter-arrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
 }
 
-/* ================= DETAIL MODAL / DRAWER (SELECTED CLASS) ================= */
+.positivus-circle-arrow {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid var(--pos-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 3px 0px var(--pos-dark);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.student-classes-card:hover .positivus-circle-arrow {
+    transform: rotate(45deg);
+}
+
+/* Empty State */
+.student-classes-empty {
+    text-align: center;
+    padding: 50px 24px;
+    background: var(--pos-grey);
+    border: 1.5px dashed var(--pos-dark);
+    border-radius: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.student-classes-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--pos-dark);
+}
+
+.student-classes-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--pos-dark);
+    border-top-color: var(--pos-lime);
+    border-radius: 50%;
+    animation: posSpin 0.7s linear infinite;
+}
+
+@keyframes posSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- 7. DETAIL MODAL / DRAWER (SELECTED CLASS) --- */
 .student-classes-detail-box {
-    background: var(--sc-surface-card);
-    border: 1.5px solid var(--sc-border-light);
-    border-radius: 20px;
-    padding: 28px 32px;
-    margin-top: 36px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 4px 0 0 #050811;
-    position: relative;
+    margin-top: 40px;
+    background: var(--pos-white);
+    border: 2px solid var(--pos-dark);
+    border-radius: 45px;
+    padding: 42px;
+    box-shadow: 0px 8px 0px var(--pos-dark);
+    animation: posSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes posSlideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .student-classes-detail-header {
@@ -488,132 +733,121 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 20px;
-    gap: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--sc-border);
+}
+
+.detail-semester-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--pos-dark);
+    background: var(--pos-lime);
+    border-radius: 6px;
+    padding: 3px 10px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
 }
 
 .student-classes-detail-header h2 {
-    font-size: 24px;
+    font-family: var(--font-heading);
+    font-size: 32px;
     font-weight: 800;
-    margin: 4px 0 0;
-    color: #ffffff;
-    letter-spacing: -0.4px;
+    color: var(--pos-dark);
+    margin: 0;
+    letter-spacing: -0.8px;
 }
 
 .student-classes-btn-close {
-    background: var(--sc-surface);
-    border: 1.5px solid var(--sc-border-light);
-    border-radius: 10px;
-    color: var(--sc-text-muted);
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--pos-dark);
+    color: var(--pos-white);
+    border: 1.5px solid var(--pos-dark);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    box-shadow: 0px 3px 0px var(--pos-dark);
     transition: all 0.15s ease;
 }
 
 .student-classes-btn-close:hover {
-    color: #ffffff;
-    border-color: var(--sc-cyan);
-    transform: scale(1.05);
+    background: var(--pos-lime);
+    color: var(--pos-dark);
+    transform: translateY(-2px);
 }
 
 .student-classes-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 14px;
-    margin: 22px 0;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
 }
 
 .student-classes-stat-tile {
-    background: var(--sc-surface);
-    border: 1.5px solid var(--sc-border);
-    border-radius: 14px;
-    padding: 16px 18px;
+    background: var(--pos-grey);
+    border: 1.5px solid var(--pos-dark);
+    border-radius: 20px;
+    padding: 20px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
+    box-shadow: 0px 4px 0px var(--pos-dark);
 }
 
 .student-classes-stat-tile-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: 1.5px solid var(--pos-dark);
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0px 3px 0px var(--pos-dark);
 }
 
-.student-classes-stat-tile-info {
-    display: flex;
-    flex-direction: column;
-}
+.icon-stat-lime { background: var(--pos-lime); color: var(--pos-dark); }
+.icon-stat-dark { background: var(--pos-dark); color: var(--pos-lime); }
+.icon-stat-white { background: var(--pos-white); color: var(--pos-dark); }
 
 .student-classes-stat-tile-info strong {
-    font-size: 20px;
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 24px;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--pos-dark);
+    line-height: 1.1;
 }
 
 .student-classes-stat-tile-info span {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--sc-text-muted);
     font-weight: 600;
 }
 
-.student-classes-empty {
-    background: rgba(17, 24, 39, 0.6);
-    border: 1.5px dashed var(--sc-border-light);
-    border-radius: 14px;
-    padding: 40px 20px;
-    text-align: center;
-    color: var(--sc-text-muted);
-    font-size: 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+.student-classes-detail-sub-section {
+    margin-top: 26px;
+    padding-top: 20px;
+    border-top: 1.5px solid rgba(0, 0, 0, 0.1);
 }
 
-.student-classes-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 64px 20px;
-    gap: 16px;
-    color: var(--sc-cyan);
-    font-size: 14px;
-    font-weight: 700;
+.student-classes-detail-sub-section h3 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--pos-dark);
+    margin: 0 0 12px;
 }
 
-.student-classes-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3.5px solid var(--sc-border-light);
-    border-top-color: var(--sc-cyan);
-    border-radius: 50%;
-    animation: sc-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-@keyframes sc-spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ================= RESPONSIVE ================= */
+/* --- 8. RESPONSIVE --- */
 @media (max-width: 768px) {
     .student-classes-root {
         padding: 24px 16px 60px;
     }
-    .student-classes-hero {
-        padding: 24px 20px;
-    }
-    .student-classes-hero h1 {
-        font-size: 26px;
-    }
+
     .student-classes-join-card {
         padding: 22px 20px;
     }
@@ -678,8 +912,8 @@
 
 [data-theme='light'] .student-classes-input-wrap {
     background: #f8fafc;
-    border: 2px solid #191a23;
-    box-shadow: 0 2px 0 0 #191a23;
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 0 0 #e2e8f0;
 }
 
 [data-theme='light'] .student-classes-input-wrap input {
@@ -710,13 +944,13 @@
 
 [data-theme='light'] .student-classes-card {
     background: #ffffff;
-    border: 2px solid #191a23;
-    box-shadow: 0 4px 0 0 #191a23;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 3px 0 0 #cbd5e1;
 }
 
 [data-theme='light'] .student-classes-card:hover {
     border-color: #0284c7;
-    box-shadow: 0 6px 0 0 #191a23;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1), 0 5px 0 0 #cbd5e1;
 }
 
 [data-theme='light'] .student-classes-card-body h3 {
@@ -744,7 +978,7 @@
 }
 
 [data-theme='light'] .student-classes-card-footer {
-    border-top-color: #191a23;
+    border-top-color: #e2e8f0;
     color: #475569;
 }
 
@@ -762,8 +996,8 @@
 
 [data-theme='light'] .student-classes-detail-box {
     background: #ffffff;
-    border: 2px solid #191a23;
-    box-shadow: 0 4px 0 0 #191a23;
+    border-color: #cbd5e1;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 0 0 #cbd5e1;
 }
 
 [data-theme='light'] .student-classes-detail-header h2 {
@@ -771,12 +1005,12 @@
 }
 
 [data-theme='light'] .student-classes-detail-header {
-    border-bottom-color: #191a23;
+    border-bottom-color: #e2e8f0;
 }
 
 [data-theme='light'] .student-classes-btn-close {
     background: #f8fafc;
-    border: 2px solid #191a23;
+    border-color: #cbd5e1;
     color: #475569;
 }
 
@@ -787,7 +1021,7 @@
 
 [data-theme='light'] .student-classes-stat-tile {
     background: #f8fafc;
-    border: 2px solid #191a23;
+    border-color: #cbd5e1;
 }
 
 [data-theme='light'] .student-classes-stat-tile-info strong {
@@ -800,6 +1034,6 @@
 
 [data-theme='light'] .student-classes-empty {
     background: #f8fafc;
-    border: 2px solid #191a23;
+    border-color: #cbd5e1;
     color: #475569;
 }

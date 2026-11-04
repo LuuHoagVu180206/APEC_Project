@@ -8,6 +8,13 @@ export const GamePageLogic = () => {
     const iframeRef = useRef(null);
     const gameContainerRef = useRef(null);
 
+    const searchParams = new URLSearchParams(location.search);
+    const initialSetId = searchParams.get('setId') || '';
+    const isWeeklyParam = searchParams.get('isWeekly') === 'true';
+    const autoStartParam = searchParams.get('autoStart') === 'true';
+    const modeParam = searchParams.get('mode') || 'solo';
+    const pinParam = searchParams.get('pin') || '';
+
     const [user, setUser] = useState(() => {
         try {
             const savedUser = JSON.parse(localStorage.getItem('user'));
@@ -22,7 +29,7 @@ export const GamePageLogic = () => {
     const [defaultSets, setDefaultSets] = useState([]);
     const [weeklySets, setWeeklySets] = useState([]);
     const [isSetModalOpen, setIsSetModalOpen] = useState(false);
-    const [gameVersion, setGameVersion] = useState("v1.0");
+    const [gameVersion, setGameVersion] = useState("v3.0");
     const [isLoadingGame, setIsLoadingGame] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [schoolMemberships, setSchoolMemberships] = useState([]);
@@ -55,10 +62,12 @@ export const GamePageLogic = () => {
                 const res = await axios.get('http://localhost:5000/api/settings/version');
                 if (res.data?.version) {
                     setGameVersion(res.data.version);
+                } else {
+                    setGameVersion("v3.0");
                 }
             } catch (err) {
-                console.warn("Dùng phiên bản game mặc định v1.0");
-                setGameVersion("v1.0");
+                console.warn("Dùng phiên bản game mặc định v3.0");
+                setGameVersion("v3.0");
             } finally {
                 setIsLoadingGame(false);
             }
@@ -86,7 +95,6 @@ export const GamePageLogic = () => {
 
     // 3. Tải câu hỏi theo setId từ URL hoặc mặc định
     useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
         const setId = searchParams.get('setId');
 
         const loadQuestionsForGame = async () => {
@@ -95,7 +103,11 @@ export const GamePageLogic = () => {
                     const res = await axios.get(`http://localhost:5000/api/sets/${setId}`);
                     if (res.data?.questions && res.data.questions.length > 0) {
                         setQuestions(res.data.questions);
-                        setActiveSet(res.data.set);
+                        const sData = res.data.set || {};
+                        if (isWeeklyParam) {
+                            sData.isWeekly = true;
+                        }
+                        setActiveSet(sData);
                         return;
                     }
                 } catch (err) {
@@ -187,7 +199,9 @@ export const GamePageLogic = () => {
                 }
             }
 
-            if (data.type === 'GAME_OVER') {
+                        if (data.type === 'GAME_OVER') {
+                // Game Godot đã tự thực hiện lưu điểm trực tiếp qua API (đầy đủ timePlayed và questionsAnswered)
+                // Web chỉ cần đồng bộ lại user state (highScore, weeklyScore) để cập nhật tức thì trên navbar
                 const score = Number(data.score) || 0;
                 let currentUser = null;
                 try {
@@ -196,48 +210,21 @@ export const GamePageLogic = () => {
                     currentUser = null;
                 }
 
-                if (!currentUser || currentUser.role === 'guest' || !currentUser.accessToken) {
-                    alert(`🎉 Hoàn thành màn chơi! Bạn đạt được: ${score} điểm.\n💡 Hãy đăng nhập để lưu kỷ lục lên Bảng Xếp Hạng nhé!`);
+                if (!currentUser || currentUser.role === 'guest') {
                     return;
                 }
 
-                try {
-                    const isWeekly = Boolean(activeSet?.isWeekly);
-                    const res = await axios.post('http://localhost:5000/api/scores/score', {
-                        username: currentUser.username,
-                        score: score,
-                        setId: activeSet?._id || '',
-                        setTitle: activeSet?.title || '',
-                        isWeekly: isWeekly
-                    }, {
-                        headers: { token: currentUser.accessToken } 
-                    });
+                const isWeekly = Boolean(data.isWeekly !== undefined ? data.isWeekly : (activeSet?.isWeekly || isWeeklyParam));
+                const newHighScore = Math.max(currentUser.highScore || 0, score);
+                const newWeeklyScore = isWeekly ? Math.max(currentUser.weeklyScore || 0, score) : (currentUser.weeklyScore || 0);
 
-                    const newHighScore = res.data?.newHighScore !== undefined 
-                        ? res.data.newHighScore 
-                        : Math.max(currentUser.highScore || 0, score);
-                    
-                    const newWeeklyScore = res.data?.weeklyScore !== undefined
-                        ? res.data.weeklyScore
-                        : (isWeekly ? Math.max(currentUser.weeklyScore || 0, score) : currentUser.weeklyScore);
-
-                    const updatedUser = { 
-                        ...currentUser, 
-                        highScore: newHighScore,
-                        weeklyScore: newWeeklyScore 
-                    };
-                    setUser(updatedUser);
-                    localStorage.setItem('user', JSON.stringify(updatedUser));
-
-                    if (isWeekly) {
-                        alert(`🏆 [THỬ THÁCH TUẦN] Chúc mừng! Bạn đạt ${score} điểm.\nĐiểm Tuần của bạn: ${newWeeklyScore} XP! Điểm cao nhất: ${newHighScore} XP.`);
-                    } else {
-                        alert(`🏆 Chúc mừng! Bạn đạt ${score} điểm. Kỷ lục cao nhất của bạn: ${newHighScore} XP!`);
-                    }
-                } catch (err) {
-                    console.error("Lỗi lưu điểm số:", err);
-                    alert(`Hoàn thành màn chơi với ${score} điểm!`);
-                }
+                const updatedUser = { 
+                    ...currentUser, 
+                    highScore: newHighScore, 
+                    weeklyScore: newWeeklyScore 
+                };
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
             }
         };
 
@@ -312,6 +299,10 @@ export const GamePageLogic = () => {
         navigate,
         handleReloadGame,
         toggleFullscreen,
-        handleLogout
+        handleLogout,
+        currentSetId: activeSet?._id || initialSetId || '',
+        isWeekly: Boolean(activeSet?.isWeekly !== undefined ? activeSet.isWeekly : isWeeklyParam),
+        autoStart: autoStartParam,
+        mode: modeParam
     };
 };

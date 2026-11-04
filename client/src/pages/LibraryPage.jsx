@@ -130,6 +130,47 @@ const LibraryPage = () => {
         const item = sortOptions.find(o => o.id === id);
         return item ? item.label : id;
     };
+    // Khởi động trực tiếp vào chế độ Solo - Thử thách tuần (Weekly Challenge)
+    const handlePlayWeekly = (wSet, e) => {
+        if (e) e.stopPropagation();
+        const targetId = wSet?._id || '';
+        const targetTitle = wSet?.title || 'Thử Thách Tuần';
+        try {
+            localStorage.setItem('apec_solo_launch', JSON.stringify({
+                setId: targetId,
+                setTitle: targetTitle,
+                isWeekly: true,
+                mode: 'solo',
+                autoStart: true,
+                timestamp: Date.now()
+            }));
+        } catch (err) {
+            console.warn('Lỗi lưu apec_solo_launch:', err);
+        }
+        navigate(`/game?setId=${encodeURIComponent(targetId)}&isWeekly=true&mode=solo&autoStart=true`);
+    };
+
+    // Khởi động trực tiếp vào chế độ Solo - Bộ đề thông thường trong Thư viện
+    const handlePlayRegular = (qSet, e) => {
+        if (e) e.stopPropagation();
+        const targetId = qSet?._id || '';
+        const targetTitle = qSet?.title || 'Bộ Đề Tự Luyện';
+        try {
+            localStorage.setItem('apec_solo_launch', JSON.stringify({
+                setId: targetId,
+                setTitle: targetTitle,
+                isWeekly: false,
+                mode: 'solo',
+                autoStart: true,
+                timestamp: Date.now()
+            }));
+        } catch (err) {
+            console.warn('Lỗi lưu apec_solo_launch:', err);
+        }
+        navigate(`/game?setId=${encodeURIComponent(targetId)}&isWeekly=false&mode=solo&autoStart=true`);
+    };
+
+
 
     return (
         <div className="library-wrapper">
@@ -477,7 +518,7 @@ const LibraryPage = () => {
                                                 className="btn-bento-play-now"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handlePlaySet(wSet._id);
+                                                    handlePlayWeekly(wSet, e);
                                                 }}
                                                 title="Luyện tập ngay"
                                             >
@@ -677,13 +718,13 @@ const LibraryPage = () => {
                                                 <button 
                                                     type="button" 
                                                     className="btn-library-action btn-action-play"
-                                                    onClick={() => handlePlaySet(qSet._id)}
+                                                    onClick={() => handlePlayRegular(qSet, e)}
                                                     title="Luyện tập ngay bộ đề này trong game"
                                                 >
                                                     <Play size={14} fill="currentColor" />
                                                     <span>Luyện tập</span>
                                                 </button>
-                                            </div>
+
 
                                             <div className="action-group-right">
                                                 {/* Nút Xuất Excel */}
