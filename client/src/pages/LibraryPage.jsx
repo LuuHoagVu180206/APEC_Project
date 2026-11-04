@@ -731,6 +731,8 @@ const LibraryPage = () => {
                                                 </button>
                                             </div>
 
+                                            </div>
+
                                             <div className="action-group-right">
                                                 {/* Nút Xuất Excel */}
                                                 <button 

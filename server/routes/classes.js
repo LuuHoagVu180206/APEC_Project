@@ -5,6 +5,7 @@ const TeacherClass = require('../models/TeacherClass');
 const QuestionSet = require('../models/QuestionSet');
 const SchoolMember = require('../models/SchoolMember');
 const { verifyToken } = require('../verifyToken');
+const { authorizeClassroom } = require('../classroomAccess');
 
 const requireTeacher = (req, res, next) => {
     if (req.user.role !== 'teacher') {
@@ -180,30 +181,10 @@ router.get('/student/:id', verifyToken, requireStudent, async (req, res) => {
 // API KIỂM TRA MÃ LỚP HỌC (Validation class code cho tạo phòng)
 router.get('/validate-code/:code', async (req, res) => {
     try {
-        const code = String(req.params.code || '').trim().toLowerCase();
-        let query = mongoose.Types.ObjectId.isValid(code) ? { _id: code } : { classCode: code };
-        const classDoc = await TeacherClass.findOne(query)
-            .populate('teacher', 'username displayName')
-            .populate('teachers', 'username displayName')
-            .populate('students', 'username displayName');
-
-        if (!classDoc) {
-            return res.status(404).json({ valid: false, message: 'Mã lớp không tồn tại trên hệ thống!' });
-        }
-
-        res.status(200).json({
-            valid: true,
-            classId: classDoc._id,
-            className: classDoc.className,
-            classCode: classDoc.classCode,
-            teacherName: classDoc.teacherName,
-            teacherUsername: classDoc.teacher?.username || '',
-            studentCount: (classDoc.students || []).length,
-            class: classDoc
-        });
+        const { classDoc } = await authorizeClassroom(req.headers.token || req.headers.authorization, req.params.code);
+        res.status(200).json({ valid: true, classId: classDoc._id, className: classDoc.className, classCode: classDoc.classCode });
     } catch (err) {
-        console.error('Lỗi kiểm tra mã lớp:', err);
-        res.status(500).json({ valid: false, message: 'Lỗi server khi kiểm tra mã lớp!' });
+        res.status(err.status || 500).json({ valid: false, message: err.status ? err.message : 'Lỗi server khi kiểm tra mã lớp!' });
     }
 });
 

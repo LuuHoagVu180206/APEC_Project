@@ -19,6 +19,19 @@ const Navbar = ({ activePage, children }) => {
         }
     });
 
+    const [schoolMemberships, setSchoolMemberships] = useState([]);
+
+    useEffect(() => {
+        if (!user?.accessToken) return undefined;
+        let isActive = true;
+        axios.get('http://localhost:5000/api/schools/mine', {
+            headers: { token: user.accessToken }
+        }).then((response) => {
+            if (isActive) setSchoolMemberships(response.data);
+        }).catch(() => {});
+        return () => { isActive = false; };
+    }, [user]);
+
     useEffect(() => {
         if (user && user.username && user.role !== 'guest') {
             axios.post('http://localhost:5000/api/auth/web-session', { user }).catch(() => {});

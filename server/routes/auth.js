@@ -285,6 +285,7 @@ router.get('/current-session', async (req, res) => {
                     });
                 }
             } catch (tokenErr) {}
+            return res.status(401).json({ isLoggedIn: false, message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn!' });
         }
 
         if (latestWebSession && latestWebSession.username && latestWebSession.role !== 'guest') {

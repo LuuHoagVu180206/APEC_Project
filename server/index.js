@@ -1,11 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const http = require('http'); 
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { Server } = require('socket.io');
+const { authorizeClassroom } = require('./classroomAccess');
+const { roomUser, roomQuestionSet, newResumeToken, matchesResumeToken, roomSnapshot } = require('./roomSession');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 require('dotenv').config();
 
 // Lưu file debug log vào thư mục tạm hệ điều hành để tránh nodemon tự động restart
@@ -73,13 +76,31 @@ const server = http.createServer(app);
 // 3. KHỞI TẠO SOCKET.IO GẮN VÀO SERVER HTTP
 const io = new Server(server, {
     cors: {
-        origin: "*", 
+        origin: "*",
         methods: ["GET", "POST"]
     }
 });
 
 
-const lobbies = {}; 
+const lobbies = {};
+
+// Room members can load the selected questions, including a private classroom set.
+// The reconnect key proves membership without exposing another teacher's set.
+app.get('/api/rooms/:pin/questions', async (req, res) => {
+    const lobby = lobbies[req.params.pin];
+    const key = req.headers['x-room-token'];
+    const allowed = lobby && (matchesResumeToken(lobby.hostResumeToken, key) ||
+        Object.values(lobby.playerResumeTokens || {}).some(token => matchesResumeToken(token, key)));
+    if (!allowed) return res.status(403).json({ message: 'Bạn không có phiên chơi trong phòng này!' });
+    try {
+        const set = await require('./models/QuestionSet').findById(lobby.setId);
+        if (!set) return res.status(404).json({ message: 'Bộ câu hỏi không còn tồn tại!' });
+        const questions = await require('./models/Question').find({ _id: { $in: set.questions } });
+        res.json({ questions });
+    } catch (_) {
+        res.status(500).json({ message: 'Không thể tải câu hỏi của phòng!' });
+    }
+});
 
 // Cơ chế lưu trữ và phục hồi phòng chơi (Persistence)
 // Đảm bảo dù server có bị nodemon khởi động lại do thay đổi code thì các phòng của Host và Học sinh KHÔNG bị mất
@@ -134,62 +155,75 @@ function loadLobbiesFromDisk() {
     }
 }
 
+function scheduleHostExpiry(pin, lobby) {
+    if (lobby.disconnectTimeout) clearTimeout(lobby.disconnectTimeout);
+    const remaining = Math.max(0, 90000 - (Date.now() - (lobby.hostDisconnectedAt || Date.now())));
+    lobby.disconnectTimeout = setTimeout(() => {
+        if (lobbies[pin] === lobby && !lobby.hostConnected) {
+            io.to(pin).emit('room_destroyed', 'Chủ phòng đã mất kết nối quá lâu, phòng đã được giải tán!');
+            io.in(pin).socketsLeave(pin);
+            delete lobbies[pin];
+            saveLobbiesToDisk();
+        }
+    }, remaining);
+}
+
 // Nạp các phòng đang có từ bộ nhớ đệm
-loadLobbiesFromDisk(); 
+loadLobbiesFromDisk();
+for (const [pin, lobby] of Object.entries(lobbies)) {
+    lobby.hostDisconnectedAt ||= Date.now();
+    scheduleHostExpiry(pin, lobby);
+}
 
 io.on('connection', (socket) => {
     logSocket(`🟢 Một thiết bị vừa kết nối: ${socket.id} (Transport: ${socket.conn ? socket.conn.transport.name : 'unknown'})`);
 
     socket.on('create_lobby', async (data) => {
         try {
-            logSocket(`📥 [create_lobby] từ socket ${socket.id}:`, data);
+            logSocket(`📥 [create_lobby] từ socket ${socket.id}`, { roomType: data?.roomType, classId: data?.classId });
             const roomType = (data && data.roomType) ? data.roomType : 'casual';
             const tag = (data && data.tag) ? data.tag : (roomType === 'classroom' ? 'Lớp học' : 'Chơi tự do');
             const rawClassInput = (data && data.classId) ? String(data.classId).trim().toLowerCase() : null;
             const setId = (data && data.setId) ? data.setId : null;
             const hostName = (data && data.hostName) ? data.hostName : 'Host';
-            const teacherParticipates = Boolean(data && data.teacherParticipates);
+            const teacherParticipates = roomType !== 'classroom' || Boolean(data && data.teacherParticipates);
 
             let finalClassId = null;
             let finalClassCode = null;
             let finalClassName = null;
             let roomName = (data && data.roomName) ? data.roomName : (roomType === 'classroom' ? 'Phòng Lớp Học' : 'Phòng Đấu');
 
-            // NẾU LÀ PHÒNG LỚP HỌC (CLASSROOM): XÁC MINH VÀ KẾT NỐI VỚI LỚP HỌC TRONG DATABASE
+            let hostUserId = null;
+            let creator = null;
+            let managedClass = null;
             if (roomType === 'classroom') {
-                if (!rawClassInput) {
-                    socket.emit('error', 'Vui lòng nhập mã lớp học để tạo phòng!');
-                    return;
-                }
-
                 try {
-                    const TeacherClass = require('./models/TeacherClass');
-                    let query = mongoose.Types.ObjectId.isValid(rawClassInput) 
-                        ? { _id: rawClassInput } 
-                        : { classCode: rawClassInput };
-
-                    const classDoc = await TeacherClass.findOne(query);
-                    if (!classDoc) {
-                        logSocket(`❌ [create_lobby] Mã lớp "${rawClassInput}" không tồn tại!`);
-                        socket.emit('error', `Mã lớp học "${rawClassInput}" không tồn tại trên hệ thống! Vui lòng kiểm tra lại.`);
-                        return;
-                    }
-
-                    finalClassId = classDoc._id.toString();
+                    const { user, classDoc } = await authorizeClassroom(data?.token, rawClassInput);
+                    creator = user;
+                    managedClass = classDoc;
+                    hostUserId = String(user._id);
+                    finalClassId = String(classDoc._id);
                     finalClassCode = classDoc.classCode;
                     finalClassName = classDoc.className;
-                    roomName = `Lớp ${classDoc.className} (${classDoc.classCode})`;
+                    roomName = 'Lớp ' + classDoc.className + ' (' + classDoc.classCode + ')';
                 } catch (err) {
-                    logSocket("❌ Lỗi xác minh lớp học khi tạo phòng:", err);
-                    socket.emit('error', 'Không thể kết nối với dữ liệu lớp học!');
+                    socket.emit('error', err.status ? err.message : 'Không thể xác thực dữ liệu lớp học!');
                     return;
                 }
             }
 
+            if (roomType !== 'classroom') {
+                creator = await roomUser(data?.token);
+                hostUserId = creator ? String(creator._id) : null;
+            }
+            const selectedSet = await roomQuestionSet(setId, creator, managedClass);
+            const hostRole = creator?.role || 'guest';
+            const hostResumeToken = newResumeToken();
+
             // Dọn dẹp sạch mọi phòng cũ do chính Host (socket.id / hostName) này từng tạo hoặc phòng cũ của cùng lớp học
             for (const [oldPin, lobby] of Object.entries(lobbies)) {
-                const isSameHost = (lobby.hostId === socket.id) || 
-                    (hostName && lobby.hostName && lobby.hostName.toLowerCase() === hostName.toLowerCase());
+                const isSameHost = (lobby.hostId === socket.id) ||
+                    (hostUserId && lobby.hostUserId === hostUserId);
                 const isSameClass = (finalClassId && lobby.classId && String(lobby.classId) === String(finalClassId));
 
                 if (isSameHost || isSameClass) {
@@ -210,8 +244,11 @@ io.on('connection', (socket) => {
                 pin = Math.floor(100000 + Math.random() * 900000).toString();
             }
 
-            lobbies[pin] = { 
-                hostId: socket.id, 
+            lobbies[pin] = {
+                hostId: socket.id,
+                hostUserId: hostUserId,
+                hostResumeToken,
+                playerResumeTokens: {},
                 hostConnected: true,
                 disconnectTimeout: null,
                 players: [],
@@ -222,6 +259,7 @@ io.on('connection', (socket) => {
                 classCode: finalClassCode,
                 className: finalClassName,
                 setId: setId,
+                setTitle: selectedSet.title,
                 roomName: roomName,
                 hostName: hostName,
                 teacherParticipates: teacherParticipates,
@@ -233,10 +271,11 @@ io.on('connection', (socket) => {
             lobbies[pin].players.push({
                 socketId: socket.id,
                 playerId: 'host_' + socket.id.substring(0, 6),
-                name: hostName + (teacherParticipates ? ' (GV Cùng Chơi)' : ' (GV - Trọng Tài)'),
+                name: hostName,
                 username: hostName,
                 isHost: true,
-                role: 'teacher',
+                role: hostRole,
+                connected: true,
                 isParticipating: teacherParticipates,
                 score: 0,
                 timePlayed: 0,
@@ -247,10 +286,13 @@ io.on('connection', (socket) => {
             socket.join(pin);
             logSocket(`👑 Host [${socket.id}] vừa tạo phòng [${tag} - ${roomName}]. PIN: ${pin} | Chơi cùng: ${teacherParticipates}`);
 
-            socket.emit('lobby_created', { 
-                pin: pin, 
-                roomType: roomType, 
-                tag: tag, 
+            socket.emit('lobby_created', {
+                ...roomSnapshot(pin, lobbies[pin]),
+                resumeToken: hostResumeToken,
+                playerId: lobbies[pin].players[0].playerId,
+                pin: pin,
+                roomType: roomType,
+                tag: tag,
                 classId: finalClassId,
                 classCode: finalClassCode,
                 className: finalClassName,
@@ -259,7 +301,7 @@ io.on('connection', (socket) => {
                 teacherParticipates: teacherParticipates
             });
 
-            io.to(pin).emit('players_update', lobbies[pin].players);
+            io.to(pin).emit('players_update', roomSnapshot(pin, lobbies[pin]).players);
         } catch (error) {
             logSocket("❌ Lỗi khi tạo phòng create_lobby:", error);
             socket.emit('error', "Lỗi máy chủ khi tạo phòng: " + (error.message || 'Lỗi không xác định'));
@@ -361,14 +403,7 @@ io.on('connection', (socket) => {
             socket.join(pin);
 
             // Kiểm tra xem người chơi này đã từng ở trong phòng chưa (tránh trùng lặp khi reconnect)
-            const isGuestUsername = (u) => !u || ['khách', 'guest', 'player'].includes(String(u).trim().toLowerCase());
-
-            const existingIndex = lobby.players.findIndex(p => 
-                (data.playerId && p.playerId === data.playerId) || 
-                (p.socketId === socket.id) ||
-                (!isGuestUsername(data.username) && !isGuestUsername(p.username) && String(p.username).toLowerCase() === String(data.username).toLowerCase() && !p.isHost) ||
-                (data.playerName && p.name && p.name.toLowerCase() === String(data.playerName).toLowerCase() && !p.isHost)
-            );
+            const existingIndex = lobby.players.findIndex(p => !p.isHost && p.socketId === socket.id);
 
             if (existingIndex !== -1) {
                 if (lobby.players[existingIndex].disconnectTimeout) {
@@ -381,9 +416,9 @@ io.on('connection', (socket) => {
                 console.log(`🔄 Cập nhật socket cho người chơi cũ [${data.playerName}] trong phòng [${pin}] (Socket mới: ${socket.id})`);
                 logSocket(`🔄 Người chơi [${data.playerName}] kết nối lại phòng [${pin}] (socket mới: ${socket.id})`);
             } else {
-                lobby.players.push({ 
+                lobby.players.push({
                     socketId: socket.id,
-                    playerId: data.playerId || ('p_' + socket.id.substring(0, 6)),
+                    playerId: require('crypto').randomUUID(),
                     name: data.playerName,
                     username: data.username || data.playerName,
                     isHost: false,
@@ -398,11 +433,20 @@ io.on('connection', (socket) => {
             }
 
             saveLobbiesToDisk();
-            
-            socket.emit('join_success', { 
-                status: "OK", 
-                pin: pin, 
-                roomType: lobby.roomType || 'casual', 
+
+            const joinedPlayer = lobby.players.find(p => p.socketId === socket.id && !p.isHost);
+            if (!joinedPlayer) return;
+            lobby.playerResumeTokens ||= {};
+            const resumeToken = newResumeToken();
+            lobby.playerResumeTokens[joinedPlayer.playerId] = resumeToken;
+            saveLobbiesToDisk();
+            socket.emit('join_success', {
+                ...roomSnapshot(pin, lobby),
+                resumeToken,
+                playerId: joinedPlayer.playerId,
+                status: "OK",
+                pin: pin,
+                roomType: lobby.roomType || 'casual',
                 tag: lobby.tag || 'Chơi tự do',
                 classId: lobby.classId,
                 classCode: lobby.classCode,
@@ -410,7 +454,7 @@ io.on('connection', (socket) => {
                 setId: lobby.setId,
                 roomName: lobby.roomName
             });
-            io.to(pin).emit('players_update', lobby.players);
+            io.to(pin).emit('players_update', roomSnapshot(pin, lobby).players);
             console.log(`🎉 [THÀNH CÔNG] Đã phát "join_success" và "players_update" cho phòng [${pin}].`);
             console.log('============================================================\n');
             logSocket(`✅ [join_lobby] Hoàn tất vào phòng [${pin}] cho [${data.playerName}], đã phát players_update.`);
@@ -422,144 +466,79 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('reconnect_host', (data) => {
-        const pin = data && data.pin ? String(data.pin).replace(/\s+/g, '').trim() : null;
-        if (!pin) return;
-
-        console.log(`\n👑 [RECONNECT_HOST] Host [${data.hostName || socket.id}] yêu cầu gắn lại phòng [${pin}]`);
-        logSocket(`👑 Host [${data.hostName || socket.id}] yêu cầu gắn lại phòng [${pin}]`);
-
-        if (!lobbies[pin]) {
-            // Tự động khôi phục phòng nếu server vừa bị reload
-            console.log(`🛠️ Phòng [${pin}] không còn trong RAM (do server reload), tiến hành tự động TÁI TẠO phòng cho Host!`);
-            const roomType = data.roomType || 'casual';
-            const tag = data.tag || (roomType === 'classroom' ? 'Lớp học' : 'Chơi tự do');
-            const classId = data.classId || null;
-            const className = data.className || null;
-            const classCode = data.classCode || null;
-            const hostName = data.hostName || 'Host';
-            const teacherParticipates = Boolean(data.teacherParticipates);
-
-            lobbies[pin] = {
-                hostId: socket.id,
-                hostConnected: true,
-                disconnectTimeout: null,
-                players: [],
-                gameState: 'WAITING',
-                roomType: roomType,
-                tag: tag,
-                classId: classId,
-                classCode: classCode,
-                className: className,
-                setId: data.setId || null,
-                roomName: data.roomName || (className ? `Lớp ${className} (${classCode || ''})` : `Phòng ${tag}`),
-                hostName: hostName,
-                teacherParticipates: teacherParticipates,
-                gameSessionRecorded: false
-            };
-
-            lobbies[pin].players.push({
-                socketId: socket.id,
-                playerId: 'host_' + socket.id.substring(0, 6),
-                name: hostName + (teacherParticipates ? ' (GV Cùng Chơi)' : ' (GV - Trọng Tài)'),
-                username: hostName,
-                isHost: true,
-                role: 'teacher',
-                isParticipating: teacherParticipates,
-                score: 0,
-                timePlayed: 0,
-                questionsAnswered: 0
-            });
-            console.log(`✅ Đã tái tạo thành công phòng [${pin}] cho Host [${hostName}]. Danh sách phòng hiện có: [${Object.keys(lobbies).join(', ')}]`);
-        } else {
-            if (lobbies[pin].disconnectTimeout) {
-                clearTimeout(lobbies[pin].disconnectTimeout);
-                lobbies[pin].disconnectTimeout = null;
+    socket.on('reconnect_host', async (data = {}) => {
+        const pin = String(data.pin || '').trim();
+        const lobby = lobbies[pin];
+        const expired = message => socket.emit('room_session_expired', message);
+        if (!lobby) return expired('Phòng này không còn tồn tại!');
+        if (!matchesResumeToken(lobby.hostResumeToken, data.resumeToken)) return expired('Phiên chủ phòng không hợp lệ. Vui lòng tạo phòng mới!');
+        if (lobby.roomType === 'classroom') {
+            try {
+                const { user } = await authorizeClassroom(data.token, lobby.classId);
+                if (lobby.hostUserId !== String(user._id)) return expired('Bạn không phải giáo viên đã tạo phòng này!');
+            } catch (err) {
+                return expired(err.status ? err.message : 'Không thể xác thực lớp học!');
             }
-            lobbies[pin].hostConnected = true;
-            lobbies[pin].hostId = socket.id;
-            const hostPlayer = lobbies[pin].players.find(p => p.isHost);
-            if (hostPlayer) {
-                hostPlayer.socketId = socket.id;
-            }
-            console.log(`✅ Đã gắn lại socket mới [${socket.id}] cho Host phòng [${pin}].`);
         }
-
+        if (lobby.disconnectTimeout) clearTimeout(lobby.disconnectTimeout);
+        lobby.disconnectTimeout = null;
+        lobby.hostDisconnectedAt = null;
+        lobby.hostConnected = true;
+        lobby.hostId = socket.id;
+        const host = lobby.players.find(p => p.isHost);
+        if (!host) return expired('Không tìm thấy chủ phòng. Vui lòng tạo phòng mới!');
+        host.socketId = socket.id;
+        host.connected = true;
         socket.join(pin);
         saveLobbiesToDisk();
-        socket.emit('host_reconnected', { pin: pin });
-        io.to(pin).emit('players_update', lobbies[pin].players);
+        socket.emit('host_reconnected', { ...roomSnapshot(pin, lobby), playerId: host.playerId, resumeToken: lobby.hostResumeToken });
+        io.to(pin).emit('players_update', roomSnapshot(pin, lobby).players);
+        io.to(pin).emit('host_connection_changed', { connected: true });
     });
 
-    socket.on('reconnect_lobby', (data) => {
-        const pin = data && data.pin ? String(data.pin).replace(/\s+/g, '').trim() : null;
-        if (!pin) return;
-
-        console.log(`\n🎒 ================== [RECONNECT_LOBBY] ==================`);
-        console.log(`📡 Socket [${socket.id}] yêu cầu gắn lại phòng [${pin}]`);
-        console.log(`📦 Payload:`, data);
-        
-        if (lobbies[pin]) {
-            const player = lobbies[pin].players.find(p => 
-                (data.playerId && p.playerId === data.playerId) ||
-                (data.username && p.username && p.username.toLowerCase() === String(data.username).toLowerCase()) ||
-                (data.playerName && p.name && p.name.toLowerCase() === String(data.playerName).toLowerCase())
-            );
-
-            if (player) {
-                if (player.disconnectTimeout) {
-                    clearTimeout(player.disconnectTimeout);
-                    player.disconnectTimeout = null;
-                }
-                player.socketId = socket.id;
-                player.connected = true;
-                socket.join(pin);
-                console.log(`✅ Đã gắn lại socket mới [${socket.id}] cho học sinh [${player.name || player.username}] trong phòng [${pin}]`);
-                socket.emit('reconnect_success', {
-                    status: "OK",
-                    pin: pin,
-                    gameState: lobbies[pin].gameState,
-                    currentScore: player.score
-                });
-                io.to(pin).emit('players_update', lobbies[pin].players);
-            } else {
-                // Tự động cho vào phòng để đảm bảo nhận được các event của phòng
-                socket.join(pin);
-                console.log(`⚠️ Không tìm thấy bản ghi cũ của học sinh, tự động đưa socket [${socket.id}] vào room [${pin}]`);
-            }
-            saveLobbiesToDisk();
-            console.log(`============================================================\n`);
-        } else {
-            console.log(`❌ THẤT BẠI: Phòng [${pin}] không tồn tại trong danh sách phòng!`);
-            console.log(`============================================================\n`);
-            socket.emit('error', "Phòng này không còn tồn tại!");
+    socket.on('reconnect_lobby', (data = {}) => {
+        const pin = String(data.pin || '').trim();
+        const lobby = lobbies[pin];
+        const player = lobby?.players.find(p => !p.isHost && p.playerId === data.playerId);
+        if (!player || !matchesResumeToken(lobby.playerResumeTokens?.[player.playerId], data.resumeToken)) {
+            socket.emit('room_session_expired', 'Phiên chơi không còn tồn tại. Vui lòng nhập lại mã phòng!');
+            return;
         }
+        if (player.disconnectTimeout) clearTimeout(player.disconnectTimeout);
+        player.disconnectTimeout = null;
+        player.socketId = socket.id;
+        player.connected = true;
+        socket.join(pin);
+        saveLobbiesToDisk();
+        socket.emit('reconnect_success', { ...roomSnapshot(pin, lobby), playerId: player.playerId, resumeToken: data.resumeToken });
+        io.to(pin).emit('players_update', roomSnapshot(pin, lobby).players);
     });
 
-    socket.on('select_room_set', (data) => {
-        const { pin, setId, setTitle } = data;
-        if (lobbies[pin]) {
-            lobbies[pin].setId = setId;
-            lobbies[pin].roomName = setTitle || lobbies[pin].roomName;
-            console.log(`📚 Phòng [${pin}] vừa đổi bộ câu hỏi: [${setTitle}] (ID: ${setId})`);
+    socket.on('select_room_set', async (data = {}) => {
+        const lobby = lobbies[data.pin];
+        if (!lobby || lobby.hostId !== socket.id || lobby.gameState !== 'WAITING') return;
+        try {
+            const user = lobby.hostUserId ? await require('./models/User').findById(lobby.hostUserId) : null;
+            const classDoc = lobby.classId ? await require('./models/TeacherClass').findById(lobby.classId) : null;
+            const set = await roomQuestionSet(data.setId, user, classDoc);
+            lobby.setId = String(set._id);
+            lobby.setTitle = set.title;
             saveLobbiesToDisk();
-            io.to(pin).emit('room_set_updated', {
-                setId: setId,
-                setTitle: setTitle
-            });
-        }
+            io.to(data.pin).emit('room_set_updated', { setId: lobby.setId, setTitle: lobby.setTitle });
+        } catch (err) { socket.emit('error', err.message); }
     });
 
     socket.on('start_game', (rawPin) => {
         const pin = String(rawPin || '').replace(/\s+/g, '').trim();
         if (lobbies[pin]) {
+            if (lobbies[pin].hostId !== socket.id || !lobbies[pin].setId || lobbies[pin].gameState !== 'WAITING') return;
             lobbies[pin].gameState = 'PLAYING';
             saveLobbiesToDisk();
             console.log(`🚀 [START_GAME] Phòng [${pin}] đã bắt đầu trận đấu!`);
             io.to(pin).emit('game_started', {
                 message: "GO!",
                 setId: lobbies[pin].setId,
-                setTitle: lobbies[pin].roomName || lobbies[pin].setTitle
+                setTitle: lobbies[pin].setTitle
             });
         } else {
             console.log(`🚀 [START_GAME] Bắt đầu trận đấu cho pin: ${pin}`);
@@ -572,11 +551,11 @@ io.on('connection', (socket) => {
 
         if (lobbies[pin]) {
             const playerIndex = lobbies[pin].players.findIndex(p => p.socketId === socket.id);
-            
+
             if (playerIndex !== -1) {
                 const finalScore = (score !== undefined) ? Number(score) : ((lobbies[pin].players[playerIndex].score || 0) + (Number(addedScore) || 0));
                 lobbies[pin].players[playerIndex].score = finalScore;
-                
+
                 const isCompleted = (completed !== undefined) ? Boolean(completed) : (finalScore > 0);
                 lobbies[pin].players[playerIndex].completed = isCompleted;
 
@@ -628,9 +607,9 @@ io.on('connection', (socket) => {
                             if (isTeacherPlayer && !lobbies[pin].teacherParticipates) {
                                 // Bỏ qua ghi điểm thi đấu cho trọng tài
                             } else {
-                                const cleanPlayerName = currentPlayerObj.username || 
+                                const cleanPlayerName = currentPlayerObj.username ||
                                     (currentPlayerObj.name ? currentPlayerObj.name.replace(/\s*\(GV.*?\)/g, '').trim() : 'Học sinh');
-                                
+
                                 let sessionPlayer = currentSession.players.find(p => p.studentName === cleanPlayerName);
                                 if (!sessionPlayer) {
                                     currentSession.players.push({
@@ -788,18 +767,40 @@ io.on('connection', (socket) => {
         }
     });
 
+    function removeMember(pin, player) {
+        const lobby = lobbies[pin];
+        if (player.disconnectTimeout) clearTimeout(player.disconnectTimeout);
+        lobby.players = lobby.players.filter(p => p !== player);
+        delete (lobby.playerResumeTokens || {})[player.playerId];
+        io.to(player.socketId).emit('room_session_expired', 'Bạn đã rời phòng.');
+        io.in(player.socketId).socketsLeave(pin);
+        saveLobbiesToDisk();
+        io.to(pin).emit('players_update', roomSnapshot(pin, lobby).players);
+    }
+    socket.on('leave_lobby', (data = {}) => {
+        const lobby = lobbies[data.pin];
+        const player = lobby?.players.find(p => p.socketId === socket.id && !p.isHost);
+        if (player) removeMember(data.pin, player);
+    });
+    socket.on('kick_member', (data = {}) => {
+        const lobby = lobbies[data.pin];
+        if (!lobby || lobby.hostId !== socket.id) return;
+        const player = lobby.players.find(p => p.playerId === data.playerId && !p.isHost);
+        if (player) removeMember(data.pin, player);
+    });
+
     socket.on('destroy_room', (rawPin) => {
         const pin = String(rawPin || '').replace(/\s+/g, '').trim();
-        if (!pin) return;
+        if (!pin || lobbies[pin]?.hostId !== socket.id) return;
         console.log(`\n🗑️ ================== [DESTROY_ROOM] ==================`);
         console.log(`🗑️ Yêu cầu giải tán phòng [${pin}] từ socket [${socket.id}]`);
         // 1. Cho socket của Host rời room trước
         socket.leave(pin);
         // 2. Báo room_destroyed cho các học sinh khác trong phòng
-        socket.to(pin).emit('room_destroyed', "Phòng đã giải tán");       
+        socket.to(pin).emit('room_destroyed', "Phòng đã giải tán");
         // 3. Giải tán tất cả socket còn lại khỏi room
         io.in(pin).socketsLeave(pin);
-        
+
         delete lobbies[pin];
         saveLobbiesToDisk();
         console.log(`✅ Đã giải tán phòng [${pin}]. Danh sách phòng còn lại: [${Object.keys(lobbies).join(', ')}]`);
@@ -814,16 +815,13 @@ io.on('connection', (socket) => {
             if (lobby.hostId === socket.id) {
                 console.log(`\n⚠️ Host [${socket.id}] tạm thời ngắt kết nối khỏi phòng [${pin}]. Giữ phòng trong 90 giây chờ Host reconnect...`);
                 lobby.hostConnected = false;
-                if (lobby.disconnectTimeout) clearTimeout(lobby.disconnectTimeout);
-                lobby.disconnectTimeout = setTimeout(() => {
-                    if (!lobby.hostConnected && lobbies[pin]) {
-                        console.log(`👑 Hết 90s chờ: Host phòng [${pin}] không kết nối lại. Chính thức giải tán phòng.`);
-                        io.to(pin).emit('room_destroyed', "Chủ phòng đã thoát, phòng đã bị giải tán!");
-                        io.in(pin).socketsLeave(pin);
-                        delete lobbies[pin];
-                        saveLobbiesToDisk();
-                    }
-                }, 90000); // 90 giây
+                lobby.hostDisconnectedAt = Date.now();
+                const host = lobby.players.find(p => p.isHost);
+                if (host) host.connected = false;
+                io.to(pin).emit('host_connection_changed', { connected: false });
+                io.to(pin).emit('players_update', roomSnapshot(pin, lobby).players);
+                scheduleHostExpiry(pin, lobby);
+                saveLobbiesToDisk();
             } else {
                 // 2. Nếu là Player / Học sinh:
                 const player = lobby.players.find(p => p.socketId === socket.id);
@@ -838,7 +836,7 @@ io.on('connection', (socket) => {
                                     const removed = lobbies[pin].players.splice(pIdx, 1)[0];
                                     console.log(`⌛ Hết 60s chờ: Học sinh [${removed.name || removed.username}] không kết nối lại -> Xóa khỏi phòng [${pin}]`);
                                     saveLobbiesToDisk();
-                                    io.to(pin).emit('players_update', lobbies[pin].players);
+                                    io.to(pin).emit('players_update', roomSnapshot(pin, lobbies[pin]).players);
                                     if (lobbies[pin].gameState !== 'WAITING') {
                                         io.to(pin).emit('live_leaderboard_update', lobbies[pin].players);
                                     }
