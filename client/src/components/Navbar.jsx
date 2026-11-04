@@ -19,7 +19,7 @@ const Navbar = ({ activePage, children }) => {
         }
     });
 
-    const [, setSchoolMemberships] = useState([]);
+    const [schoolMemberships, setSchoolMemberships] = useState([]);
 
     useEffect(() => {
         if (!user?.accessToken) return undefined;

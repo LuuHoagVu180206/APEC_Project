@@ -718,13 +718,15 @@ const LibraryPage = () => {
                                                 <button 
                                                     type="button" 
                                                     className="btn-library-action btn-action-play"
-                                                    onClick={() => handlePlayRegular(qSet, e)}
+                                                    onClick={(e) => handlePlayRegular(qSet, e)}
                                                     title="Luyện tập ngay bộ đề này trong game"
                                                 >
                                                     <Play size={14} fill="currentColor" />
                                                     <span>Luyện tập</span>
                                                 </button>
 
+
+                                            </div>
 
                                             <div className="action-group-right">
                                                 {/* Nút Xuất Excel */}
