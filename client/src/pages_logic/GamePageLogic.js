@@ -29,7 +29,7 @@ export const GamePageLogic = () => {
     const [defaultSets, setDefaultSets] = useState([]);
     const [weeklySets, setWeeklySets] = useState([]);
     const [isSetModalOpen, setIsSetModalOpen] = useState(false);
-    const [gameVersion, setGameVersion] = useState("v1.0");
+    const [gameVersion, setGameVersion] = useState("v3.0");
     const [isLoadingGame, setIsLoadingGame] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [schoolMemberships, setSchoolMemberships] = useState([]);
@@ -62,10 +62,12 @@ export const GamePageLogic = () => {
                 const res = await axios.get('http://localhost:5000/api/settings/version');
                 if (res.data?.version) {
                     setGameVersion(res.data.version);
+                } else {
+                    setGameVersion("v3.0");
                 }
             } catch (err) {
-                console.warn("Dùng phiên bản game mặc định v1.0");
-                setGameVersion("v1.0");
+                console.warn("Dùng phiên bản game mặc định v3.0");
+                setGameVersion("v3.0");
             } finally {
                 setIsLoadingGame(false);
             }

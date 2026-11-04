@@ -1,0 +1,20 @@
+{
+  "watch": [
+    "index.js",
+    "routes/",
+    "models/",
+    "sendPasswordResetEmail.js",
+    "seedData.js",
+    "verifyToken.js"
+  ],
+  "ignore": [
+    "*.json",
+    "*.log",
+    "node_modules/**",
+    "test_*.js",
+    "scratch_*.js"
+  ],
+  "ext": "js",
+  "delay": "1000"
+}
+

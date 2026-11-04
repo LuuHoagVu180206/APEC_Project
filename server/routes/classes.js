@@ -727,7 +727,13 @@ router.post('/:id/game-sessions', async (req, res) => {
         };
 
         if (!classDoc.gameSessions) classDoc.gameSessions = [];
-        classDoc.gameSessions.push(newSession);
+        const existingSessionIndex = classDoc.gameSessions.findIndex(s => s.roomPin && roomPin && s.roomPin === roomPin);
+        if (existingSessionIndex !== -1) {
+            newSession.sessionId = classDoc.gameSessions[existingSessionIndex].sessionId || newSession.sessionId;
+            classDoc.gameSessions[existingSessionIndex] = newSession;
+        } else {
+            classDoc.gameSessions.push(newSession);
+        }
 
         if (!classDoc.gameScores) classDoc.gameScores = [];
         rankedPlayers.forEach(p => {

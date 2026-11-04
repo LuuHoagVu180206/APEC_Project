@@ -5,10 +5,12 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const mongoose = require('mongoose');
 const { verifyToken } = require('../verifyToken');
 
-const SESSION_FILE = path.join(__dirname, '..', 'active_session.json');
+// Lưu session vào thư mục tạm của hệ điều hành để hoàn toàn không kích hoạt nodemon restart khi người dùng F5 web
+const SESSION_FILE = path.join(os.tmpdir(), 'apec_edugame_active_session.json');
 
 function loadPersistedSession() {
     try {
@@ -22,9 +24,17 @@ function loadPersistedSession() {
     return null;
 }
 
+let lastSavedSessionString = '';
 function savePersistedSession(session) {
     try {
-        if (session && session.username && session.role !== 'guest') {
+        const currentString = (session && session.username && session.role !== 'guest')
+            ? JSON.stringify(session)
+            : '';
+        if (currentString === lastSavedSessionString) {
+            return; // Dữ liệu phiên không đổi, không ghi file để tránh kích hoạt reload
+        }
+        lastSavedSessionString = currentString;
+        if (currentString) {
             fs.writeFileSync(SESSION_FILE, JSON.stringify(session, null, 2), 'utf8');
         } else if (fs.existsSync(SESSION_FILE)) {
             fs.unlinkSync(SESSION_FILE);

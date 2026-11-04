@@ -51,7 +51,7 @@ const GamePlayer = ({ username }) => {
       {/* Nhúng game vào đây */}
       <iframe 
         ref={iframeRef}
-        src="/game/v1.0/index.html" // Đường dẫn tới file HTML bạn đã chép vào public
+        src="/game/v3.0/index.html" // Đường dẫn tới file HTML bạn đã chép vào public
         width="100%" 
         height="100%" 
         title="EduGame"

@@ -4,11 +4,10 @@ const GameSetting = require('../models/GameSetting');
 // 1. LẤY VERSION HIỆN TẠI
 router.get('/version', async (req, res) => {
     try {
-
         let setting = await GameSetting.findOne({ settingId: "current_version" });
         
         if (!setting) {
-            return res.status(200).json({ version: "v1.0" });
+            return res.status(200).json({ version: "v3.0" });
         }
         
         res.status(200).json(setting);
@@ -20,7 +19,7 @@ router.get('/version', async (req, res) => {
 // 2. CẬP NHẬT VERSION (Dành cho Admin)
 router.post('/version', async (req, res) => {
     try {
-        const { version } = req.body; // Lấy version admin gửi lên (ví dụ "v1.2")
+        const { version } = req.body; // Lấy version admin gửi lên (ví dụ "v3.0")
         
         // Tìm và cập nhật. Nếu chưa có thì tạo mới (upsert: true)
         const updatedSetting = await GameSetting.findOneAndUpdate(

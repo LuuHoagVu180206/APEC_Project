@@ -304,14 +304,16 @@ const GamePage = () => {
                             </div>
                         )}
 
-                        <iframe 
-                            ref={iframeRef} 
-                            src={`/game/${gameVersion}/index.html?setId=${encodeURIComponent(currentSetId || '')}&isWeekly=${isWeekly ? 'true' : 'false'}&mode=${mode || 'solo'}&autoStart=${autoStart ? 'true' : 'false'}`}
-                            title="EasyLearn Canvas Game"
-                            className="game-iframe"
-                            frameBorder="0"
-                            allow="fullscreen"
-                        ></iframe>
+                        {!isLoadingGame && gameVersion && (
+                            <iframe 
+                                ref={iframeRef} 
+                                src={`/game/${gameVersion}/index.html?setId=${encodeURIComponent(currentSetId || '')}&isWeekly=${isWeekly ? 'true' : 'false'}&mode=${mode || 'solo'}&autoStart=${autoStart ? 'true' : 'false'}`}
+                                title="EasyLearn Canvas Game"
+                                className="game-iframe"
+                                frameBorder="0"
+                                allow="fullscreen"
+                            ></iframe>
+                        )}
                     </div>
                 </section>
 
