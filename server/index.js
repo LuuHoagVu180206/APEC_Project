@@ -155,7 +155,7 @@ io.on('connection', (socket) => {
             let finalClassName = null;
             let roomName = (data && data.roomName) ? data.roomName : (roomType === 'classroom' ? 'Phòng Lớp Học' : 'Phòng Đấu');
 
-            // NẾU LÀ PHÒNG LỚP HỌC (CLASSROOM): XÁC MINH VÀ KẾT NỐI VỚI LỚP HỌC TRONG DATABASE
+            // NẾU LÀ PHÒNG LỚP HỌC (CLASSROOM): XÁC MINH ROLE GIÁO VIÊN VÀ QUYỀN QUẢN LÝ LỚP HỌC
             if (roomType === 'classroom') {
                 if (!rawClassInput) {
                     socket.emit('error', 'Vui lòng nhập mã lớp học để tạo phòng!');
@@ -163,15 +163,94 @@ io.on('connection', (socket) => {
                 }
 
                 try {
+                    const User = require('./models/User');
+                    const jwt = require('jsonwebtoken');
+                    let creatorUser = null;
+
+                    // 1. Thử xác thực qua JWT token
+                    if (data && data.token) {
+                        try {
+                            const decoded = jwt.verify(data.token, process.env.JWT_SECRET || "mat_khau_bi_mat_cua_server");
+                            if (decoded && decoded.id) {
+                                creatorUser = await User.findById(decoded.id);
+                            }
+                        } catch (tokErr) {
+                            console.log("⚠️ [create_lobby] Token gửi kèm không hợp lệ hoặc đã hết hạn:", tokErr.message);
+                        }
+                    }
+
+                    // 2. Thử tìm qua userId
+                    if (!creatorUser && data && data.userId && mongoose.Types.ObjectId.isValid(data.userId)) {
+                        creatorUser = await User.findById(data.userId);
+                    }
+
+                    // 3. Thử tìm qua username / hostName
+                    if (!creatorUser) {
+                        const candidateName = (data.username || data.hostName || '').trim();
+                        if (candidateName && !['khách', 'guest', 'player', 'host'].includes(candidateName.toLowerCase())) {
+                            creatorUser = await User.findOne({
+                                $or: [
+                                    { username: candidateName },
+                                    { displayName: candidateName }
+                                ]
+                            });
+                        }
+                    }
+
+                    // BƯỚC 1: KIỂM TRA ROLE - Chỉ cho phép 'teacher' hoặc 'admin'
+                    if (!creatorUser || (creatorUser.role !== 'teacher' && creatorUser.role !== 'admin')) {
+                        const uName = creatorUser ? creatorUser.username : (data.hostName || 'Khách');
+                        const uRole = creatorUser ? creatorUser.role : 'guest';
+                        console.log('\n================== ⛔ [TỪ CHỐI TẠO PHÒNG LỚP HỌC] ==================');
+                        console.log(`📡 Socket: ${socket.id}`);
+                        console.log(`👤 Người dùng: "${uName}" (Role: ${uRole})`);
+                        console.log(`❌ Lý do: Tài khoản KHÔNG PHẢI GIÁO VIÊN. Chỉ giáo viên mới được tạo phòng lớp học!`);
+                        console.log('===================================================================\n');
+                        logSocket(`⛔ Chặn tạo phòng lớp học: [${uName}] không phải là Giáo viên (role: ${uRole})`);
+                        socket.emit('error', 'Chỉ tài khoản Giáo viên mới có quyền tạo phòng lớp học! Vui lòng đăng nhập bằng tài khoản Giáo viên.');
+                        return;
+                    }
+
+                    // BƯỚC 2: TÌM LỚP HỌC TRONG DATABASE
                     const TeacherClass = require('./models/TeacherClass');
                     let query = mongoose.Types.ObjectId.isValid(rawClassInput) 
                         ? { _id: rawClassInput } 
                         : { classCode: rawClassInput };
 
-                    const classDoc = await TeacherClass.findOne(query);
+                    const classDoc = await TeacherClass.findOne(query)
+                        .populate('teacher', 'username displayName email')
+                        .populate('teachers', 'username displayName email');
+
                     if (!classDoc) {
+                        console.log(`❌ [create_lobby] Mã lớp "${rawClassInput}" không tồn tại trên hệ thống!`);
                         logSocket(`❌ [create_lobby] Mã lớp "${rawClassInput}" không tồn tại!`);
                         socket.emit('error', `Mã lớp học "${rawClassInput}" không tồn tại trên hệ thống! Vui lòng kiểm tra lại.`);
+                        return;
+                    }
+
+                    // BƯỚC 3: KIỂM TRA QUYỀN QUẢN LÝ LỚP CỦA GIÁO VIÊN
+                    // Phải là Giáo viên chính (teacher) HOẶC Giáo viên trợ giảng (teachers) HOẶC Admin
+                    const creatorIdStr = creatorUser._id.toString();
+                    const primaryTeacherId = classDoc.teacher ? (classDoc.teacher._id || classDoc.teacher).toString() : null;
+                    const assistantTeacherIds = (classDoc.teachers || []).map(t => (t._id || t).toString());
+
+                    const isManager = (primaryTeacherId === creatorIdStr) || 
+                                      assistantTeacherIds.includes(creatorIdStr) || 
+                                      (creatorUser.role === 'admin');
+
+                    console.log('\n================== 🏫 [XÁC MINH QUYỀN QUẢN LÝ LỚP HỌC] ==================');
+                    console.log(`📡 Socket: ${socket.id}`);
+                    console.log(`👤 Giáo viên tạo phòng: "${creatorUser.username}" (ID: ${creatorIdStr})`);
+                    console.log(`🏫 Lớp học: "${classDoc.className}" (Mã: ${classDoc.classCode}, ID: ${classDoc._id})`);
+                    console.log(`👑 Giáo viên chính: "${classDoc.teacher?.username || 'N/A'}" (ID: ${primaryTeacherId})`);
+                    console.log(`👥 Giáo viên trợ giảng (${assistantTeacherIds.length}): [${assistantTeacherIds.join(', ')}]`);
+                    console.log(`🔍 Kết quả kiểm tra quyền: ${isManager ? '✅ HỢP LỆ (Có quyền quản lý)' : '⛔ BỊ CHẶN (Không quản lý lớp này)'}`);
+                    console.log('========================================================================\n');
+
+                    if (!isManager) {
+                        const errMsg = `Bạn không quản lý lớp học "${classDoc.className}" (${classDoc.classCode})! Chỉ giáo viên phụ trách lớp mới có quyền tạo phòng cho lớp này.`;
+                        logSocket(`⛔ [create_lobby] Chặn GV [${creatorUser.username}] tạo phòng cho lớp [${classDoc.className}]: Không có quyền quản lý.`);
+                        socket.emit('error', errMsg);
                         return;
                     }
 
@@ -180,8 +259,9 @@ io.on('connection', (socket) => {
                     finalClassName = classDoc.className;
                     roomName = `Lớp ${classDoc.className} (${classDoc.classCode})`;
                 } catch (err) {
+                    console.log("❌ Lỗi ngoại lệ khi kiểm tra quyền tạo phòng lớp học:", err);
                     logSocket("❌ Lỗi xác minh lớp học khi tạo phòng:", err);
-                    socket.emit('error', 'Không thể kết nối với dữ liệu lớp học!');
+                    socket.emit('error', 'Không thể kết nối hoặc xác thực dữ liệu lớp học!');
                     return;
                 }
             }
