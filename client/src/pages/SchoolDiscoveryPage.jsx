@@ -1,6 +1,5 @@
 import React from 'react';
 import { 
-    ArrowLeft, 
     MapPin, 
     Search, 
     School, 
@@ -32,26 +31,7 @@ const SchoolDiscoveryPage = () => {
             <Navbar activePage="schools" />
             <main className="school-disc-root">
             <div className="school-disc-inner">
-                {/* TOP NAVIGATION / HUD */}
-                <div className="school-disc-top-nav">
-                    <button 
-                        type="button"
-                        className="school-disc-back-btn" 
-                        onClick={() => navigate('/')}
-                    >
-                        <ArrowLeft size={16} /> Quay lại trang chủ
-                    </button>
-                    <button 
-                        type="button"
-                        className="school-disc-btn-propose" 
-                        onClick={() => navigate('/school-requests/new')}
-                    >
-                        <Plus size={16} color="var(--sd-gold-hover)" />
-                        <span>Đề xuất tạo trường mới</span>
-                    </button>
-                </div>
-
-                {/* HERO HEADER */}
+                {/* HERO HEADER - POSITIVUS PROMINENT HERO */}
                 <header className="school-disc-hero">
                     <div className="school-disc-hero-info">
                         <div className="school-disc-hero-tag">
@@ -61,6 +41,16 @@ const SchoolDiscoveryPage = () => {
                         <p className="school-disc-hero-sub">
                             Tìm kiếm cộng đồng trường học của bạn để kết nối với các thầy cô và bạn bè, cùng tham gia các lớp học và chia sẻ kho đề thi quiz mini-game.
                         </p>
+                    </div>
+                    <div className="school-disc-hero-action">
+                        <button 
+                            type="button"
+                            className="school-disc-btn-propose" 
+                            onClick={() => navigate('/school-requests/new')}
+                        >
+                            <Plus size={16} />
+                            <span>Đề xuất tạo trường mới</span>
+                        </button>
                     </div>
                 </header>
 

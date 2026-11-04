@@ -23,6 +23,7 @@ import {
     Moon
 } from 'lucide-react';
 import { useDarkMode } from '../pages_logic/useDarkMode';
+import Navbar from '../components/Navbar';
 import { TeacherClassPageLogic } from '../pages_logic/TeacherClassPageLogic';
 import '../pages_styling/TeacherClassStyling.css';
 
@@ -98,8 +99,10 @@ const TeacherClassPage = () => {
     const questionSets = classInfo.questionSets || [];
 
     return (
-        <main className="teacher-class-root">
-            <div className="teacher-class-inner">
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <Navbar activePage="classes" />
+            <main className="teacher-class-root" style={{ flex: 1 }}>
+                <div className="teacher-class-inner">
                 {/* TOP NAVIGATION / HUD */}
                 <div className="teacher-class-top-nav">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -556,7 +559,8 @@ const TeacherClassPage = () => {
                     </section>
                 )}
             </div>
-        </main>
+            </main>
+        </div>
     );
 };
 

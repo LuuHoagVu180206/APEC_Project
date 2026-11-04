@@ -16,6 +16,7 @@ import {
     Moon
 } from 'lucide-react';
 import { useDarkMode } from '../pages_logic/useDarkMode';
+import Navbar from '../components/Navbar';
 import { TeacherDashboardLogic } from '../pages_logic/TeacherDashboardLogic';
 import '../pages_styling/TeacherDashboardStyling.css';
 
@@ -48,8 +49,10 @@ const TeacherDashboardPage = () => {
     });
 
     return (
-        <main className="teacher-dash-root">
-            <div className="teacher-dash-inner">
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <Navbar activePage="classes" />
+            <main className="teacher-dash-root" style={{ flex: 1 }}>
+                <div className="teacher-dash-inner">
                 {/* TOP NAVIGATION / HUD */}
                 <div className="teacher-dash-top-nav">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -314,7 +317,8 @@ const TeacherDashboardPage = () => {
                     )}
                 </section>
             </div>
-        </main>
+            </main>
+        </div>
     );
 };
 

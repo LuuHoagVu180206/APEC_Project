@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, Sun, Moon, LogOut } from 'lucide-react';
+import { Sparkles, Sun, Moon, LogOut, ShieldCheck, Gamepad2 } from 'lucide-react';
 import { useDarkMode } from '../pages_logic/useDarkMode';
 import './Navbar.css';
 
-const Navbar = ({ activePage }) => {
+const Navbar = ({ activePage, children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { isDark, toggleTheme } = useDarkMode();
@@ -19,7 +19,7 @@ const Navbar = ({ activePage }) => {
         }
     });
 
-    const [schoolMemberships, setSchoolMemberships] = useState([]);
+    const [, setSchoolMemberships] = useState([]);
 
     useEffect(() => {
         if (!user?.accessToken) return undefined;
@@ -31,8 +31,6 @@ const Navbar = ({ activePage }) => {
         }).catch(() => {});
         return () => { isActive = false; };
     }, [user]);
-
-    const schoolActionLabel = schoolMemberships.length > 0 ? 'Trường của tôi' : 'Tham gia trường';
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -84,6 +82,7 @@ const Navbar = ({ activePage }) => {
                 </div>
 
                 <div className="nav-right">
+                    {children}
                     <button 
                         type="button"
                         className="theme-toggle-btn"
@@ -94,48 +93,33 @@ const Navbar = ({ activePage }) => {
                         {isDark ? <Sun size={19} /> : <Moon size={19} />}
                     </button>
 
-                    {user?.role === 'teacher' ? (
+                    {user ? (
                         <div className="teacher-account-menu">
-                            <Link className="nav-username" to="/profile">
+                            <Link to="/profile" className="nav-username" title="Bấm vào để mở trang Hồ sơ cá nhân của bạn">
                                 <span className="user-avatar-badge">
                                     {user.avatar ? (
                                         <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
                                     ) : (
                                         avatarChar
                                     )}
+                                    <span className="nav-online-dot" title="Đang trực tuyến"></span>
                                 </span>
-                                <span>{displayName}</span>
+                                <span className="nav-display-name">{displayName}</span>
                             </Link>
                             <div className="teacher-account-dropdown">
-                                <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
-                                <Link to="/schools">{schoolActionLabel}</Link>
-                                <Link to="/studio">Studio tạo bộ đề</Link>
-                                <Link to="/profile">Hồ sơ cá nhân</Link>
+                                {user.role === 'admin' && (
+                                    <Link to="/admin" className="dropdown-item-admin">
+                                        <ShieldCheck size={16} />
+                                        <span>Quản trị hệ thống</span>
+                                    </Link>
+                                )}
+                                <Link to="/game" className="dropdown-item-game">
+                                    <Gamepad2 size={16} />
+                                    <span>Chơi game</span>
+                                </Link>
                                 <button type="button" onClick={handleLogout} className="logout-btn">
-                                    <LogOut size={16} /> Đăng xuất
-                                </button>
-                            </div>
-                        </div>
-                    ) : user?.role === 'user' || user?.role === 'admin' ? (
-                        <div className="teacher-account-menu">
-                            <Link className="nav-username" to="/profile">
-                                <span className="user-avatar-badge">
-                                    {user.avatar ? (
-                                        <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                    ) : (
-                                        avatarChar
-                                    )}
-                                </span>
-                                <span>{displayName}</span>
-                            </Link>
-                            <div className="teacher-account-dropdown">
-                                {user.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
-                                <Link to="/schools">{schoolActionLabel}</Link>
-                                <Link to="/student/classes">Lớp học của tôi</Link>
-                                <Link to="/game">Chơi Game Quiz</Link>
-                                <Link to="/profile">Hồ sơ cá nhân</Link>
-                                <button type="button" onClick={handleLogout} className="logout-btn">
-                                    <LogOut size={16} /> Đăng xuất
+                                    <LogOut size={16} />
+                                    <span>Đăng xuất</span>
                                 </button>
                             </div>
                         </div>

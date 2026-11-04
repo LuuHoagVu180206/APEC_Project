@@ -7,12 +7,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&display=swap');
 
 .teacher-class-root {
-    --tc-bg: #0b0f19;
-    --tc-surface: #111827;
+    --tc-bg: #070a13;
+    --tc-surface: #0f172a;
     --tc-surface-hover: #1f2937;
-    --tc-surface-card: #151d30;
-    --tc-border: #1f293d;
-    --tc-border-light: #2d3b55;
+    --tc-surface-card: #121826;
+    --tc-border: #2d3b55;
+    --tc-border-light: #3e5075;
     
     --tc-text: #f9fafb;
     --tc-text-muted: #9ca3af;
@@ -24,7 +24,7 @@
     --tc-gold-shadow: #b45309;
     --tc-gold-text: #0f172a;
     
-    --tc-cyan: #0ea5e9;
+    --tc-cyan: #38bdf8;
     --tc-cyan-hover: #38bdf8;
     --tc-cyan-shadow: #0369a1;
     
@@ -39,7 +39,7 @@
     --tc-danger-hover: #f87171;
     --tc-danger-shadow: #b91c1c;
     
-    --tc-font: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --tc-font: "Iosevka Charon Mono", monospace;
     
     min-height: 100vh;
     background-color: var(--tc-bg);
@@ -858,19 +858,19 @@
 
 /* ================= LIGHT MODE OVERRIDES ================= */
 [data-theme='light'] .teacher-class-root {
-    --tc-bg: #f8fafc;
+    --tc-bg: #ffffff;
     --tc-surface: #ffffff;
     --tc-surface-hover: #f1f5f9;
     --tc-surface-card: #ffffff;
     --tc-surface-card-hover: #f8fafc;
-    --tc-border: #e2e8f0;
-    --tc-border-light: #cbd5e1;
-    --tc-text: #0f172a;
-    --tc-text-muted: #334155;
+    --tc-border: #191a23;
+    --tc-border-light: #191a23;
+    --tc-text: #191a23;
+    --tc-text-muted: #191a23;
     --tc-text-subtle: #64748b;
-    --tc-cyan: #0284c7;
-    --tc-cyan-hover: #0369a1;
-    --tc-cyan-shadow: #0369a1;
+    --tc-cyan: #7dd3fc;
+    --tc-cyan-hover: #38bdf8;
+    --tc-cyan-shadow: #191a23;
     --tc-gold: #d97706;
     --tc-gold-hover: #b45309;
     --tc-gold-shadow: #b45309;
@@ -889,8 +889,8 @@
 [data-theme='light'] .teacher-class-back-btn,
 [data-theme='light'] .teacher-class-theme-btn {
     background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 3px 0 0 #cbd5e1;
+    border: 2px solid #191a23;
+    box-shadow: 0 3px 0 0 #191a23;
     color: #334155;
 }
 
@@ -903,9 +903,9 @@
 }
 
 [data-theme='light'] .teacher-class-hero {
-    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+    background: #ffffff;
+    border: 2px solid #191a23;
+    box-shadow: 0 6px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-class-hero h1 {
@@ -918,7 +918,7 @@
 
 [data-theme='light'] .teacher-class-code-pill {
     background: #f1f5f9;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
     color: #b45309;
 }
 
@@ -931,19 +931,19 @@
 [data-theme='light'] .teacher-class-stat-card,
 [data-theme='light'] .teacher-class-metric-btn {
     background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 3px 0 0 #cbd5e1;
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-class-metric-btn:hover {
     border-color: #0284c7;
-    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.12), 0 4px 0 0 #0284c7;
+    box-shadow: 0 5px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-class-metric-btn.metric-active {
     background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
     border-color: #0284c7 !important;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.25), 0 4px 14px rgba(2, 132, 199, 0.15) !important;
+    box-shadow: 0 4px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-class-metric-btn.metric-active .teacher-class-metric-num {
@@ -976,12 +976,12 @@
 
 [data-theme='light'] .teacher-class-section {
     background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+    border: 2px solid #191a23;
+    box-shadow: 0 6px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-class-section-header {
-    border-bottom-color: #e2e8f0;
+    border-bottom-color: #191a23;
 }
 
 [data-theme='light'] .teacher-class-section-title-group h2 {
@@ -996,7 +996,7 @@
 
 [data-theme='light'] .teacher-class-search-input-wrap {
     background: #f8fafc;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
 }
 
 [data-theme='light'] .teacher-class-search-input-wrap input {
@@ -1009,9 +1009,9 @@
 
 [data-theme='light'] .teacher-class-btn-search {
     background: #f8fafc;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
     color: #0f172a;
-    box-shadow: 0 2px 0 0 #cbd5e1;
+    box-shadow: 0 2px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-class-btn-search:hover {
@@ -1022,7 +1022,7 @@
 
 [data-theme='light'] .teacher-class-member-row {
     background: #f8fafc;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
 }
 
 [data-theme='light'] .teacher-class-member-row:hover {
@@ -1040,9 +1040,9 @@
 
 [data-theme='light'] .teacher-class-btn-page {
     background: #f8fafc;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
     color: #334155;
-    box-shadow: 0 2px 0 0 #cbd5e1;
+    box-shadow: 0 2px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-class-btn-page:hover:not(:disabled) {
@@ -1053,15 +1053,15 @@
 
 [data-theme='light'] .teacher-class-select {
     background: #f8fafc;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
     color: #0f172a;
-    box-shadow: 0 2px 0 0 #e2e8f0;
+    box-shadow: 0 2px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-class-set-card {
     background: #f8fafc;
-    border-color: #cbd5e1;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05), 0 3px 0 0 #cbd5e1;
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-class-set-card:hover {
@@ -1087,7 +1087,7 @@
 
 [data-theme='light'] .teacher-class-empty {
     background: #f8fafc;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
     color: #475569;
 }
 

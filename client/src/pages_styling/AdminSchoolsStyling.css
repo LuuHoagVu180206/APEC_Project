@@ -7,13 +7,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
 .admin-schools-root {
-    --as-bg: #0b0f19;
-    --as-surface: #111827;
+    --as-bg: #070a13;
+    --as-surface: #0f172a;
     --as-surface-hover: #172033;
-    --as-surface-card: #151d30;
+    --as-surface-card: #121826;
     --as-surface-card-hover: #1a243c;
     --as-surface-alt: #0e1526;
-    --as-border: #1f293d;
+    --as-border: #2d3b55;
     --as-border-light: #29354d;
 
     --as-text: #f8fafc;
@@ -25,7 +25,7 @@
     --as-gold-hover: #fbbf24;
     --as-gold-shadow: #b45309;
 
-    --as-cyan: #0ea5e9;
+    --as-cyan: #38bdf8;
     --as-cyan-hover: #38bdf8;
     --as-cyan-shadow: #0369a1;
 
@@ -41,7 +41,7 @@
     --as-rose-hover: #fb7185;
     --as-rose-shadow: #9f1239;
 
-    --as-font: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --as-font: "Iosevka Charon Mono", monospace;
 
     min-height: 100vh;
     background-color: var(--as-bg);

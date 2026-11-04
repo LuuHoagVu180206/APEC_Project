@@ -17,6 +17,7 @@ import {
     Moon 
 } from 'lucide-react';
 import { SchoolRequestPageLogic } from '../pages_logic/SchoolRequestPageLogic';
+import Navbar from '../components/Navbar';
 import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/SchoolRequestStyling.css';
 
@@ -26,8 +27,10 @@ const SchoolRequestPage = () => {
     const updateField = (field, value) => setFormData((current) => ({ ...current, [field]: value }));
 
     return (
-        <main className="school-req-root">
-            <div className="school-req-inner">
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <Navbar activePage="schools" />
+            <main className="school-req-root" style={{ flex: 1 }}>
+                <div className="school-req-inner">
                 {/* TOP NAVIGATION / HUD */}
                 <div className="school-req-top-nav">
                     <button 
@@ -255,7 +258,8 @@ const SchoolRequestPage = () => {
                     </div>
                 </div>
             </div>
-        </main>
+            </main>
+        </div>
     );
 };
 

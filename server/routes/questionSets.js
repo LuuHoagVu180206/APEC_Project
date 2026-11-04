@@ -58,6 +58,7 @@ router.post('/', verifyToken, async (req, res) => {
             owner: req.user.id // Gắn thẻ chủ sở hữu lấy từ Token
         });
         const savedSet = await newSet.save();
+        await QuestionSet.findByIdAndUpdate(req.params.id, { $inc: { copyCount: 1 } });
         await savedSet.populate('owner', 'username displayName avatar role');
         res.status(200).json(savedSet);
     } catch (err) {
@@ -494,4 +495,23 @@ router.post('/:id/copy', verifyToken, async (req, res) => {
     }
 });
 
+
+// 12. GHI NHẬN LƯỢT CHƠI BỘ CÂU HỎI (Solo hoặc Multiplayer phòng chung)
+router.post('/:id/play', async (req, res) => {
+    try {
+        const { mode } = req.body; // 'solo' hoặc 'multiplayer'
+        const isMulti = mode === 'multiplayer';
+        const incFields = {
+            playCount: 1,
+            ...(isMulti ? { playCountMultiplayer: 1 } : { playCountSolo: 1 })
+        };
+        await QuestionSet.findByIdAndUpdate(req.params.id, { $inc: incFields });
+        res.status(200).json({ success: true, message: 'Đã cập nhật lượt chơi thành công!' });
+    } catch (err) {
+        console.error('Lỗi cập nhật lượt chơi:', err);
+        res.status(500).json(err);
+    }
+});
+
 module.exports = router;
+

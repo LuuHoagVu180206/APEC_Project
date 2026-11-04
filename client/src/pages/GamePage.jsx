@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import { GamePageLogic } from '../pages_logic/GamePageLogic';
-import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/GamePageStyling.css';
 import { 
     Sparkles, 
     Gamepad2, 
     Trophy, 
     BookOpen, 
-    Sun, 
-    Moon, 
-    LogOut, 
     Maximize, 
     Minimize, 
     RotateCcw, 
@@ -38,139 +35,40 @@ const GamePage = () => {
         isFullscreen,
         iframeRef,
         gameContainerRef,
-        schoolActionLabel,
-        navigate,
         handleReloadGame,
-        toggleFullscreen,
-        handleLogout
+        toggleFullscreen
     } = GamePageLogic();
 
-    const { isDark, toggleTheme } = useDarkMode();
     const [modalTab, setModalTab] = useState('defaults'); // 'defaults' hoặc 'weekly'
 
     const isGuest = !user || user.role === 'guest';
 
     return (
         <div className="game-page-wrapper">
-            {/* 1. NAVBAR - ĐỒNG BỘ HOÀN TOÀN VỚI LANDING PAGE */}
-            <header className="navbar">
-                <div className="nav-container">
-                    <div className="nav-left">
-                        <div className="brand-logo" onClick={() => navigate('/')}>
-                            <div className="brand-coin">
-                                <Sparkles size={18} />
-                            </div>
-                            <span className="brand-name">EasyLearn</span>
-                        </div>
-
-                        <nav className="nav-links">
-                            <Link to="/" className="nav-link">Trang chủ</Link>
-                            <Link to="/library" className="nav-link">Thư viện</Link>
-                            <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
-                            <Link to="/schools" className="nav-link">Trường học</Link>
-                            <Link to="/student/classes" className="nav-link">Lớp học</Link>
-                            <Link to="/studio" className="nav-link">Studio</Link>
-                        </nav>
-                    </div>
-
-                    <div className="nav-right">
-                        {/* Phiên bản Game */}
-                        <div className="game-version-pill" title="Phiên bản trò chơi hiện tại">
-                            <Gamepad2 size={14} />
-                            <span>{gameVersion}</span>
-                        </div>
-
-                        {/* Điểm kỷ lục nếu có */}
-                        {user?.highScore !== undefined && (
-                            <div className="game-score-pill" title="Điểm kỷ lục cao nhất của bạn">
-                                <Trophy size={14} />
-                                <span>{user.highScore} XP</span>
-                            </div>
-                        )}
-
-                        {/* Điểm Tuần nếu có */}
-                        {user?.weeklyScore !== undefined && user.weeklyScore > 0 && (
-                            <div className="game-score-pill weekly-score-pill" title="Điểm Thử Thách Tuần của bạn">
-                                <Flame size={14} />
-                                <span>{user.weeklyScore} Tuần</span>
-                            </div>
-                        )}
-
-                        {/* Nút chuyển chế độ Sáng / Tối */}
-                        <button 
-                            className="theme-toggle-btn"
-                            onClick={toggleTheme} 
-                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
-                            aria-label="Toggle Theme"
-                        >
-                            {isDark ? <Sun size={19} /> : <Moon size={19} />}
-                        </button>
-
-                        {/* User Menu tương ứng với vai trò */}
-                        {user && !isGuest ? (
-                            user.role === 'teacher' ? (
-                                <div className="teacher-account-menu">
-                                    <Link className="nav-username" to="/profile">
-                                        <span className="user-avatar-badge">
-                                            {user.avatar ? (
-                                                <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                            ) : (
-                                                user.username.charAt(0).toUpperCase()
-                                            )}
-                                        </span>
-                                        <span>{user.displayName || user.username}</span>
-                                    </Link>
-                                    <div className="teacher-account-dropdown">
-                                        <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
-                                        <Link to="/schools">{schoolActionLabel}</Link>
-                                        <Link to="/studio">Studio tạo bộ đề</Link>
-                                        <Link to="/profile">Hồ sơ cá nhân</Link>
-                                        <button type="button" onClick={handleLogout} className="logout-btn">
-                                            <LogOut size={16} /> Đăng xuất
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="teacher-account-menu">
-                                    <Link className="nav-username" to="/profile">
-                                        <span className="user-avatar-badge">
-                                            {user.avatar ? (
-                                                <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                            ) : (
-                                                user.username.charAt(0).toUpperCase()
-                                            )}
-                                        </span>
-                                        <span>{user.displayName || user.username}</span>
-                                    </Link>
-                                    <div className="teacher-account-dropdown">
-                                        {user.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
-                                        <Link to="/schools">{schoolActionLabel}</Link>
-                                        <Link to="/student/classes">Lớp học của tôi</Link>
-                                        <Link to="/profile">Hồ sơ cá nhân</Link>
-                                        <button type="button" onClick={handleLogout} className="logout-btn">
-                                            <LogOut size={16} /> Đăng xuất
-                                        </button>
-                                    </div>
-                                </div>
-                            )
-                        ) : (
-                            <div className="teacher-account-menu">
-                                <div className="nav-username" title="Đang chơi ở chế độ khách">
-                                    <span className="user-avatar-badge guest-avatar-badge">K</span>
-                                    <span>{user?.username || 'Khách'}</span>
-                                </div>
-                                <div className="teacher-account-dropdown">
-                                    <Link to="/login">Đăng nhập tài khoản</Link>
-                                    <Link to="/login?mode=register">Tạo tài khoản mới</Link>
-                                    <button type="button" onClick={handleLogout} className="logout-btn">
-                                        <LogOut size={16} /> Rời phiên khách
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+            {/* 1. NAVBAR - UNIFIED NAVBAR */}
+            <Navbar activePage="game">
+                {/* Phiên bản Game */}
+                <div className="game-version-pill" title="Phiên bản trò chơi hiện tại">
+                    <Gamepad2 size={14} />
+                    <span>{gameVersion}</span>
                 </div>
-            </header>
+
+                {/* Điểm kỷ lục nếu có */}
+                {user?.highScore !== undefined && (
+                    <div className="game-score-pill" title="Điểm kỷ lục cao nhất của bạn">
+                        <Trophy size={14} />
+                        <span>{user.highScore} XP</span>
+                    </div>
+                )}
+
+                {/* Điểm Tuần nếu có */}
+                {user?.weeklyScore !== undefined && user.weeklyScore > 0 && (
+                    <div className="game-score-pill weekly-score-pill" title="Điểm Thử Thách Tuần của bạn">
+                        <Flame size={14} />
+                        <span>{user.weeklyScore} Tuần</span>
+                    </div>
+                )}
+            </Navbar>
 
             {/* 2. KHU VỰC NỘI DUNG GAME CHÍNH */}
             <main className="game-main-content">

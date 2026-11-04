@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import { LandingPageLogic } from '../pages_logic/LandingPageLogic';
 import '../pages_styling/LandingPageStyling.css';
 import { 
@@ -11,9 +12,6 @@ import {
     Users, 
     ArrowRight, 
     ArrowUpRight, 
-    Sun, 
-    Moon, 
-    LogOut, 
     CheckCircle2, 
     GraduationCap, 
     FolderPlus, 
@@ -49,12 +47,11 @@ const LandingPage = () => {
     const {
         navigate,
         isDark,
-        toggleTheme,
         searchDev,
         setSearchDev,
     } = LandingPageLogic();
 
-    const [user, setUser] = useState(() => {
+    const [user] = useState(() => {
         try {
             const savedUser = JSON.parse(localStorage.getItem('user'));
             return savedUser?.username ? savedUser : null;
@@ -62,7 +59,6 @@ const LandingPage = () => {
             return null;
         }
     });
-    const [schoolMemberships, setSchoolMemberships] = useState([]);
     const [weeklySets, setWeeklySets] = useState([]);
     const [activeProcessStep, setActiveProcessStep] = useState(0);
 
@@ -112,28 +108,6 @@ const LandingPage = () => {
             .then(res => setWeeklySets(res.data || []))
             .catch(() => {});
     }, []);
-
-    useEffect(() => {
-        if (!user?.accessToken) return undefined;
-        let isActive = true;
-        axios.get('http://localhost:5000/api/schools/mine', {
-            headers: { token: user.accessToken }
-        }).then((response) => {
-            if (isActive) setSchoolMemberships(response.data);
-        }).catch(() => {});
-        return () => {
-            isActive = false;
-        };
-    }, [user]);
-
-    const schoolActionLabel = schoolMemberships.length > 0 ? 'Trường của tôi' : 'Tham gia trường';
-
-    const handleLogout = () => {
-        localStorage.removeItem('user');
-        setUser(null);
-        setSchoolMemberships([]);
-        navigate('/');
-    };
 
     // 7 Bộ câu hỏi chính thức (Default) của APEC Group làm fallback
     const defaultApecQuestionSets = [
@@ -252,95 +226,8 @@ const LandingPage = () => {
 
     return (
         <div className="landing-wrapper">
-            {/* 1. NAVBAR - POSITIVUS CLEAN MODERN HEADER */}
-            <header className="navbar">
-                <div className="nav-container">
-                    <div className="nav-left">
-                        <div className="brand-logo" onClick={() => navigate('/')}>
-                            <div className="brand-coin">
-                                <Sparkles size={18} />
-                            </div>
-                            <span className="brand-name">EasyLearn</span>
-                        </div>
-
-                        <nav className="nav-links">
-                            <a href="#catalog" className="nav-link">Khám phá</a>
-                            <Link to="/library" className="nav-link">Thư viện</Link>
-                            <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
-                            <Link to="/schools" className="nav-link">Trường học</Link>
-                            <Link to="/student/classes" className="nav-link">Lớp học</Link>
-                            <Link to="/studio" className="nav-link">Studio</Link>
-                        </nav>
-                    </div>
-
-                    <div className="nav-right">
-                        <button 
-                            className="theme-toggle-btn"
-                            onClick={toggleTheme} 
-                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
-                            aria-label="Toggle Theme"
-                        >
-                            {isDark ? <Sun size={19} /> : <Moon size={19} />}
-                        </button>
-
-                        {user?.role === 'teacher' ? (
-                            <div className="teacher-account-menu">
-                                <Link className="nav-username" to="/profile">
-                                    <span className="user-avatar-badge">
-                                        {user.avatar ? (
-                                            <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                        ) : (
-                                            user.username.charAt(0).toUpperCase()
-                                        )}
-                                    </span>
-                                    <span>{user.displayName || user.username}</span>
-                                </Link>
-                                <div className="teacher-account-dropdown">
-                                    <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
-                                    <Link to="/schools">{schoolActionLabel}</Link>
-                                    <Link to="/studio">Studio tạo bộ đề</Link>
-                                    <Link to="/profile">Hồ sơ cá nhân</Link>
-                                    <button type="button" onClick={handleLogout} className="logout-btn">
-                                        <LogOut size={16} /> Đăng xuất
-                                    </button>
-                                </div>
-                            </div>
-                        ) : user?.role === 'user' || user?.role === 'admin' ? (
-                            <div className="teacher-account-menu">
-                                <Link className="nav-username" to="/profile">
-                                    <span className="user-avatar-badge">
-                                        {user.avatar ? (
-                                            <img src={user.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                        ) : (
-                                            user.username.charAt(0).toUpperCase()
-                                        )}
-                                    </span>
-                                    <span>{user.displayName || user.username}</span>
-                                </Link>
-                                <div className="teacher-account-dropdown">
-                                    {user.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
-                                    <Link to="/schools">{schoolActionLabel}</Link>
-                                    <Link to="/student/classes">Lớp học của tôi</Link>
-                                    <Link to="/game">Chơi Game Quiz</Link>
-                                    <Link to="/profile">Hồ sơ cá nhân</Link>
-                                    <button type="button" onClick={handleLogout} className="logout-btn">
-                                        <LogOut size={16} /> Đăng xuất
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="auth-buttons">
-                                <button className="btn-secondary-nav" onClick={() => navigate('/login')}>
-                                    Đăng nhập
-                                </button>
-                                <button className="btn-primary-nav" onClick={() => navigate('/login?mode=register')}>
-                                    Bắt đầu ngay
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </header>
+            {/* 1. NAVBAR - UNIFIED NAVBAR */}
+            <Navbar activePage="home" />
 
             {/* 2. HERO SECTION - POSITIVUS 2-COLUMN HERO WITH CYAN ACCENT */}
             <section className="hero-section">
@@ -372,39 +259,50 @@ const LandingPage = () => {
                         </div>
                     </div>
                 </div>
+            </section>
 
-                {/* POSITIVUS SUBJECT TICKER BAR */}
-                <div className="positivus-ticker-wrap">
-                    <div className="section-container">
-                        <div className="ticker-inner">
-                            <span className="ticker-label">CHỦ ĐỀ HỌC TẬP:</span>
-                            <div className="ticker-chips-row">
-                                {[
-                                    { name: 'Toán học', icon: '📐' },
-                                    { name: 'Vật lí', icon: '⚡' },
-                                    { name: 'Hoá học', icon: '🧪' },
-                                    { name: 'Sinh học', icon: '🌱' },
-                                    { name: 'Lịch sử', icon: '📜' },
-                                    { name: 'Tiếng Anh', icon: '🌍' },
-                                    { name: 'Ngữ văn', icon: '📖' },
-                                    { name: 'Trí tuệ nhân tạo', icon: '🤖' }
-                                ].map((sub, idx) => (
-                                    <button 
-                                        key={idx} 
-                                        className="positivus-ticker-chip"
-                                        onClick={() => navigate(`/library?search=${encodeURIComponent(sub.name)}`)}
-                                    >
-                                        <span className="chip-icon">{sub.icon}</span>
-                                        <span>{sub.name}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+            {/* 3. POSITIVUS WORKING PROCESS ACCORDION (QUY TRÌNH HỌC TẬP & RÈN LUYỆN) */}
+            <section className="positivus-process-section">
+                <div className="section-container">
+                    <div className="positivus-section-header">
+                        <span className="positivus-section-badge">Quy Trình</span>
+                        <p className="positivus-section-desc">
+                            4 bước đơn giản để rèn luyện tư duy phản xạ và chinh phục điểm số cao cùng EasyLearn.
+                        </p>
+                    </div>
+
+                    <div className="positivus-accordion-list">
+                        {processSteps.map((step, idx) => {
+                            const isOpen = activeProcessStep === idx;
+                            return (
+                                <div 
+                                    key={idx} 
+                                    className={`positivus-accordion-item ${isOpen ? 'active' : ''}`}
+                                    onClick={() => setActiveProcessStep(isOpen ? -1 : idx)}
+                                >
+                                    <div className="accordion-header">
+                                        <div className="accordion-title-wrap">
+                                            <span className="accordion-num">{step.num}</span>
+                                            <h4 className="accordion-title">{step.title}</h4>
+                                        </div>
+                                        <div className="accordion-icon-wrap">
+                                            <span className="accordion-toggle-icon">{isOpen ? '−' : '+'}</span>
+                                        </div>
+                                    </div>
+                                    {isOpen && (
+                                        <div className="accordion-body">
+                                            <div className="accordion-divider"></div>
+                                            <p className="accordion-desc">{step.desc}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
 
-            {/* 3. THỬ THÁCH ĐẤU TRÍ HÀNG TUẦN (POSITIVUS BENTO CARDS) */}
+            {/* 4. THỬ THÁCH ĐẤU TRÍ HÀNG TUẦN (POSITIVUS BENTO CARDS) */}
             <section className="weekly-challenges-section" id="weekly">
                 <div className="section-container">
                     <div className="positivus-section-header">
@@ -638,48 +536,7 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* 6. POSITIVUS WORKING PROCESS ACCORDION (QUY TRÌNH HỌC TẬP & RÈN LUYỆN) */}
-            <section className="positivus-process-section">
-                <div className="section-container">
-                    <div className="positivus-section-header">
-                        <span className="positivus-section-badge">Quy Trình</span>
-                        <p className="positivus-section-desc">
-                            4 bước đơn giản để rèn luyện tư duy phản xạ và chinh phục điểm số cao cùng EasyLearn.
-                        </p>
-                    </div>
-
-                    <div className="positivus-accordion-list">
-                        {processSteps.map((step, idx) => {
-                            const isOpen = activeProcessStep === idx;
-                            return (
-                                <div 
-                                    key={idx} 
-                                    className={`positivus-accordion-item ${isOpen ? 'active' : ''}`}
-                                    onClick={() => setActiveProcessStep(isOpen ? -1 : idx)}
-                                >
-                                    <div className="accordion-header">
-                                        <div className="accordion-title-wrap">
-                                            <span className="accordion-num">{step.num}</span>
-                                            <h4 className="accordion-title">{step.title}</h4>
-                                        </div>
-                                        <div className="accordion-icon-wrap">
-                                            <span className="accordion-toggle-icon">{isOpen ? '−' : '+'}</span>
-                                        </div>
-                                    </div>
-                                    {isOpen && (
-                                        <div className="accordion-body">
-                                            <div className="accordion-divider"></div>
-                                            <p className="accordion-desc">{step.desc}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
-
-            {/* 7. TÍNH NĂNG NỔI BẬT (TRÒ CHƠI HÓA HỌC TẬP TƯƠNG TÁC) */}
+            {/* 6. TÍNH NĂNG NỔI BẬT (TRÒ CHƠI HÓA HỌC TẬP TƯƠNG TÁC) */}
             <section className="features-spotlight-section">
                 <div className="section-container">
                     <div className="positivus-section-header">

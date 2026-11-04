@@ -7,12 +7,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&display=swap');
 
 .teacher-dash-root {
-    --td-bg: #0b0f19;
-    --td-surface: #111827;
+    --td-bg: #070a13;
+    --td-surface: #0f172a;
     --td-surface-hover: #1f2937;
-    --td-surface-card: #151d30;
-    --td-border: #1f293d;
-    --td-border-light: #2d3b55;
+    --td-surface-card: #121826;
+    --td-border: #2d3b55;
+    --td-border-light: #3e5075;
     
     --td-text: #f9fafb;
     --td-text-muted: #9ca3af;
@@ -24,7 +24,7 @@
     --td-gold-shadow: #b45309;
     --td-gold-text: #0f172a;
     
-    --td-cyan: #0ea5e9;
+    --td-cyan: #38bdf8;
     --td-cyan-hover: #38bdf8;
     --td-cyan-shadow: #0369a1;
     
@@ -35,7 +35,7 @@
     --td-emerald: #10b981;
     --td-emerald-shadow: #047857;
     
-    --td-font: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --td-font: "Iosevka Charon Mono", monospace;
     
     min-height: 100vh;
     background-color: var(--td-bg);
@@ -690,22 +690,22 @@
 
 /* ================= LIGHT MODE OVERRIDES ================= */
 [data-theme='light'] .teacher-dash-root {
-    --td-bg: #f8fafc;
+    --td-bg: #ffffff;
     --td-surface: #ffffff;
     --td-surface-hover: #f1f5f9;
     --td-surface-card: #ffffff;
     --td-surface-card-hover: #f8fafc;
-    --td-border: #e2e8f0;
-    --td-border-light: #cbd5e1;
-    --td-text: #0f172a;
-    --td-text-muted: #334155;
+    --td-border: #191a23;
+    --td-border-light: #191a23;
+    --td-text: #191a23;
+    --td-text-muted: #191a23;
     --td-text-subtle: #64748b;
     --td-gold: #d97706;
     --td-gold-hover: #b45309;
     --td-gold-shadow: #b45309;
-    --td-cyan: #0284c7;
-    --td-cyan-hover: #0369a1;
-    --td-cyan-shadow: #0369a1;
+    --td-cyan: #7dd3fc;
+    --td-cyan-hover: #38bdf8;
+    --td-cyan-shadow: #191a23;
     --td-purple: #7c3aed;
     --td-purple-hover: #6d28d9;
     --td-purple-shadow: #6d28d9;
@@ -721,8 +721,8 @@
 [data-theme='light'] .teacher-dash-back-btn,
 [data-theme='light'] .teacher-dash-theme-btn {
     background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 3px 0 0 #cbd5e1;
+    border: 2px solid #191a23;
+    box-shadow: 0 3px 0 0 #191a23;
     color: #334155;
 }
 
@@ -741,9 +741,9 @@
 }
 
 [data-theme='light'] .teacher-dash-hero {
-    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 4px 0 0 #cbd5e1;
+    background: #ffffff;
+    border: 2px solid #191a23;
+    box-shadow: 0 6px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-dash-hero-info h1 {
@@ -764,8 +764,8 @@
 
 [data-theme='light'] .teacher-dash-hud-pill {
     background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 3px 0 0 #cbd5e1;
+    border: 2px solid #191a23;
+    box-shadow: 0 3px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-dash-hud-num {
@@ -793,12 +793,12 @@
 /* Quick Action Cards */
 [data-theme='light'] .teacher-dash-action-card {
     background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 4px 0 0 #cbd5e1;
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-dash-action-card:hover {
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1), 0 6px 0 0 #cbd5e1;
+    box-shadow: 0 6px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-dash-action-text h3 {
@@ -815,7 +815,7 @@
 
 [data-theme='light'] .teacher-dash-card-gold:hover {
     border-color: #d97706;
-    box-shadow: 0 8px 22px rgba(217, 119, 6, 0.12), 0 6px 0 0 var(--td-gold-shadow);
+    box-shadow: 0 6px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-dash-card-cyan {
@@ -824,7 +824,7 @@
 
 [data-theme='light'] .teacher-dash-card-cyan:hover {
     border-color: #0284c7;
-    box-shadow: 0 8px 22px rgba(2, 132, 199, 0.12), 0 6px 0 0 var(--td-cyan-shadow);
+    box-shadow: 0 6px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-dash-card-purple {
@@ -833,14 +833,14 @@
 
 [data-theme='light'] .teacher-dash-card-purple:hover {
     border-color: #7c3aed;
-    box-shadow: 0 8px 22px rgba(124, 58, 237, 0.12), 0 6px 0 0 var(--td-purple-shadow);
+    box-shadow: 0 6px 0 0 #191a23;
 }
 
 /* Search Box */
 [data-theme='light'] .teacher-dash-search-box {
     background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 2px 0 0 #e2e8f0;
+    border: 2px solid #191a23;
+    box-shadow: 0 2px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-dash-search-box input {
@@ -855,13 +855,13 @@
 /* Class Cards */
 [data-theme='light'] .teacher-dash-class-card {
     background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 4px 0 0 #cbd5e1;
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-dash-class-card:hover {
     border-color: #0284c7;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1), 0 6px 0 0 #cbd5e1;
+    box-shadow: 0 6px 0 0 #191a23;
 }
 
 [data-theme='light'] .teacher-dash-class-title {
@@ -880,19 +880,19 @@
 
 [data-theme='light'] .teacher-dash-semester-pill {
     background: #f1f5f9;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
     color: #475569;
 }
 
 [data-theme='light'] .teacher-dash-card-footer {
     background: #f8fafc;
-    border-top-color: #e2e8f0;
+    border-top-color: #191a23;
     color: #475569;
 }
 
 [data-theme='light'] .teacher-dash-code-badge {
     background: #f1f5f9;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
     color: #b45309;
 }
 
@@ -912,7 +912,7 @@
 /* Empty State */
 [data-theme='light'] .teacher-dash-empty {
     background: #ffffff;
-    border-color: #cbd5e1;
+    border: 2px solid #191a23;
     color: #475569;
 }
 

@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const User = require('../models/User');
+const QuestionSet = require('../models/QuestionSet');
 const { verifyToken } = require('../verifyToken');
 
 // API LƯU ĐIỂM (Cả chế độ thường & Thử thách tuần)
@@ -34,6 +35,15 @@ router.post('/score', verifyToken, async (req, res) => {
             }
             
             await user.save();
+            if (setId) {
+                const isMulti = Boolean(req.body.isMultiplayer);
+                await QuestionSet.findByIdAndUpdate(setId, {
+                    $inc: {
+                        playCount: 1,
+                        ...(isMulti ? { playCountMultiplayer: 1 } : { playCountSolo: 1 })
+                    }
+                }).catch(e => console.warn('Lỗi tăng playCount:', e));
+            }
             res.status(200).json({ 
                 message: "Lưu điểm thành công!", 
                 newHighScore: user.highScore,

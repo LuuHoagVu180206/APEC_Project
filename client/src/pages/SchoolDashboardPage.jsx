@@ -21,6 +21,7 @@ import {
     Moon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import { SchoolDashboardLogic } from '../pages_logic/SchoolDashboardLogic';
 import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/SchoolDashboardStyling.css';
@@ -73,8 +74,10 @@ const SchoolDashboardPage = () => {
     const displayRole = (role) => role === 'teacher' ? 'Giáo viên' : role === 'user' ? 'Học sinh' : 'Quản trị viên';
 
     return (
-        <main className="school-dash-root">
-            <div className="school-dash-inner">
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <Navbar activePage="schools" />
+            <main className="school-dash-root" style={{ flex: 1 }}>
+                <div className="school-dash-inner">
                 {/* TOP NAVIGATION / HUD */}
                 <div className="school-dash-top-nav">
                     <button 
@@ -594,7 +597,8 @@ const SchoolDashboardPage = () => {
                     )}
                 </section>
             </div>
-        </main>
+            </main>
+        </div>
     );
 };
 

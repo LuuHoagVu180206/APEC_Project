@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import { ProfilePageLogic } from '../pages_logic/ProfilePageLogic';
-import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/ProfilePageStyling.css';
 import { 
-    Sparkles, 
-    Sun, 
-    Moon, 
-    LogOut, 
     Camera, 
     Trash2, 
     User, 
@@ -38,16 +33,11 @@ const ProfilePage = () => {
         passwordMessage,
         isUpdatingProfile,
         isChangingPassword,
-        schoolActionLabel,
         handleAvatarUpload,
         handleRemoveAvatar,
         handleUpdateProfile,
-        handleChangePassword,
-        handleLogout,
-        navigate
+        handleChangePassword
     } = ProfilePageLogic();
-
-    const { isDark, toggleTheme } = useDarkMode();
 
     // Ẩn/Hiện mật khẩu
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -64,74 +54,8 @@ const ProfilePage = () => {
 
     return (
         <div className="profile-wrapper">
-            {/* 1. NAVBAR - ĐỒNG BỘ HOÀN TOÀN */}
-            <header className="navbar">
-                <div className="nav-container">
-                    <div className="nav-left">
-                        <div className="brand-logo" onClick={() => navigate('/')}>
-                            <div className="brand-coin">
-                                <Sparkles size={18} />
-                            </div>
-                            <span className="brand-name">EasyLearn</span>
-                        </div>
-
-                        <nav className="nav-links">
-                            <Link to="/" className="nav-link">Trang chủ</Link>
-                            <Link to="/library" className="nav-link">Thư viện</Link>
-                            <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
-                            <Link to="/schools" className="nav-link">Trường học</Link>
-                            <Link to="/student/classes" className="nav-link">Lớp học</Link>
-                            <Link to="/studio" className="nav-link">Studio</Link>
-                        </nav>
-                    </div>
-
-                    <div className="nav-right">
-                        <button 
-                            className="theme-toggle-btn"
-                            onClick={toggleTheme} 
-                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
-                            aria-label="Toggle Theme"
-                        >
-                            {isDark ? <Sun size={19} /> : <Moon size={19} />}
-                        </button>
-
-                        {currentUser && (
-                            <div className="teacher-account-menu">
-                                <Link className="nav-username" to="/profile">
-                                    <span className="user-avatar-badge">
-                                        {formData.avatar ? (
-                                            <img src={formData.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                        ) : (
-                                            currentUser.username.charAt(0).toUpperCase()
-                                        )}
-                                    </span>
-                                    <span>{formData.displayName || currentUser.username}</span>
-                                </Link>
-                                <div className="teacher-account-dropdown">
-                                    {currentUser.role === 'teacher' ? (
-                                        <>
-                                            <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
-                                            <Link to="/schools">{schoolActionLabel}</Link>
-                                            <Link to="/studio">Studio tạo bộ đề</Link>
-                                        </>
-                                    ) : (
-                                        <>
-                                            {currentUser.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
-                                            <Link to="/schools">{schoolActionLabel}</Link>
-                                            <Link to="/student/classes">Lớp học của tôi</Link>
-                                            <Link to="/game">Chơi Game Quiz</Link>
-                                        </>
-                                    )}
-                                    <Link to="/profile">Hồ sơ cá nhân</Link>
-                                    <button type="button" onClick={handleLogout} className="logout-btn">
-                                        <LogOut size={16} /> Đăng xuất
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </header>
+            {/* 1. NAVBAR - UNIFIED NAVBAR */}
+            <Navbar activePage="profile" />
 
             {/* 2. HERO SECTION */}
             <section className="profile-hero">
@@ -174,7 +98,13 @@ const ProfilePage = () => {
                         </div>
 
                         <div className="avatar-info-group">
-                            <h3>{formData.displayName || currentUser?.username}</h3>
+                            <div className="avatar-name-badge-wrap">
+                                <h3>{formData.displayName || currentUser?.username}</h3>
+                                <div className="profile-status-pill">
+                                    <span className="profile-status-dot"></span>
+                                    <span>Trực tuyến</span>
+                                </div>
+                            </div>
                             <span className="avatar-username-handle">@{currentUser?.username}</span>
                         </div>
 

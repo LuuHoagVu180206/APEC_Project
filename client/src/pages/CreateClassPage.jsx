@@ -14,6 +14,7 @@ import {
     Moon
 } from 'lucide-react';
 import { CreateClassPageLogic } from '../pages_logic/CreateClassPageLogic';
+import Navbar from '../components/Navbar';
 import { useDarkMode } from '../pages_logic/useDarkMode';
 import '../pages_styling/CreateClassStyling.css';
 
@@ -22,8 +23,10 @@ const CreateClassPage = () => {
     const { isDark, toggleTheme } = useDarkMode();
 
     return (
-        <main className="create-class-root">
-            <div className="create-class-inner">
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <Navbar activePage="classes" />
+            <main className="create-class-root" style={{ flex: 1 }}>
+                <div className="create-class-inner">
                 {/* TOP NAVIGATION / HUD */}
                 <div className="create-class-top-nav">
                     <button 
@@ -167,7 +170,8 @@ const CreateClassPage = () => {
                     </div>
                 </div>
             </div>
-        </main>
+            </main>
+        </div>
     );
 };
 

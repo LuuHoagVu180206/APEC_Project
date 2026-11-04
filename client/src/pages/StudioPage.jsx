@@ -3,7 +3,6 @@ import { StudioPageLogic } from '../pages_logic/StudioPageLogic';
 import Navbar from '../components/Navbar';
 import '../pages_styling/StudioPageStyling.css';
 import { 
-    Sparkles, 
     Bookmark, 
     Layers, 
     FolderPlus,
@@ -19,7 +18,10 @@ import {
     Pencil,
     X,
     CheckCircle2,
-    HelpCircle
+    HelpCircle,
+    ArrowUpRight,
+    Wrench,
+    Check
 } from 'lucide-react';
 
 const StudioPage = () => {
@@ -63,516 +65,607 @@ const StudioPage = () => {
         handleTogglePrivacy
     } = StudioPageLogic();
 
+    const getTopicBadgeClass = (topic) => {
+        if (!topic) return 'badge-other';
+        const t = topic.toLowerCase();
+        if (t.includes('toán')) return 'badge-math';
+        if (t.includes('tiếng anh') || t.includes('anh')) return 'badge-english';
+        if (t.includes('lịch sử') || t.includes('sử')) return 'badge-history';
+        if (t.includes('hoá') || t.includes('vật lý') || t.includes('sinh')) return 'badge-science';
+        if (t.includes('việt') || t.includes('văn')) return 'badge-literature';
+        return 'badge-other';
+    };
+
     return (
         <div className="studio-wrapper">
             {/* 1. NAVBAR - ĐỒNG BỘ TOÀN HỆ THỐNG */}
             <Navbar activePage="studio" />
 
-            {/* 2. HERO SECTION & THỐNG KÊ NHANH */}
+            {/* 2. HERO SECTION - WORKSHOP CONSOLE THEO PHONG CÁCH POSITIVUS */}
             <section className="studio-hero">
-                <div className="studio-backdrop-glow"></div>
-                <div className="studio-header-wrap">
-                    <div className="studio-header-left">
-                        <div className="studio-pill-badge">
-                            <Sparkles size={13} />
-                            <span>Trung Tâm Biên Soạn & Sáng Tạo</span>
-                        </div>
-                        <h1 className="studio-title">Góc Sáng Tạo của {currentUser?.displayName || currentUser?.username}</h1>
-                        <p className="studio-subtitle">
-                            Thiết kế bộ câu hỏi trắc nghiệm, quản lý ngân hàng câu đố và xuất tài liệu học tập PDF/Excel.
+                <div className="section-container">
+                    <div className="positivus-section-header">
+                        <span className="positivus-section-badge">Góc Sáng Tạo</span>
+                        <p className="positivus-section-desc">
+                            Xưởng thiết kế đề thi cá nhân & ngân hàng câu đố trắc nghiệm của <strong>{currentUser?.displayName || currentUser?.username}</strong>.
                         </p>
                     </div>
 
-                    <div className="studio-stats-pills">
-                        <div className="studio-stat-item">
-                            <div className="studio-stat-icon icon-gold">
-                                <Layers size={18} />
+                    {/* Quick Stats & Action Workbench */}
+                    <div className="studio-workbench-panel">
+                        <div className="workbench-stats-grid">
+                            <div className="workbench-stat-card stat-cyan">
+                                <div className="stat-card-header">
+                                    <span className="stat-card-title">Bộ đề của bạn</span>
+                                    <Layers size={20} />
+                                </div>
+                                <div className="stat-card-val">{mySets.length}</div>
+                                <div className="stat-card-sub">Bộ câu hỏi đã biên soạn</div>
                             </div>
-                            <div>
-                                <div className="studio-stat-val">{mySets.length}</div>
-                                <div className="studio-stat-label">Bộ đề của bạn</div>
+
+                            <div className="workbench-stat-card stat-white">
+                                <div className="stat-card-header">
+                                    <span className="stat-card-title">Kho câu hỏi lẻ</span>
+                                    <HelpCircle size={20} />
+                                </div>
+                                <div className="stat-card-val">{questions.length}</div>
+                                <div className="stat-card-sub">Câu hỏi trắc nghiệm tự tạo</div>
+                            </div>
+
+                            <div className="workbench-stat-card stat-white">
+                                <div className="stat-card-header">
+                                    <span className="stat-card-title">Bộ đề đã lưu</span>
+                                    <Bookmark size={20} />
+                                </div>
+                                <div className="stat-card-val">{savedSetsData.length}</div>
+                                <div className="stat-card-sub">Lưu từ Thư viện cộng đồng</div>
                             </div>
                         </div>
 
-                        <div className="studio-stat-item">
-                            <div className="studio-stat-icon icon-blue">
-                                <HelpCircle size={18} />
-                            </div>
-                            <div>
-                                <div className="studio-stat-val">{questions.length}</div>
-                                <div className="studio-stat-label">Câu hỏi tự tạo</div>
-                            </div>
-                        </div>
+                        {/* Nút hành động nhanh */}
+                        <div className="workbench-actions-bar">
+                            <button 
+                                type="button" 
+                                className="btn-workbench-cta btn-cta-dark"
+                                onClick={handleOpenCreateSetModal}
+                                title="Mở bảng tạo bộ câu hỏi mới"
+                            >
+                                <FolderPlus size={18} />
+                                <span>Tạo bộ đề mới</span>
+                            </button>
 
-                        <div className="studio-stat-item">
-                            <div className="studio-stat-icon icon-emerald">
-                                <Bookmark size={18} />
-                            </div>
-                            <div>
-                                <div className="studio-stat-val">{savedSetsData.length}</div>
-                                <div className="studio-stat-label">Bộ đã lưu</div>
-                            </div>
+                            <button 
+                                type="button" 
+                                className="btn-workbench-cta btn-cta-cyan"
+                                onClick={handleOpenCreateQuestionModal}
+                                title="Mở bảng tạo câu hỏi trắc nghiệm mới"
+                            >
+                                <Plus size={18} />
+                                <span>Thêm câu hỏi lẻ</span>
+                            </button>
                         </div>
+                    </div>
+
+                    {/* 3. TABS PHÂN KHU SÁNG TẠO (SEGMENTED SWITCHER) */}
+                    <div className="studio-tabs-bar">
+                        <button
+                            type="button"
+                            className={`studio-tab-btn ${activeTab === 'sets' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('sets')}
+                        >
+                            <Layers size={17} />
+                            <span>Bộ câu hỏi của tôi</span>
+                            <span className="tab-counter-badge">{mySets.length}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={`studio-tab-btn ${activeTab === 'questions' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('questions')}
+                        >
+                            <HelpCircle size={17} />
+                            <span>Ngân hàng câu hỏi lẻ</span>
+                            <span className="tab-counter-badge">{questions.length}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={`studio-tab-btn ${activeTab === 'saved' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('saved')}
+                        >
+                            <Bookmark size={17} />
+                            <span>Bộ đề đã lưu</span>
+                            <span className="tab-counter-badge">{savedSetsData.length}</span>
+                        </button>
                     </div>
                 </div>
             </section>
 
-            {/* 3. TABS PHÂN KHU SÁNG TẠO */}
-            <div className="studio-tabs-bar">
-                <button
-                    type="button"
-                    className={`studio-tab-btn ${activeTab === 'sets' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('sets')}
-                >
-                    <Layers size={16} />
-                    <span>Bộ câu hỏi của tôi</span>
-                    <span className="studio-tab-badge">{mySets.length}</span>
-                </button>
-
-                <button
-                    type="button"
-                    className={`studio-tab-btn ${activeTab === 'questions' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('questions')}
-                >
-                    <HelpCircle size={16} />
-                    <span>Ngân hàng câu hỏi lẻ</span>
-                    <span className="studio-tab-badge">{questions.length}</span>
-                </button>
-
-                <button
-                    type="button"
-                    className={`studio-tab-btn ${activeTab === 'saved' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('saved')}
-                >
-                    <Bookmark size={16} />
-                    <span>Bộ đề đã lưu</span>
-                    <span className="studio-tab-badge">{savedSetsData.length}</span>
-                </button>
-            </div>
-
-            {/* 4. KHU VỰC NỘI DUNG CHÍNH THEO TAB (BỐ CỤC THOÁNG ĐÃNG) */}
+            {/* 4. KHU VỰC NỘI DUNG CHÍNH THEO TAB (POSITIVUS WORKSHOP STYLE) */}
             <main className="studio-main-content">
-                {/* TAB 1: BỘ CÂU HỎI */}
-                {activeTab === 'sets' && (
-                    <div className="studio-tab-pane">
-                        <div className="studio-pane-header">
-                            <div>
-                                <h3 className="studio-pane-title">Bộ câu hỏi của tôi ({mySets.length})</h3>
-                                <p className="studio-pane-desc">Nhấp vào bộ câu hỏi bất kỳ để xem và quản lý chi tiết các câu hỏi bên trong.</p>
-                            </div>
-                            <button 
-                                type="button" 
-                                className="btn-studio-create-main btn-create-set"
-                                onClick={handleOpenCreateSetModal}
-                                title="Mở bảng tạo bộ câu hỏi mới"
-                            >
-                                <Plus size={16} />
-                                <span>Tạo bộ câu hỏi mới</span>
-                            </button>
-                        </div>
-
-                        {mySets.length === 0 ? (
-                            <div className="studio-empty-box">
-                                <Layers size={44} color="var(--text-muted)" />
-                                <h4>Bạn chưa tạo bộ câu hỏi nào</h4>
-                                <p>Hãy bấm nút "Tạo bộ câu hỏi mới" phía trên để bắt đầu xây dựng bộ đề trắc nghiệm đầu tiên của bạn!</p>
+                <div className="section-container">
+                    {/* TAB 1: BỘ CÂU HỎI */}
+                    {activeTab === 'sets' && (
+                        <div className="studio-tab-pane">
+                            <div className="studio-pane-header">
+                                <div className="pane-header-left">
+                                    <h3 className="studio-pane-title">Danh sách bộ đề của bạn ({mySets.length})</h3>
+                                    <p className="studio-pane-desc">Nhấp vào bộ đề để mở trang quản lý chi tiết hoặc thêm bớt các câu hỏi bên trong.</p>
+                                </div>
                                 <button 
                                     type="button" 
-                                    className="btn-studio-create-main btn-create-set"
+                                    className="btn-pane-action"
                                     onClick={handleOpenCreateSetModal}
-                                    style={{ marginTop: '16px' }}
                                 >
                                     <Plus size={16} />
-                                    <span>Tạo bộ câu hỏi ngay</span>
+                                    <span>Tạo bộ đề mới</span>
                                 </button>
                             </div>
-                        ) : (
-                            <div className="studio-sets-cards-grid">
-                                {mySets.map((set) => (
-                                    <div 
-                                        key={set._id} 
-                                        className="studio-item-card studio-set-card-clickable"
-                                        onClick={() => navigate(`/set/${set._id}`)}
-                                        title="Bấm để mở trang chi tiết bộ câu hỏi này"
-                                    >
-                                        <div className="item-card-top">
-                                            <div className="item-title-group">
-                                                <h4>{set.title}</h4>
-                                                <div className="item-meta-tags">
-                                                    <span 
-                                                        className={set.isPublic ? "pill-privacy-public clickable" : "pill-privacy-private clickable"}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleTogglePrivacy(set._id, set.isPublic);
-                                                        }}
-                                                        title={set.isPublic ? "Đang Công khai (Bấm để chuyển thành Riêng tư)" : "Đang Riêng tư (Bấm để chuyển thành Công khai)"}
-                                                    >
-                                                        {set.isPublic ? (
-                                                            <>
-                                                                <Globe size={11} style={{ display: 'inline', marginRight: '3px' }} />
-                                                                Công khai
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Lock size={11} style={{ display: 'inline', marginRight: '3px' }} />
-                                                                Riêng tư
-                                                            </>
-                                                        )}
-                                                    </span>
 
-                                                    {set.isPublic && (
-                                                        <span
-                                                            className={`pill-author-mode clickable ${set.isAnonymous ? 'mode-anon' : 'mode-named'}`}
+                            {mySets.length === 0 ? (
+                                <div className="studio-empty-state">
+                                    <div className="empty-icon-wrap">
+                                        <Layers size={36} />
+                                    </div>
+                                    <h4>Bạn chưa tạo bộ câu hỏi nào</h4>
+                                    <p>Hãy bắt đầu xây dựng bộ đề trắc nghiệm đầu tiên của bạn để chia sẻ hoặc luyện tập!</p>
+                                    <button 
+                                        type="button" 
+                                        className="btn-empty-create"
+                                        onClick={handleOpenCreateSetModal}
+                                    >
+                                        <Plus size={16} />
+                                        <span>Tạo bộ đề ngay</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="studio-cards-grid studio-sets-grid">
+                                    {mySets.map((set) => {
+                                        const topicClass = getTopicBadgeClass(set.topic);
+                                        const questionsCount = set.questions?.length || 0;
+
+                                        return (
+                                            <div 
+                                                key={set._id} 
+                                                className="studio-workshop-card"
+                                                onClick={() => navigate(`/set/${set._id}`)}
+                                                title="Bấm để mở trang chi tiết và quản lý câu hỏi"
+                                            >
+                                                {/* Header thẻ: Toggles Trạng thái & Môn học */}
+                                                <div className="workshop-card-header">
+                                                    <div className="card-toggles-wrap">
+                                                        {/* Toggle Riêng tư / Công khai */}
+                                                        <button 
+                                                            type="button"
+                                                            className={`pill-toggle-btn ${set.isPublic ? 'status-public' : 'status-private'}`}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleToggleAnonymous(set._id, set.isAnonymous);
+                                                                handleTogglePrivacy(set._id, set.isPublic);
                                                             }}
-                                                            title={set.isAnonymous ? "Đang Ẩn danh (Bấm để Hiện tên tác giả)" : "Đang Hiện tên tác giả (Bấm để Đăng Ẩn danh)"}
+                                                            title={set.isPublic ? "Đang Công khai (Bấm để chuyển sang Riêng tư)" : "Đang Riêng tư (Bấm để chuyển sang Công khai)"}
                                                         >
-                                                            {set.isAnonymous ? (
+                                                            {set.isPublic ? (
                                                                 <>
-                                                                    <UserX size={11} style={{ display: 'inline', marginRight: '3px' }} />
-                                                                    Ẩn danh
+                                                                    <Globe size={12} />
+                                                                    <span>Công khai</span>
                                                                 </>
                                                             ) : (
                                                                 <>
-                                                                    <Eye size={11} style={{ display: 'inline', marginRight: '3px' }} />
-                                                                    Hiện tên: {currentUser?.displayName || currentUser?.username}
+                                                                    <Lock size={12} />
+                                                                    <span>Riêng tư</span>
                                                                 </>
                                                             )}
+                                                        </button>
+
+                                                        {/* Toggle Ẩn danh (khi công khai) */}
+                                                        {set.isPublic && (
+                                                            <button 
+                                                                type="button"
+                                                                className={`pill-toggle-btn ${set.isAnonymous ? 'status-anon' : 'status-named'}`}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleToggleAnonymous(set._id, set.isAnonymous);
+                                                                }}
+                                                                title={set.isAnonymous ? "Đang Ẩn danh (Bấm để Hiện tên)" : "Đang Hiện tên tác giả (Bấm để Ẩn danh)"}
+                                                            >
+                                                                {set.isAnonymous ? (
+                                                                    <>
+                                                                        <UserX size={12} />
+                                                                        <span>Ẩn danh</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Eye size={12} />
+                                                                        <span>Hiện tên</span>
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        )}
+
+                                                        <span className={`workshop-topic-tag ${topicClass}`}>
+                                                            {set.topic || 'Khác'}
                                                         </span>
-                                                    )}
 
-                                                    <span>🏷️ {set.topic}</span>
-                                                    <span>📝 {set.questions?.length || 0} câu</span>
+                                                        <span className="workshop-count-pill">
+                                                            {questionsCount} câu hỏi
+                                                        </span>
+                                                    </div>
+
+                                                    <button 
+                                                        type="button"
+                                                        className="btn-card-delete"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteSet(set._id);
+                                                        }}
+                                                        title="Xóa bộ đề này khỏi tài khoản"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
                                                 </div>
-                                            </div>
-                                        </div>
 
-                                        <p className="item-card-desc">
-                                            {set.description || "Chưa có mô tả cho bộ đề này. Bấm vào để thêm mô tả và câu hỏi."}
-                                        </p>
+                                                {/* Tiêu đề & Mô tả */}
+                                                <div className="workshop-card-body">
+                                                    <h4 className="workshop-card-title">
+                                                        <span>{set.title}</span>
+                                                        <ArrowUpRight size={17} className="title-arrow" />
+                                                    </h4>
+                                                    <p className="workshop-card-desc">
+                                                        {set.description || "Bộ câu hỏi chất lượng cao biên soạn tại Góc Sáng Tạo EasyLearn."}
+                                                    </p>
+                                                </div>
 
-                                        <div className="item-card-actions">
-                                            <div className="action-btns-group">
-                                                <button 
-                                                    type="button"
-                                                    className="btn-studio-action btn-view-set"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate(`/set/${set._id}`);
-                                                    }}
-                                                    title="Mở trang chi tiết bộ câu hỏi"
-                                                >
-                                                    <ExternalLink size={13} />
-                                                    <span>Xem chi tiết</span>
-                                                </button>
+                                                {/* Thanh hành động bên dưới thẻ */}
+                                                <div className="workshop-card-footer">
+                                                    <div className="footer-actions-left">
+                                                        <button 
+                                                            type="button"
+                                                            className="btn-workshop-action btn-action-manage"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigate(`/set/${set._id}`);
+                                                            }}
+                                                            title="Mở bảng biên soạn chi tiết câu hỏi"
+                                                        >
+                                                            <Wrench size={14} />
+                                                            <span>Quản lý câu hỏi</span>
+                                                        </button>
+                                                    </div>
 
-                                                <button 
-                                                    type="button"
-                                                    className="btn-studio-action"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleExport(set._id, 'excel');
-                                                    }}
-                                                    title="Xuất đề ra bảng tính Excel"
-                                                >
-                                                    <FileSpreadsheet size={13} />
-                                                    <span>Excel</span>
-                                                </button>
+                                                    <div className="footer-actions-right">
+                                                        <button 
+                                                            type="button"
+                                                            className="btn-workshop-action"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleExport(set._id, 'excel');
+                                                            }}
+                                                            title="Tải về file Excel"
+                                                        >
+                                                            <FileSpreadsheet size={14} />
+                                                            <span>Excel</span>
+                                                        </button>
 
-                                                <button 
-                                                    type="button"
-                                                    className="btn-studio-action"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleExport(set._id, 'pdf');
-                                                    }}
-                                                    title="Xuất tài liệu in ấn PDF"
-                                                >
-                                                    <FileText size={13} />
-                                                    <span>PDF</span>
-                                                </button>
-                                            </div>
-
-                                            <button 
-                                                type="button"
-                                                className="btn-studio-delete"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteSet(set._id);
-                                                }}
-                                                title="Xóa bộ đề này khỏi tài khoản"
-                                            >
-                                                <Trash2 size={15} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* TAB 2: NGÂN HÀNG CÂU HỎI LẺ */}
-                {activeTab === 'questions' && (
-                    <div className="studio-tab-pane">
-                        <div className="studio-pane-header">
-                            <div>
-                                <h3 className="studio-pane-title">Ngân hàng câu hỏi lẻ ({questions.length})</h3>
-                                <p className="studio-pane-desc">Bấm vào câu hỏi bất kỳ để chỉnh sửa nội dung, hoặc bấm nút để thêm vào bộ đề.</p>
-                            </div>
-                            <button 
-                                type="button" 
-                                className="btn-studio-create-main btn-create-q"
-                                onClick={handleOpenCreateQuestionModal}
-                                title="Mở bảng tạo câu hỏi trắc nghiệm mới"
-                            >
-                                <Plus size={16} />
-                                <span>Tạo câu hỏi mới</span>
-                            </button>
-                        </div>
-
-                        {questions.length === 0 ? (
-                            <div className="studio-empty-box">
-                                <HelpCircle size={44} color="var(--text-muted)" />
-                                <h4>Ngân hàng câu hỏi của bạn đang trống</h4>
-                                <p>Hãy bấm nút "Tạo câu hỏi mới" để tạo các câu hỏi trắc nghiệm và quản lý trong kho đề của bạn!</p>
-                                <button 
-                                    type="button" 
-                                    className="btn-studio-create-main btn-create-q"
-                                    onClick={handleOpenCreateQuestionModal}
-                                    style={{ marginTop: '16px' }}
-                                >
-                                    <Plus size={16} />
-                                    <span>Tạo câu hỏi ngay</span>
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="studio-questions-cards-grid">
-                                {questions.map((q, index) => {
-                                    const diffClass = q.difficulty === 'hard' 
-                                        ? 'pill-difficulty-hard' 
-                                        : q.difficulty === 'medium' 
-                                            ? 'pill-difficulty-medium' 
-                                            : 'pill-difficulty-easy';
-                                    
-                                    const diffText = q.difficulty === 'hard' 
-                                        ? 'Khó' 
-                                        : q.difficulty === 'medium' 
-                                            ? 'Trung bình' 
-                                            : 'Dễ';
-
-                                    return (
-                                        <div 
-                                            key={q._id} 
-                                            className="studio-item-card studio-question-card-clickable"
-                                            onClick={() => handleOpenEditQuestionModal(q)}
-                                            title="Bấm vào câu hỏi để chỉnh sửa nội dung"
-                                        >
-                                            <div className="item-card-top">
-                                                <div className="item-title-group">
-                                                    <h4>Câu {index + 1}: {q.questionText}</h4>
-                                                    <div className="item-meta-tags">
-                                                        <span className={diffClass}>• Độ khó: {diffText}</span>
-                                                        <span>• Môn: {q.topic || 'Khác'}</span>
+                                                        <button 
+                                                            type="button"
+                                                            className="btn-workshop-action"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleExport(set._id, 'pdf');
+                                                            }}
+                                                            title="Tải về file PDF"
+                                                        >
+                                                            <FileText size={14} />
+                                                            <span>PDF</span>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            {/* Preview 4 đáp án */}
-                                            {q.options && q.options.length === 4 && (
-                                                <div className="item-answers-preview">
-                                                    {q.options.map((opt, i) => {
-                                                        const label = ['A', 'B', 'C', 'D'][i];
-                                                        const isCorrect = q.correctAnswer === opt || q.correctAnswer === label;
-                                                        return (
-                                                            <div key={i} className={`answer-pill-snippet ${isCorrect ? 'is-correct' : ''}`}>
-                                                                <strong>{label}.</strong> {opt} {isCorrect && '✓'}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-
-                                            <div className="item-card-actions">
-                                                <div className="action-btns-group">
-                                                    <button 
-                                                        type="button"
-                                                        className="btn-studio-action btn-add-q-to-set"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleOpenAddToSetModal(q);
-                                                        }}
-                                                        title="Thêm câu hỏi này vào một trong các bộ đề của bạn"
-                                                    >
-                                                        <Plus size={14} />
-                                                        <span>Thêm vào bộ đề</span>
-                                                    </button>
-                                                    <button 
-                                                        type="button"
-                                                        className="btn-studio-action"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleOpenEditQuestionModal(q);
-                                                        }}
-                                                        title="Chỉnh sửa nội dung câu hỏi"
-                                                    >
-                                                        <Pencil size={13} />
-                                                        <span>Chỉnh sửa</span>
-                                                    </button>
-                                                </div>
-
-                                                <button 
-                                                    type="button"
-                                                    className="btn-studio-delete"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteQuestion(q._id);
-                                                    }}
-                                                    title="Xóa câu hỏi khỏi ngân hàng"
-                                                >
-                                                    <Trash2 size={15} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* TAB 3: BỘ ĐỀ ĐÃ LƯU */}
-                {activeTab === 'saved' && (
-                    <div className="studio-tab-pane">
-                        <div className="studio-pane-header">
-                            <div>
-                                <h3 className="studio-pane-title">Bộ đề đã lưu ({savedSetsData.length})</h3>
-                                <p className="studio-pane-desc">Các bộ câu hỏi hay từ thư viện cộng đồng mà bạn đã lưu vào tủ đồ cá nhân.</p>
-                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
+                    )}
 
-                        {savedSetsData.length === 0 ? (
-                            <div className="studio-empty-box">
-                                <Bookmark size={44} color="var(--text-muted)" />
-                                <h4>Bạn chưa lưu bộ câu hỏi nào</h4>
-                                <p>Khám phá Thư viện đề thi cộng đồng và bấm nút "Lưu bộ" để lưu các bộ đề yêu thích vào đây!</p>
+                    {/* TAB 2: NGÂN HÀNG CÂU HỎI LẺ */}
+                    {activeTab === 'questions' && (
+                        <div className="studio-tab-pane">
+                            <div className="studio-pane-header">
+                                <div className="pane-header-left">
+                                    <h3 className="studio-pane-title">Kho câu hỏi lẻ của bạn ({questions.length})</h3>
+                                    <p className="studio-pane-desc">Nhấp vào câu hỏi bất kỳ để chỉnh sửa nhanh nội dung, hoặc gán vào một trong các bộ đề đã tạo.</p>
+                                </div>
                                 <button 
                                     type="button" 
-                                    className="btn-studio-create-main"
-                                    onClick={() => navigate('/library')}
-                                    style={{ marginTop: '16px' }}
+                                    className="btn-pane-action"
+                                    onClick={handleOpenCreateQuestionModal}
                                 >
-                                    <ExternalLink size={16} />
+                                    <Plus size={16} />
+                                    <span>Tạo câu hỏi mới</span>
+                                </button>
+                            </div>
+
+                            {questions.length === 0 ? (
+                                <div className="studio-empty-state">
+                                    <div className="empty-icon-wrap">
+                                        <HelpCircle size={36} />
+                                    </div>
+                                    <h4>Ngân hàng câu hỏi của bạn đang trống</h4>
+                                    <p>Hãy thêm câu hỏi trắc nghiệm đầu tiên để tích lũy kho đề của bạn!</p>
+                                    <button 
+                                        type="button" 
+                                        className="btn-empty-create"
+                                        onClick={handleOpenCreateQuestionModal}
+                                    >
+                                        <Plus size={16} />
+                                        <span>Tạo câu hỏi ngay</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="studio-cards-grid studio-questions-grid">
+                                    {questions.map((q, index) => {
+                                        const diffClass = q.difficulty === 'hard' 
+                                            ? 'diff-hard' 
+                                            : q.difficulty === 'medium' 
+                                                ? 'diff-medium' 
+                                                : 'diff-easy';
+                                        
+                                        const diffText = q.difficulty === 'hard' 
+                                            ? 'Khó' 
+                                            : q.difficulty === 'medium' 
+                                                ? 'Trung bình' 
+                                                : 'Dễ';
+
+                                        const topicClass = getTopicBadgeClass(q.topic);
+
+                                        return (
+                                            <div 
+                                                key={q._id} 
+                                                className="studio-question-card"
+                                                onClick={() => handleOpenEditQuestionModal(q)}
+                                                title="Bấm vào câu hỏi để chỉnh sửa nội dung"
+                                            >
+                                                {/* Header câu hỏi */}
+                                                <div className="question-card-header">
+                                                    <div className="q-badge-group">
+                                                        <span className="q-num-badge">Câu {index + 1}</span>
+                                                        <span className={`q-diff-badge ${diffClass}`}>• {diffText}</span>
+                                                        <span className={`workshop-topic-tag ${topicClass}`}>{q.topic || 'Khác'}</span>
+                                                    </div>
+
+                                                    <button 
+                                                        type="button"
+                                                        className="btn-card-delete"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteQuestion(q._id);
+                                                        }}
+                                                        title="Xóa câu hỏi khỏi kho đề"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+
+                                                {/* Đề bài câu hỏi */}
+                                                <h4 className="question-card-text">
+                                                    {q.questionText}
+                                                </h4>
+
+                                                {/* Lưới 4 đáp án (Đáp án đúng highlight viền xanh nổi bật) */}
+                                                {q.options && q.options.length === 4 && (
+                                                    <div className="question-options-preview">
+                                                        {q.options.map((opt, i) => {
+                                                            const label = ['A', 'B', 'C', 'D'][i];
+                                                            const isCorrect = q.correctAnswer === opt || q.correctAnswer === label;
+                                                            return (
+                                                                <div key={i} className={`q-option-snippet ${isCorrect ? 'is-correct-opt' : ''}`}>
+                                                                    <span className="opt-letter">{label}</span>
+                                                                    <span className="opt-content">{opt}</span>
+                                                                    {isCorrect && <Check size={13} className="opt-check-icon" />}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+
+                                                {/* Thanh hành động */}
+                                                <div className="workshop-card-footer">
+                                                    <div className="footer-actions-left">
+                                                        <button 
+                                                            type="button"
+                                                            className="btn-workshop-action btn-add-to-set"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleOpenAddToSetModal(q);
+                                                            }}
+                                                            title="Thêm câu hỏi này vào một trong các bộ đề của bạn"
+                                                        >
+                                                            <Plus size={14} />
+                                                            <span>Gán vào bộ đề</span>
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="footer-actions-right">
+                                                        <button 
+                                                            type="button"
+                                                            className="btn-workshop-action"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleOpenEditQuestionModal(q);
+                                                            }}
+                                                            title="Chỉnh sửa nội dung câu hỏi"
+                                                        >
+                                                            <Pencil size={13} />
+                                                            <span>Chỉnh sửa</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* TAB 3: BỘ ĐỀ ĐÃ LƯU */}
+                    {activeTab === 'saved' && (
+                        <div className="studio-tab-pane">
+                            <div className="studio-pane-header">
+                                <div className="pane-header-left">
+                                    <h3 className="studio-pane-title">Bộ đề đã lưu vào tủ đồ ({savedSetsData.length})</h3>
+                                    <p className="studio-pane-desc">Các bộ câu hỏi hay từ Thư viện cộng đồng EasyLearn mà bạn đã lưu lại.</p>
+                                </div>
+                                <button 
+                                    type="button" 
+                                    className="btn-pane-action"
+                                    onClick={() => navigate('/library')}
+                                >
+                                    <ExternalLink size={15} />
                                     <span>Khám phá Thư viện</span>
                                 </button>
                             </div>
-                        ) : (
-                            <div className="studio-sets-cards-grid">
-                                {savedSetsData.map((set) => (
-                                    <div 
-                                        key={set._id} 
-                                        className="studio-item-card studio-set-card-clickable"
-                                        onClick={() => navigate(`/set/${set._id}`)}
-                                        title="Bấm để xem chi tiết bộ câu hỏi này"
+
+                            {savedSetsData.length === 0 ? (
+                                <div className="studio-empty-state">
+                                    <div className="empty-icon-wrap">
+                                        <Bookmark size={36} />
+                                    </div>
+                                    <h4>Bạn chưa lưu bộ câu hỏi nào</h4>
+                                    <p>Khám phá Thư viện đề thi cộng đồng và bấm nút "Lưu bộ" để lưu các bộ đề yêu thích vào đây!</p>
+                                    <button 
+                                        type="button" 
+                                        className="btn-empty-create"
+                                        onClick={() => navigate('/library')}
                                     >
-                                        <div className="item-card-top">
-                                            <div className="item-title-group">
-                                                <h4>{set.title}</h4>
-                                                <div className="item-meta-tags">
-                                                    <span>🏷️ {set.topic}</span>
-                                                    <span>📝 {set.questions?.length || 0} câu</span>
-                                                    <span>👤 Tác giả: {set.authorName || set.owner?.displayName || set.owner?.username || 'APEC Group'}</span>
+                                        <ExternalLink size={16} />
+                                        <span>Xem Thư viện đề thi</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="studio-cards-grid studio-sets-grid">
+                                    {savedSetsData.map((set) => {
+                                        const topicClass = getTopicBadgeClass(set.topic);
+                                        const questionsCount = set.questions?.length || 0;
+                                        const authorName = set.authorName || set.owner?.displayName || set.owner?.username || 'APEC Group';
+
+                                        return (
+                                            <div 
+                                                key={set._id} 
+                                                className="studio-workshop-card"
+                                                onClick={() => navigate(`/set/${set._id}`)}
+                                                title="Bấm để xem chi tiết bộ câu hỏi này"
+                                            >
+                                                <div className="workshop-card-header">
+                                                    <div className="card-toggles-wrap">
+                                                        <span className={`workshop-topic-tag ${topicClass}`}>
+                                                            {set.topic || 'Khác'}
+                                                        </span>
+                                                        <span className="workshop-count-pill">
+                                                            {questionsCount} câu hỏi
+                                                        </span>
+                                                        <span className="author-credit-pill">
+                                                            Biên soạn: {authorName}
+                                                        </span>
+                                                    </div>
+
+                                                    <button 
+                                                        type="button"
+                                                        className="btn-card-delete btn-card-unsave"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleRemoveSavedSet(set._id);
+                                                        }}
+                                                        title="Bỏ lưu bộ đề này"
+                                                    >
+                                                        <Bookmark size={15} fill="currentColor" />
+                                                    </button>
+                                                </div>
+
+                                                <div className="workshop-card-body">
+                                                    <h4 className="workshop-card-title">
+                                                        <span>{set.title}</span>
+                                                        <ArrowUpRight size={17} className="title-arrow" />
+                                                    </h4>
+                                                    <p className="workshop-card-desc">
+                                                        {set.description || "Bộ đề yêu thích được lưu từ Thư viện cộng đồng EasyLearn."}
+                                                    </p>
+                                                </div>
+
+                                                <div className="workshop-card-footer">
+                                                    <div className="footer-actions-left">
+                                                        <button 
+                                                            type="button"
+                                                            className="btn-workshop-action btn-action-manage"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigate(`/set/${set._id}`);
+                                                            }}
+                                                        >
+                                                            <ExternalLink size={14} />
+                                                            <span>Xem chi tiết</span>
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="footer-actions-right">
+                                                        <button 
+                                                            type="button"
+                                                            className="btn-workshop-action"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleExport(set._id, 'excel');
+                                                            }}
+                                                        >
+                                                            <FileSpreadsheet size={14} />
+                                                            <span>Excel</span>
+                                                        </button>
+
+                                                        <button 
+                                                            type="button"
+                                                            className="btn-workshop-action"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleExport(set._id, 'pdf');
+                                                            }}
+                                                        >
+                                                            <FileText size={14} />
+                                                            <span>PDF</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <p className="item-card-desc">
-                                            {set.description || "Bộ đề lưu từ Thư viện cộng đồng EasyLearn."}
-                                        </p>
-
-                                        <div className="item-card-actions">
-                                            <div className="action-btns-group">
-                                                <button 
-                                                    type="button"
-                                                    className="btn-studio-action btn-view-set"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate(`/set/${set._id}`);
-                                                    }}
-                                                >
-                                                    <ExternalLink size={13} />
-                                                    <span>Xem chi tiết</span>
-                                                </button>
-
-                                                <button 
-                                                    type="button"
-                                                    className="btn-studio-action"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleExport(set._id, 'excel');
-                                                    }}
-                                                >
-                                                    <FileSpreadsheet size={13} />
-                                                    <span>Excel</span>
-                                                </button>
-
-                                                <button 
-                                                    type="button"
-                                                    className="btn-studio-action"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleExport(set._id, 'pdf');
-                                                    }}
-                                                >
-                                                    <FileText size={13} />
-                                                    <span>PDF</span>
-                                                </button>
-                                            </div>
-
-                                            <button 
-                                                type="button"
-                                                className="btn-studio-delete"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleRemoveSavedSet(set._id);
-                                                }}
-                                                title="Bỏ lưu bộ đề này"
-                                            >
-                                                <Bookmark size={14} fill="currentColor" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </main>
 
-            {/* MODAL 1: TẠO BỘ CÂU HỎI MỚI (GỌN GÀNG, ĐẸP MẮT) */}
+            {/* MODAL 1: TẠO BỘ CÂU HỎI MỚI */}
             {isCreateSetModalOpen && (
                 <div className="studio-modal-backdrop" onClick={handleCloseCreateSetModal}>
                     <div className="studio-modal-dialog" onClick={(e) => e.stopPropagation()}>
                         <div className="studio-modal-header">
                             <div className="modal-title-wrap">
-                                <FolderPlus size={19} color="var(--accent-gold)" />
+                                <FolderPlus size={20} />
                                 <h3>Tạo Bộ Câu Hỏi Mới</h3>
                             </div>
                             <button type="button" className="btn-modal-close" onClick={handleCloseCreateSetModal}>
-                                <X size={18} />
+                                <X size={20} />
                             </button>
                         </div>
 
                         <form onSubmit={handleCreateSet} className="studio-modal-form">
                             <div className="form-group-field">
-                                <label htmlFor="modal-set-title">Tên bộ đề</label>
+                                <label htmlFor="modal-set-title">Tên bộ đề trắc nghiệm</label>
                                 <input 
                                     id="modal-set-title"
                                     className="studio-input"
                                     required 
-                                    placeholder="VD: Tổng ôn Toán 12 - Giải tích" 
+                                    placeholder="VD: Tổng ôn Toán 12 - Chuyên đề Tích phân" 
                                     value={questionSetFormData.title} 
                                     onChange={(e) => setQuestionSetFormData({...questionSetFormData, title: e.target.value})} 
                                 />
@@ -583,7 +676,7 @@ const StudioPage = () => {
                                 <textarea 
                                     id="modal-set-desc"
                                     className="studio-textarea"
-                                    placeholder="Mô tả nội dung, mục tiêu ôn tập..." 
+                                    placeholder="Mô tả mục tiêu, kiến thức trọng tâm..." 
                                     value={questionSetFormData.description} 
                                     onChange={(e) => setQuestionSetFormData({...questionSetFormData, description: e.target.value})} 
                                 />
@@ -609,7 +702,7 @@ const StudioPage = () => {
 
                             {currentUser?.role === 'teacher' && teacherClasses.length > 0 && (
                                 <div className="form-group-field">
-                                    <label htmlFor="modal-set-class">Gán trực tiếp vào lớp (Tùy chọn)</label>
+                                    <label htmlFor="modal-set-class">Gán trực tiếp vào lớp học (Tùy chọn)</label>
                                     <select
                                         id="modal-set-class"
                                         className="studio-select"
@@ -645,16 +738,14 @@ const StudioPage = () => {
                                             type="button"
                                             className={`btn-author-mode ${!questionSetFormData.isAnonymous ? 'active' : ''}`}
                                             onClick={() => setQuestionSetFormData({ ...questionSetFormData, isAnonymous: false })}
-                                            title="Hiển thị tên tác giả khi người khác xem bộ này"
                                         >
                                             <Eye size={14} />
                                             <span>Hiện tên tác giả</span>
                                         </button>
                                         <button
                                             type="button"
-                                            className={`btn-author-mode mode-anon-btn ${questionSetFormData.isAnonymous ? 'active' : ''}`}
+                                            className={`btn-author-mode ${questionSetFormData.isAnonymous ? 'active' : ''}`}
                                             onClick={() => setQuestionSetFormData({ ...questionSetFormData, isAnonymous: true })}
-                                            title="Đăng dưới dạng Ẩn danh"
                                         >
                                             <UserX size={14} />
                                             <span>Đăng Ẩn danh</span>
@@ -674,7 +765,7 @@ const StudioPage = () => {
                                 <button type="button" className="btn-modal-cancel" onClick={handleCloseCreateSetModal}>
                                     Hủy bỏ
                                 </button>
-                                <button type="submit" className="btn-modal-submit btn-submit-gold">
+                                <button type="submit" className="btn-modal-submit">
                                     <Plus size={16} />
                                     <span>Tạo Bộ Câu Hỏi</span>
                                 </button>
@@ -690,11 +781,11 @@ const StudioPage = () => {
                     <div className="studio-modal-dialog" onClick={(e) => e.stopPropagation()}>
                         <div className="studio-modal-header">
                             <div className="modal-title-wrap">
-                                <HelpCircle size={19} color="var(--accent-blue)" />
+                                <HelpCircle size={20} />
                                 <h3>Thêm Câu Hỏi Trắc Nghiệm Mới</h3>
                             </div>
                             <button type="button" className="btn-modal-close" onClick={handleCloseCreateQuestionModal}>
-                                <X size={18} />
+                                <X size={20} />
                             </button>
                         </div>
 
@@ -708,7 +799,7 @@ const StudioPage = () => {
                                     placeholder="Nhập đề bài câu hỏi trắc nghiệm..." 
                                     value={formData.questionText} 
                                     onChange={(e) => setFormData({...formData, questionText: e.target.value})} 
-                                    style={{ minHeight: '75px' }}
+                                    style={{ minHeight: '80px' }}
                                 />
                             </div>
 
@@ -828,7 +919,7 @@ const StudioPage = () => {
                                 <button type="button" className="btn-modal-cancel" onClick={handleCloseCreateQuestionModal}>
                                     Hủy bỏ
                                 </button>
-                                <button type="submit" className="btn-modal-submit btn-submit-blue">
+                                <button type="submit" className="btn-modal-submit">
                                     <Plus size={16} />
                                     <span>Lưu Câu Hỏi</span>
                                 </button>
@@ -838,17 +929,17 @@ const StudioPage = () => {
                 </div>
             )}
 
-            {/* MODAL 3: CHỈNH SỬA CÂU HỎI LẺ (KHI BẤM VÀO CÂU HỎI) */}
+            {/* MODAL 3: CHỈNH SỬA CÂU HỎI */}
             {isEditQuestionModalOpen && (
                 <div className="studio-modal-backdrop" onClick={handleCloseEditQuestionModal}>
                     <div className="studio-modal-dialog" onClick={(e) => e.stopPropagation()}>
                         <div className="studio-modal-header">
                             <div className="modal-title-wrap">
-                                <Pencil size={19} color="var(--accent-blue)" />
+                                <Pencil size={20} />
                                 <h3>Chỉnh Sửa Câu Hỏi</h3>
                             </div>
                             <button type="button" className="btn-modal-close" onClick={handleCloseEditQuestionModal}>
-                                <X size={18} />
+                                <X size={20} />
                             </button>
                         </div>
 
@@ -861,7 +952,7 @@ const StudioPage = () => {
                                     required 
                                     value={editingQuestionData.questionText} 
                                     onChange={(e) => setEditingQuestionData({...editingQuestionData, questionText: e.target.value})} 
-                                    style={{ minHeight: '75px' }}
+                                    style={{ minHeight: '80px' }}
                                 />
                             </div>
 
@@ -960,7 +1051,7 @@ const StudioPage = () => {
                                 <button type="button" className="btn-modal-cancel" onClick={handleCloseEditQuestionModal}>
                                     Hủy bỏ
                                 </button>
-                                <button type="submit" className="btn-modal-submit btn-submit-blue">
+                                <button type="submit" className="btn-modal-submit">
                                     <CheckCircle2 size={16} />
                                     <span>Lưu Thay Đổi</span>
                                 </button>
@@ -970,17 +1061,17 @@ const StudioPage = () => {
                 </div>
             )}
 
-            {/* MODAL 4: PANEL CHỌN BỘ CÂU HỎI ĐỂ THÊM CÂU HỎI VÀO */}
+            {/* MODAL 4: GÁN CÂU HỎI VÀO BỘ ĐỀ */}
             {isAddToSetModalOpen && (
                 <div className="studio-modal-backdrop" onClick={handleCloseAddToSetModal}>
                     <div className="studio-modal-dialog" onClick={(e) => e.stopPropagation()}>
                         <div className="studio-modal-header">
                             <div className="modal-title-wrap">
-                                <Layers size={19} color="var(--accent-gold)" />
+                                <Layers size={20} />
                                 <h3>Thêm Câu Hỏi Vào Bộ Đề</h3>
                             </div>
                             <button type="button" className="btn-modal-close" onClick={handleCloseAddToSetModal}>
-                                <X size={18} />
+                                <X size={20} />
                             </button>
                         </div>
 
@@ -992,15 +1083,15 @@ const StudioPage = () => {
                                 </div>
                             )}
 
-                            <h4 className="select-set-subheading">Chọn bộ đề của bạn:</h4>
+                            <h4 className="select-set-subheading">Chọn bộ đề đích để thêm:</h4>
 
                             {mySets.length === 0 ? (
                                 <div className="add-set-empty">
-                                    <Layers size={32} />
+                                    <Layers size={36} />
                                     <p>Bạn chưa có bộ câu hỏi nào để thêm.</p>
                                     <button 
                                         type="button" 
-                                        className="btn-studio-create-main btn-create-set"
+                                        className="btn-empty-create"
                                         onClick={() => {
                                             handleCloseAddToSetModal();
                                             handleOpenCreateSetModal();
@@ -1053,7 +1144,7 @@ const StudioPage = () => {
                                 </div>
                             )}
 
-                            <div className="studio-modal-actions" style={{ marginTop: '16px' }}>
+                            <div className="studio-modal-actions" style={{ marginTop: '18px' }}>
                                 <button type="button" className="btn-modal-cancel" onClick={handleCloseAddToSetModal}>
                                     Đóng
                                 </button>

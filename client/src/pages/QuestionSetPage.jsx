@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { QuestionSetPageLogic } from '../pages_logic/QuestionSetPageLogic';
-import { useDarkMode } from '../pages_logic/useDarkMode';
+import Navbar from '../components/Navbar';
 import '../pages_styling/QuestionSetStyling.css';
 import { getAuthorInfo } from '../utils/authorUtils';
 import { 
@@ -9,9 +8,6 @@ import {
     ArrowLeft, 
     BookOpen, 
     Gamepad2, 
-    Sun, 
-    Moon, 
-    LogOut, 
     CheckCircle2, 
     Layers,
     FileSpreadsheet,
@@ -40,7 +36,6 @@ const QuestionSetPage = () => {
         isLoading,
         isOwner,
         isSaved,
-        schoolActionLabel,
         isEditModalOpen,
         isAddQuestionModalOpen,
         isSavingEdit,
@@ -68,18 +63,27 @@ const QuestionSetPage = () => {
         handleDeleteQuestion,
         handleCopySet,
         handleToggleSave,
-        handleExport,
-        handleLogout
+        handleExport
     } = QuestionSetPageLogic();
 
-    const { isDark, toggleTheme } = useDarkMode();
+    const getTopicBadgeClass = (topic) => {
+        if (!topic) return 'badge-other';
+        const t = topic.toLowerCase();
+        if (t.includes('toán')) return 'badge-math';
+        if (t.includes('tiếng anh') || t.includes('anh')) return 'badge-english';
+        if (t.includes('lịch sử') || t.includes('sử')) return 'badge-history';
+        if (t.includes('hoá') || t.includes('vật lý') || t.includes('sinh')) return 'badge-science';
+        if (t.includes('việt') || t.includes('văn')) return 'badge-literature';
+        return 'badge-other';
+    };
 
     if (isLoading || !setData) {
         return (
-            <div className="qset-page-wrapper" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                    <div style={{ width: '48px', height: '48px', margin: '0 auto 16px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'var(--bg-surface-elevated)' }}>
-                        <Layers size={28} />
+            <div className="qset-page-wrapper">
+                <Navbar activePage="library" />
+                <div className="qset-loading-box">
+                    <div className="loading-icon-wrap">
+                        <Layers size={32} />
                     </div>
                     <h3>Đang tải dữ liệu bộ câu hỏi...</h3>
                 </div>
@@ -88,6 +92,7 @@ const QuestionSetPage = () => {
     }
 
     const authorInfo = getAuthorInfo(setData, currentUser);
+    const topicClass = getTopicBadgeClass(setData.topic);
 
     // Lọc danh sách câu hỏi có sẵn chưa nằm trong bộ đề hiện tại
     const existingQuestionsNotInSet = (myExistingQuestions || []).filter(
@@ -102,380 +107,310 @@ const QuestionSetPage = () => {
 
     return (
         <div className="qset-page-wrapper">
-            {/* 1. NAVBAR ĐỒNG BỘ */}
-            <header className="navbar">
-                <div className="nav-container">
-                    <div className="nav-left">
-                        <div className="brand-logo" onClick={() => navigate('/')}>
-                            <div className="brand-coin">
-                                <Sparkles size={18} />
-                            </div>
-                            <span className="brand-name">EasyLearn</span>
-                        </div>
-
-                        <nav className="nav-links">
-                            <Link to="/" className="nav-link">Trang chủ</Link>
-                            <Link to="/library" className="nav-link active">Thư viện</Link>
-                            <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
-                            <Link to="/schools" className="nav-link">Trường học</Link>
-                            <Link to="/student/classes" className="nav-link">Lớp học</Link>
-                            <Link to="/studio" className="nav-link">Studio</Link>
-                        </nav>
-                    </div>
-
-                    <div className="nav-right">
-                        <button 
-                            className="theme-toggle-btn"
-                            onClick={toggleTheme} 
-                            title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
-                            aria-label="Toggle Theme"
-                        >
-                            {isDark ? <Sun size={19} /> : <Moon size={19} />}
-                        </button>
-
-                        {currentUser ? (
-                            <div className="teacher-account-menu">
-                                <Link className="nav-username" to="/profile">
-                                    <span className="user-avatar-badge">
-                                        {currentUser.avatar ? (
-                                            <img src={currentUser.avatar} alt="Avatar" className="user-avatar-img-nav" />
-                                        ) : (
-                                            currentUser.username.charAt(0).toUpperCase()
-                                        )}
-                                    </span>
-                                    <span>{currentUser.displayName || currentUser.username}</span>
-                                </Link>
-                                <div className="teacher-account-dropdown">
-                                    {currentUser.role === 'teacher' ? (
-                                        <>
-                                            <Link to="/teacher/dashboard">Bảng điều khiển giáo viên</Link>
-                                            <Link to="/schools">{schoolActionLabel}</Link>
-                                            <Link to="/studio">Studio tạo bộ đề</Link>
-                                        </>
-                                    ) : (
-                                        <>
-                                            {currentUser.role === 'admin' && <Link to="/admin">Quản trị hệ thống</Link>}
-                                            <Link to="/schools">{schoolActionLabel}</Link>
-                                            <Link to="/student/classes">Lớp học của tôi</Link>
-                                            <Link to="/game">Chơi Game Quiz</Link>
-                                        </>
-                                    )}
-                                    <Link to="/profile">Hồ sơ cá nhân</Link>
-                                    <button type="button" onClick={handleLogout} className="logout-btn">
-                                        <LogOut size={16} /> Đăng xuất
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="auth-buttons">
-                                <button className="btn-secondary-nav" onClick={() => navigate('/login')}>
-                                    Đăng nhập
-                                </button>
-                                <button className="btn-primary-nav" onClick={() => navigate('/login?mode=register')}>
-                                    Bắt đầu ngay
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </header>
+            {/* 1. NAVBAR DÙNG CHUNG ĐỒNG BỘ TOÀN HỆ THỐNG */}
+            <Navbar activePage="library" />
 
             {/* 2. NỘI DUNG CHI TIẾT BỘ ĐỀ */}
             <main className="qset-main-container">
-                {/* Hàng điều hướng trên cùng (Có cả Về Thư Viện & Về Studio) */}
-                <div className="qset-top-nav-row">
-                    <div className="qset-back-buttons-wrap">
-                        <button 
-                            onClick={() => navigate('/library')} 
-                            className="btn-qset-back"
-                            title="Quay lại Thư viện chia sẻ câu hỏi"
-                        >
-                            <ArrowLeft size={16} />
-                            <span>Về Thư Viện</span>
-                        </button>
-                        <button 
-                            onClick={() => navigate('/studio')} 
-                            className="btn-qset-back btn-qset-studio"
-                            title="Quay lại Studio Sáng Tạo của bạn"
-                        >
-                            <Layers size={16} />
-                            <span>Về Studio</span>
-                        </button>
+                <div className="section-container">
+                    {/* Hàng điều hướng trên cùng (Quay lại Thư Viện, Studio & Xuất Excel/PDF) */}
+                    <div className="qset-top-nav-row">
+                        <div className="qset-back-buttons-wrap">
+                            <button 
+                                onClick={() => navigate('/library')} 
+                                className="btn-qset-nav-back"
+                                title="Quay lại Thư viện câu hỏi"
+                            >
+                                <ArrowLeft size={16} />
+                                <span>Thư Viện</span>
+                            </button>
+                            <button 
+                                onClick={() => navigate('/studio')} 
+                                className="btn-qset-nav-back btn-qset-studio"
+                                title="Quay lại Studio Sáng Tạo của bạn"
+                            >
+                                <Layers size={16} />
+                                <span>Góc Sáng Tạo</span>
+                            </button>
+                        </div>
+
+                        <div className="qset-export-group">
+                            <button 
+                                className="btn-qset-export" 
+                                onClick={() => handleExport('excel')}
+                                title="Tải về file bảng tính Excel"
+                            >
+                                <FileSpreadsheet size={15} />
+                                <span>Xuất Excel</span>
+                            </button>
+                            <button 
+                                className="btn-qset-export" 
+                                onClick={() => handleExport('pdf')}
+                                title="Tải về file tài liệu PDF"
+                            >
+                                <FileText size={15} />
+                                <span>Xuất PDF</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="qset-export-group">
-                        <button 
-                            className="btn-qset-export" 
-                            onClick={() => handleExport('excel')}
-                            title="Tải về file bảng tính Excel"
-                        >
-                            <FileSpreadsheet size={15} />
-                            <span>Tải Excel</span>
-                        </button>
-                        <button 
-                            className="btn-qset-export" 
-                            onClick={() => handleExport('pdf')}
-                            title="Tải về file tài liệu in ấn PDF"
-                        >
-                            <FileText size={15} />
-                            <span>Tải PDF</span>
-                        </button>
-                    </div>
-                </div>
+                    {/* Banner Thông Tin Bộ Đề Phong Cách Positivus */}
+                    <div className="qset-hero-card">
+                        <div className="qset-badge-row">
+                            <span className={`qset-topic-tag ${topicClass}`}>
+                                {setData.topic || 'Khác'}
+                            </span>
+                            <span className="qset-count-pill">
+                                📝 {questions.length} câu hỏi
+                            </span>
 
-                {/* Banner Thông Tin Bộ Đề */}
-                <div className="qset-hero-card">
-                    <div className="qset-badge-row">
-                        <span className="qset-pill-topic">
-                            🏷️ {setData.topic || 'Khác'}
-                        </span>
-                        <span className="qset-pill-count">
-                            📝 {questions.length} câu hỏi
-                        </span>
-
-                        <span className={setData.isPublic ? "qset-pill-privacy public" : "qset-pill-privacy private"}>
-                            {setData.isPublic ? (
-                                <>
-                                    <Globe size={12} />
-                                    <span>Công khai</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Lock size={12} />
-                                    <span>Riêng tư</span>
-                                </>
-                            )}
-                        </span>
-
-                        {setData.isPublic && (
-                            <span className={`qset-pill-anon ${setData.isAnonymous ? 'anon' : 'named'}`}>
-                                {setData.isAnonymous ? (
+                            <span className={setData.isPublic ? "qset-pill-privacy public" : "qset-pill-privacy private"}>
+                                {setData.isPublic ? (
                                     <>
-                                        <UserX size={12} />
-                                        <span>Đăng Ẩn danh</span>
+                                        <Globe size={12} />
+                                        <span>Công khai</span>
                                     </>
                                 ) : (
                                     <>
-                                        <Eye size={12} />
-                                        <span>Hiện tên tác giả</span>
+                                        <Lock size={12} />
+                                        <span>Riêng tư</span>
                                     </>
                                 )}
                             </span>
-                        )}
+
+                            {setData.isPublic && (
+                                <span className={`qset-pill-anon ${setData.isAnonymous ? 'anon' : 'named'}`}>
+                                    {setData.isAnonymous ? (
+                                        <>
+                                            <UserX size={12} />
+                                            <span>Đăng Ẩn danh</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Eye size={12} />
+                                            <span>Hiện tên tác giả</span>
+                                        </>
+                                    )}
+                                </span>
+                            )}
+                        </div>
+
+                        <h1 className="qset-title">
+                            {setData.title}
+                        </h1>
+
+                        <p className="qset-description">
+                            {setData.description || "Bộ câu hỏi chất lượng cao phục vụ rèn luyện, nâng cao kỹ năng và củng cố kiến thức."}
+                        </p>
+
+                        {/* Tác giả biên soạn */}
+                        <div className="qset-author-info-row">
+                            <div className={`qset-avatar ${authorInfo.isOfficial ? 'official' : ''} ${authorInfo.isAnonymous ? 'anon' : ''}`}>
+                                {authorInfo.avatarImg ? (
+                                    <img src={authorInfo.avatarImg} alt={authorInfo.name} className="qset-avatar-img" />
+                                ) : (
+                                    authorInfo.avatarChar
+                                )}
+                            </div>
+                            <div className="qset-author-text">
+                                <span className="qset-author-label">Biên soạn bởi:</span>
+                                <strong className={`qset-author-name ${authorInfo.isAnonymous ? 'anon-name' : ''}`}>
+                                    {authorInfo.name}
+                                </strong>
+                            </div>
+                        </div>
+
+                        {/* Thanh công cụ thao tác dành cho Chủ sở hữu hoặc Khách */}
+                        <div className="qset-actions-toolbar">
+                            {isOwner ? (
+                                <div className="owner-toolbar-group">
+                                    <div className="owner-badge-indicator">
+                                        <Sparkles size={15} />
+                                        <span>Bạn là chủ sở hữu bộ câu hỏi này</span>
+                                    </div>
+                                    <div className="owner-buttons-wrap">
+                                        <button 
+                                            type="button" 
+                                            className="btn-owner-action btn-edit-set-info"
+                                            onClick={handleOpenEditModal}
+                                            title="Chỉnh sửa tên, mô tả, chủ đề và trạng thái công khai"
+                                        >
+                                            <Pencil size={15} />
+                                            <span>Chỉnh sửa thông tin</span>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            className="btn-owner-action btn-add-new-q"
+                                            onClick={handleOpenAddQuestionModal}
+                                            title="Thêm câu hỏi mới hoặc chọn từ ngân hàng câu hỏi có sẵn"
+                                        >
+                                            <Plus size={16} />
+                                            <span>Thêm câu hỏi vào bộ</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="visitor-toolbar-group">
+                                    <button 
+                                        type="button" 
+                                        className="btn-visitor-action btn-copy-set"
+                                        onClick={handleCopySet}
+                                        disabled={isCopying}
+                                        title="Sao chép toàn bộ câu hỏi trong bộ này về Studio của bạn"
+                                    >
+                                        <Copy size={15} />
+                                        <span>{isCopying ? "Đang sao chép..." : "Sao chép bộ đề (-copy)"}</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className={`btn-visitor-action btn-bookmark-set ${isSaved ? 'saved' : ''}`}
+                                        onClick={handleToggleSave}
+                                        title={isSaved ? "Đã lưu vào bộ sưu tập cá nhân" : "Lưu bộ câu hỏi vào bộ sưu tập"}
+                                    >
+                                        <Bookmark size={15} fill={isSaved ? "currentColor" : "none"} />
+                                        <span>{isSaved ? "Đã lưu bộ đề" : "Lưu bộ đề"}</span>
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Nút Chơi game luyện tập ngay */}
+                            <button 
+                                className="btn-qset-play-now"
+                                onClick={() => navigate(`/game?setId=${setData._id}`)}
+                                title="Luyện tập ngay bộ đề này trong game"
+                            >
+                                <Gamepad2 size={19} />
+                                <span>Luyện tập ngay</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <h1 className="qset-title">
-                        {setData.title}
-                    </h1>
+                    {/* 3. DANH SÁCH TỪNG CÂU HỎI TRONG BỘ */}
+                    <div className="qset-questions-section">
+                        <div className="qset-questions-header">
+                            <div className="qset-section-title-wrap">
+                                <BookOpen size={20} />
+                                <h2>Danh Sách Câu Hỏi Trắc Nghiệm ({questions.length})</h2>
+                            </div>
+                            {isOwner && (
+                                <button 
+                                    type="button" 
+                                    className="btn-add-q-inline" 
+                                    onClick={handleOpenAddQuestionModal}
+                                    title="Thêm câu hỏi mới vào bộ đề này"
+                                >
+                                    <Plus size={15} />
+                                    <span>Thêm câu hỏi</span>
+                                </button>
+                            )}
+                        </div>
 
-                    <p className="qset-description">
-                        {setData.description || "Bộ câu hỏi chất lượng cao phục vụ rèn luyện, nâng cao kỹ năng và củng cố kiến thức."}
-                    </p>
-
-                    {/* KHU VỰC THAO TÁC DÀNH CHO CHỦ SỞ HỮU HOẶC KHÁCH */}
-                    <div className="qset-actions-toolbar">
-                        {isOwner ? (
-                            <div className="owner-toolbar-group">
-                                <div className="owner-badge-indicator">
-                                    <Sparkles size={14} />
-                                    <span>Bạn là chủ sở hữu bộ câu hỏi này</span>
-                                </div>
-                                <div className="owner-buttons-wrap">
-                                    <button 
-                                        type="button" 
-                                        className="btn-owner-action btn-edit-set-info"
-                                        onClick={handleOpenEditModal}
-                                        title="Chỉnh sửa tên, mô tả, chủ đề và trạng thái công khai của bộ đề"
-                                    >
-                                        <Pencil size={15} />
-                                        <span>Chỉnh sửa thông tin</span>
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn-owner-action btn-add-new-q"
-                                        onClick={handleOpenAddQuestionModal}
-                                        title="Thêm câu hỏi mới hoặc chọn từ ngân hàng câu hỏi có sẵn"
-                                    >
+                        {questions.length === 0 ? (
+                            <div className="qset-empty-card">
+                                <Layers size={40} />
+                                <h3>Bộ câu hỏi này chưa có câu hỏi nào</h3>
+                                <p>
+                                    {isOwner 
+                                        ? "Hãy bấm nút 'Thêm câu hỏi vào bộ' ở trên để bắt đầu thêm câu hỏi vào bộ đề này!" 
+                                        : "Bộ câu hỏi này đang trong quá trình biên soạn nội dung."}
+                                </p>
+                                {isOwner && (
+                                    <button type="button" className="btn-empty-add-q" onClick={handleOpenAddQuestionModal}>
                                         <Plus size={16} />
-                                        <span>Thêm câu hỏi vào bộ</span>
+                                        <span>Thêm câu hỏi ngay</span>
                                     </button>
-                                </div>
+                                )}
                             </div>
                         ) : (
-                            <div className="visitor-toolbar-group">
-                                <button 
-                                    type="button" 
-                                    className="btn-visitor-action btn-copy-set"
-                                    onClick={handleCopySet}
-                                    disabled={isCopying}
-                                    title="Sao chép toàn bộ câu hỏi trong bộ này về Studio của bạn (kèm hậu tố -copy)"
-                                >
-                                    <Copy size={15} />
-                                    <span>{isCopying ? "Đang sao chép..." : "Sao chép bộ đề (-copy)"}</span>
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className={`btn-visitor-action btn-bookmark-set ${isSaved ? 'saved' : ''}`}
-                                    onClick={handleToggleSave}
-                                    title={isSaved ? "Đã lưu vào bộ sưu tập cá nhân" : "Lưu bộ câu hỏi vào bộ sưu tập cá nhân"}
-                                >
-                                    <Bookmark size={15} fill={isSaved ? "currentColor" : "none"} />
-                                    <span>{isSaved ? "Đã lưu bộ đề" : "Lưu bộ câu hỏi"}</span>
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                            <div className="qset-cards-list">
+                                {questions.map((q, index) => {
+                                    const diffClass = q.difficulty === 'hard' 
+                                        ? 'diff-hard' 
+                                        : q.difficulty === 'medium' 
+                                            ? 'diff-medium' 
+                                            : 'diff-easy';
+                                    
+                                    const diffText = q.difficulty === 'hard' 
+                                        ? 'Khó' 
+                                        : q.difficulty === 'medium' 
+                                            ? 'Trung bình' 
+                                            : 'Dễ';
 
-                    <div className="qset-author-info-row">
-                        <div className={`qset-avatar ${authorInfo.isOfficial ? 'official' : ''} ${authorInfo.isAnonymous ? 'anon' : ''}`}>
-                            {authorInfo.avatarImg ? (
-                                <img src={authorInfo.avatarImg} alt={authorInfo.name} className="qset-avatar-img" />
-                            ) : (
-                                authorInfo.avatarChar
-                            )}
-                        </div>
-                        <div className="qset-author-text">
-                            <span className="qset-author-label">Tác giả biên soạn:</span>
-                            <span className={`qset-author-name ${authorInfo.isAnonymous ? 'anon-name' : ''}`}>
-                                {authorInfo.name}
-                            </span>
-                        </div>
-                    </div>
+                                    const qTopicClass = getTopicBadgeClass(q.topic);
 
-                    <div className="qset-hero-cta">
-                        <button 
-                            className="btn-qset-play-now"
-                            onClick={() => navigate(`/game?setId=${setData._id}`)}
-                        >
-                            <Gamepad2 size={20} />
-                            <span>Bắt đầu Luyện tập với Bộ đề này</span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* 3. DANH SÁCH TỪNG CÂU HỎI TRONG BỘ */}
-                <div className="qset-questions-section">
-                    <div className="qset-questions-header">
-                        <div className="qset-section-title-wrap">
-                            <BookOpen size={20} color="var(--accent-blue)" />
-                            <h2>Danh Sách Câu Hỏi Trắc Nghiệm ({questions.length})</h2>
-                        </div>
-                        {isOwner && (
-                            <button 
-                                type="button" 
-                                className="btn-add-q-inline" 
-                                onClick={handleOpenAddQuestionModal}
-                                title="Thêm câu hỏi mới vào bộ đề này"
-                            >
-                                <Plus size={15} />
-                                <span>Thêm câu hỏi</span>
-                            </button>
-                        )}
-                    </div>
-
-                    {questions.length === 0 ? (
-                        <div className="qset-empty-card">
-                            <Layers size={36} color="var(--text-muted)" />
-                            <h3>Bộ câu hỏi này chưa có câu hỏi nào</h3>
-                            <p>
-                                {isOwner 
-                                    ? "Hãy bấm nút 'Thêm câu hỏi vào bộ' ở trên để bắt đầu thêm câu hỏi vào bộ đề này!" 
-                                    : "Bộ câu hỏi này đang trong quá trình biên soạn nội dung."}
-                            </p>
-                            {isOwner && (
-                                <button type="button" className="btn-empty-add-q" onClick={handleOpenAddQuestionModal}>
-                                    <Plus size={16} />
-                                    <span>Thêm câu hỏi ngay</span>
-                                </button>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="qset-cards-list">
-                            {questions.map((q, index) => {
-                                const diffClass = q.difficulty === 'hard' 
-                                    ? 'hard' 
-                                    : q.difficulty === 'medium' 
-                                        ? 'medium' 
-                                        : 'easy';
-                                
-                                const diffText = q.difficulty === 'hard' 
-                                    ? 'Khó' 
-                                    : q.difficulty === 'medium' 
-                                        ? 'Trung bình' 
-                                        : 'Dễ';
-
-                                return (
-                                    <div key={q._id || index} className="qset-question-item-card">
-                                        <div className="qset-q-card-top">
-                                            <div className="qset-q-left-meta">
-                                                <span className="qset-q-number">Câu {index + 1}</span>
-                                                <span className={`qset-q-diff-badge ${diffClass}`}>
-                                                    {diffText}
-                                                </span>
-                                                {q.topic && (
-                                                    <span className="qset-q-topic-tag">
-                                                        {q.topic}
+                                    return (
+                                        <div key={q._id || index} className="qset-question-item-card">
+                                            <div className="qset-q-card-top">
+                                                <div className="qset-q-left-meta">
+                                                    <span className="qset-q-number">Câu {index + 1}</span>
+                                                    <span className={`qset-q-diff-badge ${diffClass}`}>
+                                                        • {diffText}
                                                     </span>
+                                                    {q.topic && (
+                                                        <span className={`qset-topic-tag ${qTopicClass}`}>
+                                                            {q.topic}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Nút Xóa câu hỏi dành cho chủ sở hữu */}
+                                                {isOwner && (
+                                                    <button 
+                                                        type="button" 
+                                                        className="btn-qset-delete-q" 
+                                                        onClick={() => handleDeleteQuestion(q._id)}
+                                                        title="Xóa câu hỏi này khỏi bộ đề"
+                                                    >
+                                                        <Trash2 size={15} />
+                                                        <span>Xóa</span>
+                                                    </button>
                                                 )}
                                             </div>
 
-                                            {/* Nút Xóa câu hỏi dành cho chủ sở hữu */}
-                                            {isOwner && (
-                                                <button 
-                                                    type="button" 
-                                                    className="btn-qset-delete-q" 
-                                                    onClick={() => handleDeleteQuestion(q._id)}
-                                                    title="Xóa câu hỏi này khỏi bộ đề"
-                                                >
-                                                    <Trash2 size={15} />
-                                                    <span>Xóa</span>
-                                                </button>
-                                            )}
-                                        </div>
+                                            <h3 className="qset-q-text">
+                                                {q.questionText}
+                                            </h3>
 
-                                        <h3 className="qset-q-text">
-                                            {q.questionText}
-                                        </h3>
-
-                                        <div className="qset-options-grid">
-                                            {q.options && q.options.map((opt, optIdx) => {
-                                                const label = ['A', 'B', 'C', 'D'][optIdx];
-                                                const isCorrect = q.correctAnswer === opt || q.correctAnswer === label;
-                                                return (
-                                                    <div 
-                                                        key={optIdx} 
-                                                        className={`qset-option-item ${isCorrect ? 'correct-option' : ''}`}
-                                                    >
-                                                        <span className="option-badge-key">{label}</span>
-                                                        <span className="option-text-val">{opt}</span>
-                                                        {isCorrect && (
-                                                            <span className="correct-check-icon">
-                                                                <CheckCircle2 size={16} />
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
+                                            <div className="qset-options-grid">
+                                                {q.options && q.options.map((opt, optIdx) => {
+                                                    const label = ['A', 'B', 'C', 'D'][optIdx];
+                                                    const isCorrect = q.correctAnswer === opt || q.correctAnswer === label;
+                                                    return (
+                                                        <div 
+                                                            key={optIdx} 
+                                                            className={`qset-option-item ${isCorrect ? 'correct-option' : ''}`}
+                                                        >
+                                                            <span className="option-badge-key">{label}</span>
+                                                            <span className="option-text-val">{opt}</span>
+                                                            {isCorrect && (
+                                                                <span className="correct-check-icon">
+                                                                    <CheckCircle2 size={16} />
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </main>
 
-            {/* MODAL 1: CHỈNH SỬA THÔNG TIN BỘ CÂU HỎI (DÀNH CHO CHỦ SỞ HỮU) */}
+            {/* MODAL 1: CHỈNH SỬA THÔNG TIN BỘ CÂU HỎI */}
             {isEditModalOpen && (
                 <div className="qset-modal-backdrop" onClick={handleCloseEditModal}>
                     <div className="qset-modal-dialog" onClick={(e) => e.stopPropagation()}>
                         <div className="qset-modal-header">
                             <div className="modal-title-wrap">
-                                <Pencil size={18} color="var(--accent-gold)" />
+                                <Pencil size={19} />
                                 <h3>Chỉnh Sửa Thông Tin Bộ Câu Hỏi</h3>
                             </div>
                             <button type="button" className="btn-modal-close" onClick={handleCloseEditModal}>
-                                <X size={18} />
+                                <X size={20} />
                             </button>
                         </div>
 
@@ -546,7 +481,7 @@ const QuestionSetPage = () => {
                                         </button>
                                         <button
                                             type="button"
-                                            className={`btn-author-mode mode-anon-btn ${editFormData.isAnonymous ? 'active' : ''}`}
+                                            className={`btn-author-mode ${editFormData.isAnonymous ? 'active' : ''}`}
                                             onClick={() => setEditFormData({ ...editFormData, isAnonymous: true })}
                                         >
                                             <UserX size={14} />
@@ -569,17 +504,17 @@ const QuestionSetPage = () => {
                 </div>
             )}
 
-            {/* MODAL 2: THÊM CÂU HỎI VÀO BỘ ĐỀ (CÓ CẢ TẠO MỚI HOẶC CHỌN TỪ CÂU HỎI CÓ SẴN) */}
+            {/* MODAL 2: THÊM CÂU HỎI VÀO BỘ ĐỀ */}
             {isAddQuestionModalOpen && (
                 <div className="qset-modal-backdrop" onClick={handleCloseAddQuestionModal}>
                     <div className="qset-modal-dialog qset-modal-dialog-large" onClick={(e) => e.stopPropagation()}>
                         <div className="qset-modal-header">
                             <div className="modal-title-wrap">
-                                <Plus size={18} color="var(--accent-blue)" />
+                                <Plus size={19} />
                                 <h3>Thêm Câu Hỏi Vào Bộ Đề</h3>
                             </div>
                             <button type="button" className="btn-modal-close" onClick={handleCloseAddQuestionModal}>
-                                <X size={18} />
+                                <X size={20} />
                             </button>
                         </div>
 
@@ -599,7 +534,7 @@ const QuestionSetPage = () => {
                                 onClick={() => setAddQuestionMode('existing')}
                             >
                                 <Layers size={15} />
-                                <span>Chọn từ câu hỏi của tôi ({existingQuestionsNotInSet.length})</span>
+                                <span>Chọn từ ngân hàng ({existingQuestionsNotInSet.length})</span>
                             </button>
                         </div>
 
@@ -612,9 +547,10 @@ const QuestionSetPage = () => {
                                         id="new-q-text"
                                         className="studio-textarea"
                                         required
-                                        placeholder="Nhập câu hỏi trắc nghiệm..."
+                                        placeholder="Nhập đề bài câu hỏi trắc nghiệm..."
                                         value={newQuestionData.questionText}
                                         onChange={(e) => setNewQuestionData({ ...newQuestionData, questionText: e.target.value })}
+                                        style={{ minHeight: '80px' }}
                                     />
                                 </div>
 
@@ -695,16 +631,16 @@ const QuestionSetPage = () => {
                                         Hủy bỏ
                                     </button>
                                     <button type="submit" className="btn-modal-submit" disabled={isAddingQuestion}>
-                                        {isAddingQuestion ? "Đang thêm..." : "Tạo & Thêm vào bộ đề"}
+                                        {isAddingQuestion ? "Đang thêm..." : "Tạo & Thêm vào bộ"}
                                     </button>
                                 </div>
                             </form>
                         ) : (
-                            /* CHẾ ĐỘ 2: CHỌN TỪ CÂU HỎI CÓ SẴN TRONG NGÂN HÀNG CỦA TÔI */
+                            /* CHẾ ĐỘ 2: CHỌN TỪ CÂU HỎI CÓ SẴN TRONG NGÂN HÀNG */
                             <div className="qset-existing-questions-panel">
                                 <div className="existing-q-toolbar">
                                     <div className="existing-search-box">
-                                        <Search size={15} />
+                                        <Search size={16} />
                                         <input 
                                             type="text" 
                                             placeholder="Tìm kiếm câu hỏi theo đề bài hoặc môn học..."
@@ -717,7 +653,7 @@ const QuestionSetPage = () => {
                                                 className="btn-clear-q-search"
                                                 onClick={() => setExistingSearchKeyword('')}
                                             >
-                                                <X size={13} />
+                                                <X size={14} />
                                             </button>
                                         )}
                                     </div>
@@ -729,12 +665,12 @@ const QuestionSetPage = () => {
                                 <div className="existing-q-scroll-list">
                                     {isFetchingExistingQuestions ? (
                                         <div className="existing-q-loading">
-                                            <Layers size={24} className="spin-icon" />
+                                            <Layers size={24} />
                                             <span>Đang tải danh sách câu hỏi của bạn...</span>
                                         </div>
                                     ) : filteredExistingQuestions.length === 0 ? (
                                         <div className="existing-q-empty">
-                                            <BookOpen size={28} />
+                                            <BookOpen size={30} />
                                             <h4>Không tìm thấy câu hỏi khả dụng</h4>
                                             <p>
                                                 {existingQuestionsNotInSet.length === 0
@@ -753,9 +689,9 @@ const QuestionSetPage = () => {
                                                 >
                                                     <div className="existing-q-checkbox">
                                                         {isSelected ? (
-                                                            <CheckSquare size={19} color="var(--accent-blue)" />
+                                                            <CheckSquare size={19} color="#0284c7" />
                                                         ) : (
-                                                            <Square size={19} color="var(--border-strong)" />
+                                                            <Square size={19} color="#191a23" />
                                                         )}
                                                     </div>
 
@@ -797,7 +733,7 @@ const QuestionSetPage = () => {
                                     >
                                         {isAddingQuestion 
                                             ? "Đang thêm..." 
-                                            : `Thêm ${selectedExistingIds.length} câu hỏi đã chọn vào bộ`}
+                                            : `Thêm ${selectedExistingIds.length} câu hỏi vào bộ`}
                                     </button>
                                 </div>
                             </div>
