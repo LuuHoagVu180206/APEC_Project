@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const verifyToken = (req, res, next) => {
     // Lấy vé từ trong header gửi lên
-    const authHeader = req.headers.token || req.headers.authorization;
+    const authHeader = req.headers.token || req.headers.authorization || req.headers['x-access-token'] || req.body?.token || req.query?.token;
     if (authHeader) {
         const token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
             ? authHeader.slice(7).trim()

@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const QuestionSet = require('../models/QuestionSet');
 const { verifyToken } = require('../verifyToken');
@@ -7,7 +8,8 @@ const { verifyToken } = require('../verifyToken');
 router.post('/score', verifyToken, async (req, res) => {
     try {
         const { username, score, setId, setTitle, isWeekly, timePlayed, questionsAnswered, roomType } = req.body;
-        const targetUsername = username || req.user.username;
+        const targetUsername = username || req.user?.username;
+        const cleanSetId = (setId && setId !== 'null' && setId !== 'undefined') ? String(setId).trim() : '';
         const user = await User.findOne({ username: targetUsername });
         
         if (user) {
@@ -42,7 +44,7 @@ router.post('/score', verifyToken, async (req, res) => {
                         score: numericScore,
                         timePlayed: numericTime,
                         questionsAnswered: numericQuestions,
-                        setId: setId || '',
+                        setId: cleanSetId,
                         setTitle: setTitle || 'Màn chơi Solo',
                         isWeekly: Boolean(isWeekly),
                         mode: 'solo',
@@ -78,7 +80,7 @@ router.post('/score', verifyToken, async (req, res) => {
                         score: numericScore,
                         timePlayed: numericTime,
                         questionsAnswered: numericQuestions,
-                        setId: setId || '',
+                        setId: cleanSetId,
                         setTitle: setTitle || 'Phòng Lớp Học',
                         isWeekly: false,
                         mode: 'classroom',
@@ -114,7 +116,7 @@ router.post('/score', verifyToken, async (req, res) => {
                         score: numericScore,
                         timePlayed: numericTime,
                         questionsAnswered: numericQuestions,
-                        setId: setId || '',
+                        setId: cleanSetId,
                         setTitle: setTitle || 'Thử thách Tuần',
                         playedAt: now
                     });
@@ -127,9 +129,9 @@ router.post('/score', verifyToken, async (req, res) => {
             const weeklyRank = await User.countDocuments({ weeklyScore: { $gt: user.weeklyScore || 0 } }) + 1;
             const allTimeRank = await User.countDocuments({ highScore: { $gt: user.highScore || 0 } }) + 1;
 
-            if (setId) {
+            if (cleanSetId && mongoose.Types.ObjectId.isValid(cleanSetId)) {
                 const isMulti = Boolean(req.body.isMultiplayer);
-                await QuestionSet.findByIdAndUpdate(setId, {
+                await QuestionSet.findByIdAndUpdate(cleanSetId, {
                     $inc: {
                         playCount: 1,
                         ...(isMulti ? { playCountMultiplayer: 1 } : { playCountSolo: 1 })
@@ -144,11 +146,11 @@ router.post('/score', verifyToken, async (req, res) => {
                 allTimeRank
             });
         } else {
-            res.status(404).json("Không tìm thấy người dùng!");
+            res.status(404).json({ message: "Không tìm thấy người dùng!" });
         }
     } catch (err) {
         console.error("Lỗi lưu điểm:", err);
-        res.status(500).json(err);
+        res.status(500).json({ message: "Lỗi lưu điểm", error: err.message || String(err) });
     }
 });
 
