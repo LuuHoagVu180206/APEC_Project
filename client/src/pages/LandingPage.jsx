@@ -76,7 +76,7 @@ const LandingPage = () => {
         {
             num: '03',
             title: 'Mở khóa huy hiệu & tích lũy điểm kinh nghiệm',
-            desc: 'Nhận phân tích đáp án chi tiết, tích lũy điểm EXP, thăng cấp thứ hạng hồ sơ cá nhân và sở hữu bộ sưu tập huy hiệu thành tích độc đáo.'
+            desc: 'Nhận phân tích đáp án chi tiết, tích lũy điểm số, thăng cấp thứ hạng hồ sơ cá nhân và sở hữu bộ sưu tập huy hiệu thành tích độc đáo.'
         },
         {
             num: '04',

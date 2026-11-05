@@ -2,26 +2,24 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: "Iosevka Charon Mono", monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: "Iosevka Charon Mono", monospace;
 }
 
-/* ĐỒNG BỘ FONT CHỮ CHÍNH CỦA WEB CHO TOÀN BỘ NAVBAR, QUESTION SET VÀ STUDIO */
+/* ĐỒNG BỘ FONT CHỮ CHÍNH CỦA WEB CHO TOÀN BỘ CÁC TRANG THEO THIẾT KẾ */
+body,
+body *,
+button,
+input,
+select,
+textarea,
 .navbar,
-.navbar button,
-.navbar input,
-.navbar select,
-.navbar a,
-.navbar span,
-.navbar div,
+.navbar *,
 .brand-name,
 .nav-link,
 .auth-navbar,
@@ -29,6 +27,14 @@ code {
 .qset-page-wrapper,
 .qset-page-wrapper *,
 .studio-wrapper,
-.studio-wrapper * {
+.studio-wrapper *,
+.teacher-class-root,
+.teacher-class-root *,
+.student-classes-root,
+.student-classes-root *,
+.teacher-dash-root,
+.teacher-dash-root *,
+.game-page-wrapper,
+.game-page-wrapper * {
   font-family: "Iosevka Charon Mono", monospace !important;
 }

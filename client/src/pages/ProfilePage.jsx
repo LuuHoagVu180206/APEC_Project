@@ -162,11 +162,11 @@ const ProfilePage = () => {
                     <div className="profile-stats-card">
                         <div className="stat-row-item">
                             <span>🏆 Kỷ lục cá nhân:</span>
-                            <strong>{(currentUser?.highScore || 0).toLocaleString()} XP</strong>
+                            <strong>{(currentUser?.highScore || 0).toLocaleString()} điểm</strong>
                         </div>
                         <div className="stat-row-item">
                             <span>⚡ Điểm tuần này:</span>
-                            <strong style={{ color: 'var(--accent-gold)' }}>{(currentUser?.weeklyScore || 0).toLocaleString()} XP</strong>
+                            <strong>{(currentUser?.weeklyScore || 0).toLocaleString()} điểm</strong>
                         </div>
                         <div className="stat-row-item">
                             <span>🎮 Số màn đã chơi:</span>
@@ -372,7 +372,7 @@ const ProfilePage = () => {
                                                     )}
                                                 </td>
                                                 <td className="history-score-cell">
-                                                    <strong>+{(item.score || 0).toLocaleString()}</strong> XP
+                                                    <strong>+{(item.score || 0).toLocaleString()}</strong> điểm
                                                 </td>
                                                 <td className="history-time-cell">
                                                     <Clock size={13} />

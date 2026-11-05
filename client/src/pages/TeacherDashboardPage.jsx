@@ -12,10 +12,7 @@ import {
     ArrowRight,
     LayoutDashboard,
     Zap,
-    Sun,
-    Moon
 } from 'lucide-react';
-import { useDarkMode } from '../pages_logic/useDarkMode';
 import Navbar from '../components/Navbar';
 import { TeacherDashboardLogic } from '../pages_logic/TeacherDashboardLogic';
 import '../pages_styling/TeacherDashboardStyling.css';
@@ -24,7 +21,6 @@ const stripeColors = ['stripe-cyan', 'stripe-gold', 'stripe-purple', 'stripe-eme
 
 const TeacherDashboardPage = () => {
     const { currentUser, classes, isLoading, error, navigate } = TeacherDashboardLogic();
-    const { isDark, toggleTheme } = useDarkMode();
     const [searchQuery, setSearchQuery] = useState('');
     const [copiedCode, setCopiedCode] = useState(null);
 
@@ -63,15 +59,7 @@ const TeacherDashboardPage = () => {
                             <Sparkles size={14} /> Khu vực Giáo viên
                         </div>
                     </div>
-                    <button 
-                        type="button"
-                        className="teacher-dash-theme-btn"
-                        onClick={toggleTheme}
-                        title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
-                        aria-label="Toggle Theme"
-                    >
-                        {isDark ? <Sun size={18} /> : <Moon size={18} />}
-                    </button>
+
                 </div>
 
                 {/* HERO BANNER - MODERN EDTECH STYLE */}

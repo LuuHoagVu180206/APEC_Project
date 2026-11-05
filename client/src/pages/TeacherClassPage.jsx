@@ -19,21 +19,17 @@ import {
     Sparkles,
     Calendar,
     User,
-    Sun,
-    Moon,
     Gamepad2,
     Trophy,
     Clock,
     HelpCircle,
     Lock
 } from 'lucide-react';
-import { useDarkMode } from '../pages_logic/useDarkMode';
 import Navbar from '../components/Navbar';
 import { TeacherClassPageLogic } from '../pages_logic/TeacherClassPageLogic';
 import '../pages_styling/TeacherClassStyling.css';
 
 const TeacherClassPage = () => {
-    const { isDark, toggleTheme } = useDarkMode();
     const {
         classInfo,
         isTeacherAccount,
@@ -143,15 +139,7 @@ const TeacherClassPage = () => {
                             <span>{classInfo.isPrimaryTeacher ? 'Giáo viên quản lý chính' : 'Trợ giảng lớp học'}</span>
                         </div>
                     </div>
-                    <button 
-                        type="button"
-                        className="teacher-class-theme-btn"
-                        onClick={toggleTheme}
-                        title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
-                        aria-label="Toggle Theme"
-                    >
-                        {isDark ? <Sun size={18} /> : <Moon size={18} />}
-                    </button>
+
                 </div>
 
                 {/* HERO HEADER BANNER */}
@@ -601,7 +589,7 @@ const TeacherClassPage = () => {
                                                     {!isTeacherOfClass && session.myResult && (
                                                         <div className="session-my-score-pill">
                                                             <span>Hạng #{session.myResult.rank}</span>
-                                                            <strong>+{(session.myResult.score || 0).toLocaleString()} XP</strong>
+                                                            <strong>+{(session.myResult.score || 0).toLocaleString()} điểm</strong>
                                                         </div>
                                                     )}
 
@@ -656,7 +644,7 @@ const TeacherClassPage = () => {
                                                                             </span>
                                                                         </td>
                                                                         <td className="score-cell">
-                                                                            <strong>+{(player.score || 0).toLocaleString()}</strong> XP
+                                                                            <strong>+{(player.score || 0).toLocaleString()}</strong> điểm
                                                                         </td>
                                                                         <td className="time-cell">
                                                                             <Clock size={13} /> {player.timePlayed ? `${Number(player.timePlayed).toFixed(1)}s` : '--'}

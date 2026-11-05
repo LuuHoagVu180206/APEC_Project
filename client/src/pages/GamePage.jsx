@@ -57,19 +57,19 @@ const GamePage = () => {
                     <span>{gameVersion}</span>
                 </div>
 
-                {/* Điểm kỷ lục nếu có */}
+                {/* Điểm kỷ lục */}
                 {user?.highScore !== undefined && (
                     <div className="game-score-pill" title="Điểm kỷ lục cao nhất của bạn">
                         <Trophy size={14} />
-                        <span>{user.highScore} XP</span>
+                        <span>{user.highScore} điểm</span>
                     </div>
                 )}
 
-                {/* Điểm Tuần nếu có */}
+                {/* Điểm Tuần */}
                 {user?.weeklyScore !== undefined && user.weeklyScore > 0 && (
                     <div className="game-score-pill weekly-score-pill" title="Điểm Thử Thách Tuần của bạn">
                         <Flame size={14} />
-                        <span>{user.weeklyScore} Tuần</span>
+                        <span>{user.weeklyScore} điểm tuần</span>
                     </div>
                 )}
             </Navbar>
@@ -95,72 +95,58 @@ const GamePage = () => {
                     </div>
                 )}
 
-                {/* THANH THÔNG TIN BỘ ĐỀ ĐANG CHƠI */}
-                <div className="active-set-strip">
-                    <div className="active-set-left">
-                        {activeSet?.isWeekly ? (
-                            <span className="active-set-tag tag-weekly">
-                                <Flame size={14} /> Thử Thách Tuần {activeSet.weekNumber || ''}
-                            </span>
-                        ) : (
-                            <span className="active-set-tag tag-official">
-                                ⭐ Đề Chính Thức • APEC Group
-                            </span>
-                        )}
-                        <h2 className="active-set-title">
-                            {activeSet?.title || 'Bộ đề khởi động chuẩn'}
-                        </h2>
-                        <span className="active-set-meta">
-                            {activeSet?.topic && `[${activeSet.topic}] • `} {questions.length} câu đố
-                        </span>
-                    </div>
-
-                    <div className="active-set-actions">
-                        <button 
-                            className="btn-select-set-modal"
-                            onClick={() => setIsSetModalOpen(true)}
-                        >
-                            <BookOpen size={16} />
-                            <span>Đổi bộ câu hỏi</span>
-                        </button>
-                        <Link to="/leaderboard" className="btn-view-leaderboard">
-                            <Trophy size={16} />
-                            <span>Đua Top BXH</span>
-                        </Link>
-                    </div>
-                </div>
-
-                {/* KHUNG ARCADE CONSOLE CHỨA GAME */}
+                {/* KHUNG ARCADE CONSOLE CHỨA GAME - ĐÃ GỘP GỌN 1 HEADER THEO CHUẨN THEME WEB */}
                 <section className="arcade-console-card">
-                    {/* Header thanh công cụ điều khiển Arcade */}
-                    <div className="arcade-console-header">
-                        <div className="arcade-header-left">
-                            <div className="arcade-dots">
-                                <span className="arcade-dot dot-red"></span>
-                                <span className="arcade-dot dot-yellow"></span>
-                                <span className="arcade-dot dot-green"></span>
+                    {/* Header điều khiển duy nhất, tích hợp thông tin đề thi và các nút chức năng */}
+                    <div className="game-console-header">
+                        <div className="game-console-header-left">
+                            <div className="game-window-dots">
+                                <span className="window-dot dot-red"></span>
+                                <span className="window-dot dot-yellow"></span>
+                                <span className="window-dot dot-green"></span>
                             </div>
 
-                            <div className="arcade-title-group">
-                                <div className="arcade-badge-live">
-                                    <span className="arcade-live-pulse"></span>
-                                    <span>TRỰC TIẾP</span>
-                                </div>
-                                <span className="arcade-title">MÀN ĐẤU QUIZ ARCADE • PHIÊU LƯU TRI THỨC</span>
+                            <div className="game-set-info">
+                                {activeSet?.isWeekly ? (
+                                    <span className="game-set-badge badge-weekly">
+                                        <Flame size={13} /> TUẦN {activeSet.weekNumber || ''}
+                                    </span>
+                                ) : (
+                                    <span className="game-set-badge badge-official">
+                                        <Sparkles size={13} /> {activeSet?.authorName || 'APEC'}
+                                    </span>
+                                )}
+                                <h2 className="game-active-title" title={activeSet?.title || 'Bộ đề khởi động chuẩn'}>
+                                    {activeSet?.title || 'Bộ đề khởi động chuẩn'}
+                                </h2>
+                                {activeSet?.topic && (
+                                    <span className="game-active-topic">
+                                        [{activeSet.topic}]
+                                    </span>
+                                )}
+                                {questions.length > 0 && (
+                                    <span className="game-active-count">
+                                        📝 {questions.length} câu đố
+                                    </span>
+                                )}
                             </div>
-
-                            {questions.length > 0 && (
-                                <span className="arcade-questions-count">
-                                    📝 {questions.length} câu hỏi sẵn sàng
-                                </span>
-                            )}
                         </div>
 
-                        {/* Các nút tiện ích */}
-                        <div className="arcade-header-controls">
+                        {/* Các nút điều khiển & chuyển trang */}
+                        <div className="game-console-header-right">
                             <button 
                                 type="button"
-                                className="arcade-ctrl-btn" 
+                                className="game-btn-action btn-change-set" 
+                                onClick={() => setIsSetModalOpen(true)} 
+                                title="Chọn bộ câu hỏi khác từ thư viện"
+                            >
+                                <BookOpen size={15} />
+                                <span>Đổi bộ đề</span>
+                            </button>
+
+                            <button 
+                                type="button"
+                                className="game-btn-action" 
                                 onClick={handleReloadGame} 
                                 title="Khởi động lại màn chơi hiện tại"
                             >
@@ -170,7 +156,7 @@ const GamePage = () => {
 
                             <button 
                                 type="button"
-                                className="arcade-ctrl-btn" 
+                                className="game-btn-action" 
                                 onClick={toggleFullscreen} 
                                 title={isFullscreen ? "Thoát toàn màn hình" : "Chơi toàn màn hình"}
                             >
@@ -178,15 +164,10 @@ const GamePage = () => {
                                 <span>{isFullscreen ? "Thu nhỏ" : "Toàn màn hình"}</span>
                             </button>
 
-                            <button 
-                                type="button"
-                                className="arcade-ctrl-btn" 
-                                onClick={() => setIsSetModalOpen(true)} 
-                                title="Chọn bộ câu hỏi khác từ danh sách"
-                            >
-                                <BookOpen size={15} />
-                                <span>Đổi đề</span>
-                            </button>
+                            <Link to="/leaderboard" className="game-btn-action btn-leaderboard-link" title="Xem Bảng xếp hạng">
+                                <Trophy size={15} />
+                                <span>Đua Top BXH</span>
+                            </Link>
                         </div>
                     </div>
 
@@ -215,37 +196,57 @@ const GamePage = () => {
                     </div>
                 </section>
 
-                {/* 3 CARDS THÔNG TIN & HƯỚNG DẪN DƯỚI KHUNG GAME */}
+                {/* 3 CARDS HƯỚNG DẪN & TIỆN ÍCH DƯỚI KHUNG GAME (CHUẨN BENTO POSITIVUS) */}
                 <section className="game-info-grid">
-                    <div className="game-guide-card">
-                        <div className="game-guide-header">
-                            <div className="guide-icon-pill guide-icon-gold">
-                                <HelpCircle size={22} />
-                            </div>
-                            <h3>Cách thức điều khiển</h3>
-                        </div>
-                        <p>
-                            Sử dụng các phím mũi tên hoặc <strong>W, A, S, D</strong> để di chuyển nhân vật. Nhấn phím <strong>Space</strong> (Khoảng trắng) để nhảy và chạm vào các khối câu đố để trả lời câu hỏi trắc nghiệm.
-                        </p>
-                    </div>
-
-                    <div className="game-guide-card">
+                    {/* Card 1: Điều khiển */}
+                    <div className="game-guide-card guide-card-controls">
                         <div className="game-guide-header">
                             <div className="guide-icon-pill guide-icon-blue">
+                                <HelpCircle size={22} />
+                            </div>
+                            <h3>Cách Thức Điều Khiển</h3>
+                        </div>
+                        <p>
+                            Điều khiển nhân vật vượt mê cung học tập và tương tác trực tiếp với các khối câu đố trắc nghiệm:
+                        </p>
+                        <div className="keycap-list">
+                            <div className="keycap-row">
+                                <div className="keycap-row-keys">
+                                    <span className="keycap">W</span>
+                                    <span className="keycap">A</span>
+                                    <span className="keycap">S</span>
+                                    <span className="keycap">D</span>
+                                </div>
+                                <span>hoặc <strong>Phím mũi tên</strong>: Di chuyển</span>
+                            </div>
+                            <div className="keycap-row">
+                                <div className="keycap-row-keys">
+                                    <span className="keycap keycap-space">Space</span>
+                                </div>
+                                <span>: Nhảy & chạm khối câu đố</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Card 2: Bảng xếp hạng */}
+                    <div className="game-guide-card guide-card-leaderboard">
+                        <div className="game-guide-header">
+                            <div className="guide-icon-pill guide-icon-gold">
                                 <Award size={22} />
                             </div>
                             <h3>Bảng Vàng Danh Dự</h3>
                         </div>
                         <p>
-                            Mỗi câu trả lời chuẩn xác sẽ đem lại cho bạn điểm kinh nghiệm (XP). Cạnh tranh vị trí dẫn đầu cùng bạn bè trên bảng tổng sắp toàn hệ thống!
+                            Mỗi câu trả lời chuẩn xác sẽ đem lại điểm số cho bạn. Cạnh tranh vị trí dẫn đầu cùng bạn bè trên bảng tổng sắp toàn hệ thống!
                         </p>
-                        <Link to="/leaderboard" className="game-guide-btn">
-                            <span>Xem BXH</span>
+                        <Link to="/leaderboard" className="btn-positivus-guide">
+                            <span>Xem Bảng Xếp Hạng</span>
                             <ArrowRight size={14} />
                         </Link>
                     </div>
 
-                    <div className="game-guide-card">
+                    {/* Card 3: Thư viện & Studio */}
+                    <div className="game-guide-card guide-card-library">
                         <div className="game-guide-header">
                             <div className="guide-icon-pill guide-icon-emerald">
                                 <FolderPlus size={22} />
@@ -253,10 +254,10 @@ const GamePage = () => {
                             <h3>Thư Viện & Studio Đề Thi</h3>
                         </div>
                         <p>
-                            Khám phá hàng ngàn bộ câu hỏi về Toán học, Tiếng Anh, Vật lý do cộng đồng giáo viên và học sinh chia sẻ, hoặc tự tạo bộ đề của riêng bạn.
+                            Khám phá hàng ngàn bộ câu hỏi về Toán học, Tiếng Anh, Vật lý do cộng đồng chia sẻ, hoặc tự tạo bộ đề của riêng bạn trong Studio.
                         </p>
-                        <Link to="/library" className="game-guide-btn">
-                            <span>Vào Thư viện</span>
+                        <Link to="/library" className="btn-positivus-guide">
+                            <span>Khám Phá Thư Viện</span>
                             <ArrowRight size={14} />
                         </Link>
                     </div>
