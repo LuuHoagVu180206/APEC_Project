@@ -4,7 +4,6 @@ import {
     Search, 
     School, 
     Building2, 
-    Sparkles, 
     ChevronRight, 
     Plus, 
     Users, 
@@ -66,11 +65,8 @@ const SchoolDiscoveryPage = () => {
                     <section className="school-disc-section">
                         <div className="school-disc-section-header">
                             <div>
-                                <div className="school-disc-section-tag">
-                                    <Sparkles size={13} /> Membership đã tham gia
-                                </div>
                                 <h2>
-                                    Trường của bạn
+                                    <span className="school-disc-title-highlight highlight-green">Trường của bạn</span>
                                     <span className="school-disc-count-badge">{memberships.length}</span>
                                 </h2>
                             </div>
@@ -123,12 +119,9 @@ const SchoolDiscoveryPage = () => {
                 <section className="school-disc-section">
                     <div className="school-disc-section-header">
                         <div>
-                            <div className="school-disc-section-tag" style={{ color: 'var(--sd-cyan)' }}>
-                                <Search size={13} /> Tra cứu & Gia nhập
-                            </div>
                             <h2>
-                                Tìm School Community
-                                <span className="school-disc-count-badge" style={{ background: 'rgba(14, 165, 233, 0.15)', borderColor: 'rgba(14, 165, 233, 0.4)', color: 'var(--sd-cyan-hover)' }}>
+                                <span className="school-disc-title-highlight">Tìm School Community</span>
+                                <span className="school-disc-count-badge">
                                     {schools.length}
                                 </span>
                             </h2>

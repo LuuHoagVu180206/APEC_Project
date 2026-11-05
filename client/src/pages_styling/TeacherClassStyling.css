@@ -1126,6 +1126,71 @@
     color: #64748b;
 }
 
+[data-theme='light'] .teacher-class-btn-add-set {
+    background: #b9ff66;
+    color: #191a23;
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 0 #191a23;
+    font-weight: 800;
+}
+
+[data-theme='light'] .teacher-class-btn-add-set:hover:not(:disabled) {
+    background: #a3e635;
+    transform: translate(-1px, -1px);
+    box-shadow: 0 6px 0 0 #191a23;
+}
+
+[data-theme='light'] .teacher-class-btn-promote {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 2px solid #191a23;
+    box-shadow: 0 2px 0 0 #191a23;
+    font-weight: 800;
+}
+
+[data-theme='light'] .teacher-class-btn-promote:hover {
+    background: #bae6fd;
+    transform: translate(-1px, -1px);
+    box-shadow: 0 3px 0 0 #191a23;
+}
+
+[data-theme='light'] .teacher-class-btn-demote {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 2px solid #191a23;
+    box-shadow: 0 2px 0 0 #191a23;
+    font-weight: 800;
+}
+
+[data-theme='light'] .teacher-class-btn-demote:hover {
+    background: #fecaca;
+    transform: translate(-1px, -1px);
+    box-shadow: 0 3px 0 0 #191a23;
+}
+
+[data-theme='light'] .class-session-card {
+    background: #ffffff;
+    border: 2px solid #191a23;
+    box-shadow: 0 4px 0 0 #191a23;
+}
+
+[data-theme='light'] .class-session-card:hover {
+    box-shadow: 0 6px 0 0 #191a23;
+    border-color: #191a23;
+}
+
+[data-theme='light'] .class-session-header {
+    background: #f8fafc;
+    border-bottom: 2px solid #191a23;
+}
+
+[data-theme='light'] .class-session-icon {
+    background: #fef3c7;
+    border: 2px solid #191a23;
+    color: #b45309;
+    box-shadow: 0 2px 0 #191a23;
+}
+
 [data-theme='light'] .teacher-class-select option {
     background: #ffffff;
     color: #0f172a;

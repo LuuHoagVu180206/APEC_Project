@@ -18,8 +18,14 @@ export const TeacherDashboardLogic = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!currentUser || currentUser.role !== 'teacher') {
-            navigate(currentUser ? '/' : '/login', { replace: true });
+        if (!currentUser) {
+            navigate('/login', { replace: true });
+            return;
+        }
+
+        if (currentUser.role !== 'teacher') {
+            setError('Chức năng này dành cho tài khoản Giáo viên. Vui lòng đăng ký hoặc đăng nhập với vai trò Giáo viên để tạo và quản lý lớp học.');
+            setIsLoading(false);
             return;
         }
 
