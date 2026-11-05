@@ -249,7 +249,7 @@ const SchoolDashboardPage = () => {
                 <section className="school-dash-section">
                     <div className="school-dash-section-header">
                         <div>
-                            <div className="school-dash-section-tag" style={{ color: 'var(--sh-gold)' }}>
+                            <div className="school-dash-section-tag tag-gold">
                                 <BookOpen size={14} /> Kho Học Liệu Chung
                             </div>
                             <h2>Bộ đề câu hỏi được chia sẻ</h2>
@@ -333,7 +333,7 @@ const SchoolDashboardPage = () => {
                 <section className="school-dash-section">
                     <div className="school-dash-section-header">
                         <div>
-                            <div className="school-dash-section-tag" style={{ color: 'var(--sh-purple)' }}>
+                            <div className="school-dash-section-tag tag-purple">
                                 <School size={14} /> Không Gian Lớp Học
                             </div>
                             <h2>Danh sách lớp học trong trường</h2>
@@ -542,7 +542,7 @@ const SchoolDashboardPage = () => {
                 <section className="school-dash-section">
                     <div className="school-dash-section-header">
                         <div>
-                            <div className="school-dash-section-tag" style={{ color: 'var(--sh-emerald)' }}>
+                            <div className="school-dash-section-tag tag-emerald">
                                 <Users size={14} /> Danh Bạ Thành Viên
                             </div>
                             <h2>

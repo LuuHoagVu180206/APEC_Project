@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, Sun, Moon, LogOut, ShieldCheck, Gamepad2 } from 'lucide-react';
+import { Sparkles, Sun, Moon, LogOut, ShieldCheck, Gamepad2, GraduationCap } from 'lucide-react';
 import { useDarkMode } from '../pages_logic/useDarkMode';
 import './Navbar.css';
 
@@ -106,6 +106,10 @@ const Navbar = ({ activePage, children }) => {
                                         <span>Quản trị hệ thống</span>
                                     </Link>
                                 )}
+                                <Link to="/teacher/dashboard" className="dropdown-item-teacher">
+                                    <GraduationCap size={16} />
+                                    <span>Dashboard giáo viên</span>
+                                </Link>
                                 <Link to="/game" className="dropdown-item-game">
                                     <Gamepad2 size={16} />
                                     <span>Chơi game</span>
