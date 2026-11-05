@@ -11,6 +11,7 @@ function fixture() {
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../routes/scores.js'), 'utf8'), {
         module: { exports: {} }, console: { log() {}, warn() {}, error() {} }, require(name) {
             if (name === 'express') return { Router: () => ({ post: (url, ...handlers) => { routes[url] = handlers.at(-1); }, get() {} }) };
+            if (name === 'mongoose') return require('mongoose');
             if (name === '../models/User') return { findById: async id => { savedId = id; return user; }, countDocuments: async () => 0 };
             if (name === '../models/QuestionSet') return { findByIdAndUpdate: async () => {} };
             if (name === '../verifyToken') return { verifyToken() {} };
