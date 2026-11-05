@@ -8,18 +8,20 @@ const { verifyToken } = require('../verifyToken');
 router.post('/score', verifyToken, async (req, res) => {
     try {
         const { username, score, setId, setTitle, isWeekly, timePlayed, questionsAnswered, roomType } = req.body;
-        const targetUsername = username || req.user?.username;
+        const targetUsername = username || req.user.username;
         const cleanSetId = (setId && setId !== 'null' && setId !== 'undefined') ? String(setId).trim() : '';
         const user = await User.findOne({ username: targetUsername });
+        const user = await User.findById(req.user.id);
         
         if (user) {
             const numericScore = Number(score) || 0;
             const numericTime = Number(timePlayed) || 0;
             const numericQuestions = Number(questionsAnswered) || 0;
             const mode = roomType || 'solo';
+            if (!['solo', 'casual', 'classroom'].includes(mode)) return res.status(400).json('Chế độ chơi không hợp lệ!');
 
             // 1. MÀN CHƠI SOLO: Lưu vào lịch sử cá nhân và cập nhật kỷ lục cá nhân
-            if (mode === 'solo') {
+            if (mode === 'solo' || mode === 'casual') {
                 if (!user.playHistory) user.playHistory = [];
                 const now = new Date();
 
@@ -29,7 +31,7 @@ router.post('/score', verifyToken, async (req, res) => {
                     return timeDiff < 15000 && 
                            entry.score === numericScore && 
                            (entry.setId === (setId || '') || !setId || !entry.setId) &&
-                           entry.mode === 'solo';
+                           entry.mode === mode;
                 });
 
                 if (recentDuplicateIndex !== -1) {
@@ -45,9 +47,9 @@ router.post('/score', verifyToken, async (req, res) => {
                         timePlayed: numericTime,
                         questionsAnswered: numericQuestions,
                         setId: cleanSetId,
-                        setTitle: setTitle || 'Màn chơi Solo',
-                        isWeekly: Boolean(isWeekly),
-                        mode: 'solo',
+                        setTitle: setTitle || (mode === 'casual' ? 'Phòng Chơi tự do' : 'Màn chơi Solo'),
+                        isWeekly: mode === 'solo' && Boolean(isWeekly),
+                        mode,
                         playedAt: now
                     });
                 }
@@ -90,7 +92,7 @@ router.post('/score', verifyToken, async (req, res) => {
             }
 
             // CHỈ KHI NÀO user chọn bộ câu hỏi weekly thì mới lưu vào điểm tuần và tính rank tuần
-            if (isWeekly) {
+            if (mode === 'solo' && isWeekly) {
                 if (!user.weeklyHistory) user.weeklyHistory = [];
                 if (numericScore > (user.weeklyScore || 0)) {
                     user.weeklyScore = numericScore;
@@ -130,7 +132,7 @@ router.post('/score', verifyToken, async (req, res) => {
             const allTimeRank = await User.countDocuments({ highScore: { $gt: user.highScore || 0 } }) + 1;
 
             if (cleanSetId && mongoose.Types.ObjectId.isValid(cleanSetId)) {
-                const isMulti = Boolean(req.body.isMultiplayer);
+                const isMulti = mode !== 'solo';
                 await QuestionSet.findByIdAndUpdate(cleanSetId, {
                     $inc: {
                         playCount: 1,
