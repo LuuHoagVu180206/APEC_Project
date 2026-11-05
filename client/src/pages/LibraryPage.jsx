@@ -364,7 +364,6 @@ const LibraryPage = () => {
                                                         <Check size={12} />
                                                     )}
                                                 </button>
-                                            </div>
                                             ))}
                                         </div>
                                     </div>
@@ -643,7 +642,6 @@ const LibraryPage = () => {
                                                     >
                                                         <Trash2 size={16} />
                                                     </button>
-                                            </div>
                                                 )}
                                             </div>
 
@@ -689,7 +687,6 @@ const LibraryPage = () => {
                                                     <Heart size={15} fill={qSet.likesCount > 0 ? "#ef4444" : "none"} />
                                                     <span>{qSet.likesCount || 0} Thích</span>
                                                 </button>
-                                            </div>
 
                                                 {/* Nút Lưu bộ đề (Ẩn nếu là chủ sở hữu) */}
                                                 {!isMySet && (
@@ -702,7 +699,6 @@ const LibraryPage = () => {
                                                         <Bookmark size={15} fill={isSaved ? "currentColor" : "none"} />
                                                         <span>{isSaved ? "Đã lưu" : "Lưu bộ"}</span>
                                                     </button>
-                                            </div>
                                                 )}
 
                                                 {/* Nút Sao chép về Studio (Ẩn nếu là chủ sở hữu) */}
@@ -716,7 +712,6 @@ const LibraryPage = () => {
                                                         <Copy size={15} />
                                                         <span>Sao chép</span>
                                                     </button>
-                                            </div>
                                                 )}
 
                                                 {/* Nút Chơi ngay trong Game */}
@@ -731,8 +726,6 @@ const LibraryPage = () => {
                                                 </button>
                                             </div>
 
-                                            </div>
-
                                             <div className="action-group-right">
                                                 {/* Nút Xuất Excel */}
                                                 <button 
@@ -744,7 +737,6 @@ const LibraryPage = () => {
                                                     <FileSpreadsheet size={15} />
                                                     <span>Xuất Excel</span>
                                                 </button>
-                                            </div>
 
                                                 {/* Nút Xuất PDF */}
                                                 <button 
@@ -756,7 +748,6 @@ const LibraryPage = () => {
                                                     <FileText size={15} />
                                                     <span>Xuất PDF</span>
                                                 </button>
-                                            </div>
                                             </div>
                                         </div>
                                     </div>
