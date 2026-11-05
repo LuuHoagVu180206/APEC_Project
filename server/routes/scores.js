@@ -7,10 +7,8 @@ const { verifyToken } = require('../verifyToken');
 // API LƯU ĐIỂM (Cả chế độ thường & Thử thách tuần)
 router.post('/score', verifyToken, async (req, res) => {
     try {
-        const { username, score, setId, setTitle, isWeekly, timePlayed, questionsAnswered, roomType } = req.body;
-        const targetUsername = username || req.user.username;
+        const { score, setId, setTitle, isWeekly, timePlayed, questionsAnswered, roomType } = req.body;
         const cleanSetId = (setId && setId !== 'null' && setId !== 'undefined') ? String(setId).trim() : '';
-        const user = await User.findOne({ username: targetUsername });
         const user = await User.findById(req.user.id);
         
         if (user) {
@@ -173,7 +171,7 @@ router.get('/history', verifyToken, async (req, res) => {
         });
     } catch (err) {
         console.error("Lỗi lấy lịch sử chơi:", err);
-        res.status(500).json(err);
+        res.status(500).json({ message: "Lỗi lấy lịch sử chơi", error: err.message || String(err) });
     }
 });
 
@@ -195,7 +193,7 @@ router.get('/leaderboard', async (req, res) => {
         res.status(200).json(leaderboard);
     } catch (err) {
         console.error("Lỗi lấy BXH:", err);
-        res.status(500).json(err);
+        res.status(500).json({ message: "Lỗi lấy BXH", error: err.message || String(err) });
     }
 });
 
