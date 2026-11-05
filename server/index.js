@@ -333,6 +333,10 @@ io.on('connection', (socket) => {
             }
 
             const lobby = lobbies[pin];
+            if (lobby.gameState !== 'WAITING') {
+                socket.emit('error', 'Phòng đã bắt đầu hoặc đã kết thúc trận. Bạn không thể tham gia thêm!');
+                return;
+            }
             console.log(`✅ Tìm thấy phòng [${pin}]. Loại: ${lobby.roomType} | Tên: "${lobby.roomName}" | Host: "${lobby.hostName}"`);
 
             // NẾU LÀ PHÒNG LỚP HỌC (CLASSROOM): RESTRICTION CHẶN ACCOUNT NGOÀI LỚP
@@ -400,6 +404,12 @@ io.on('connection', (socket) => {
                 }
             }
 
+            // Class verification above awaits the database. Recheck in case the
+            // host started or destroyed the room while that request was pending.
+            if (lobbies[pin] !== lobby || lobby.gameState !== 'WAITING') {
+                socket.emit('error', 'Phòng không còn chờ người chơi. Bạn không thể tham gia thêm!');
+                return;
+            }
             socket.join(pin);
 
             // Kiểm tra xem người chơi này đã từng ở trong phòng chưa (tránh trùng lặp khi reconnect)
@@ -571,7 +581,7 @@ io.on('connection', (socket) => {
 
                 saveLobbiesToDisk();
 
-                const sortedLeaderboard = [...lobbies[pin].players].sort((a, b) => {
+                const sortedLeaderboard = roomSnapshot(pin, lobbies[pin]).players.sort((a, b) => {
                     const scoreA = a.score || 0;
                     const scoreB = b.score || 0;
                     return scoreB - scoreA;
@@ -658,7 +668,7 @@ io.on('connection', (socket) => {
                 }
             });
 
-            const sortedLeaderboard = [...lobbies[pin].players].sort((a, b) => {
+            const sortedLeaderboard = roomSnapshot(pin, lobbies[pin]).players.sort((a, b) => {
                 const scoreA = a.score || 0;
                 const scoreB = b.score || 0;
                 return scoreB - scoreA;
@@ -749,7 +759,7 @@ io.on('connection', (socket) => {
                 }
             });
 
-            const sortedLeaderboard = [...lobbies[pin].players].sort((a, b) => {
+            const sortedLeaderboard = roomSnapshot(pin, lobbies[pin]).players.sort((a, b) => {
                 const scoreA = a.score || 0;
                 const scoreB = b.score || 0;
                 return scoreB - scoreA;
@@ -838,7 +848,7 @@ io.on('connection', (socket) => {
                                     saveLobbiesToDisk();
                                     io.to(pin).emit('players_update', roomSnapshot(pin, lobbies[pin]).players);
                                     if (lobbies[pin].gameState !== 'WAITING') {
-                                        io.to(pin).emit('live_leaderboard_update', lobbies[pin].players);
+                                        io.to(pin).emit('live_leaderboard_update', roomSnapshot(pin, lobbies[pin]).players);
                                     }
                                 }
                             }

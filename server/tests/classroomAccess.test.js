@@ -34,12 +34,12 @@ function harness({ role = 'teacher', owner = teacherId, assistants = [], exists 
         }
     });
     const timers = [];
-    const fakeTimeout = (fn, delay) => { const timer = { fn, delay, cleared: false }; timers.push(timer); return timers.length; };
-    const fakeClear = id => { if (timers[id - 1]) timers[id - 1].cleared = true; };
+    const fakeTimeout = (fn, delay) => { const timer = { fn, delay, cleared: false }; timer.self = timer; timers.push(timer); return timer; };
+    const fakeClear = timer => { if (timer) timer.cleared = true; };
     let connection;
     let saved = {};
     const broadcasts = [];
-    const io = { on: (event, fn) => { if (event === 'connection') connection = fn; }, to: pin => ({ emit: (event, data) => broadcasts.push({ pin, event, data }) }), in: () => ({ socketsLeave() {} }) };
+    const io = { on: (event, fn) => { if (event === 'connection') connection = fn; }, to: pin => ({ emit: (event, data) => { JSON.stringify(data); broadcasts.push({ pin, event, data }); } }), in: () => ({ socketsLeave() {}, allSockets: async () => new Set() }) };
     const apiRoutes = {};
     const express = () => ({ use() {}, get: (url, fn) => { apiRoutes[url] = fn; } });
     express.json = express.urlencoded = () => () => {};
@@ -296,3 +296,51 @@ test('member can leave; only host can kick and revoked sessions cannot reconnect
  member.handlers.leave_lobby({pin});
  assert.equal(h.saved()[pin].players.length,1);
 });
+
+test('starting the match blocks new joins but permits an existing member to reconnect', async () => {
+    const h = harness();
+    await h.handlers.create_lobby({ roomType: 'casual' });
+    const pin = h.events[0].data.pin;
+    const member = h.connect('original-member');
+    await member.handlers.join_lobby({ pin, playerName: 'Member' });
+    const joined = member.events[0].data;
+    h.handlers.start_game(pin);
+    const late = h.connect('late-member');
+    await late.handlers.join_lobby({ pin, playerName: 'Late' });
+    assert.equal(late.events[0].event, 'error');
+    assert.match(late.events[0].data, /đã bắt đầu/);
+    assert.equal(h.saved()[pin].players.length, 2);
+    const reconnected = h.connect('reconnected-member');
+    reconnected.handlers.reconnect_lobby({ pin, playerId: joined.playerId, resumeToken: joined.resumeToken });
+    assert.equal(reconnected.events[0].event, 'reconnect_success');
+    assert.equal(h.saved()[pin].players.length, 2);
+});
+
+test('finished rooms also reject new members', async () => {
+    const h = harness({ initialLobbies: { '123456': { createdAt: Date.now(), gameState: 'FINISHED', players: [] } } });
+    await h.handlers.join_lobby({ pin: '123456', playerName: 'Late' });
+    assert.equal(h.events[0].event, 'error');
+    assert.match(h.events[0].data, /đã kết thúc/);
+});
+
+for (const event of ['request_end_game', 'trigger_end_game']) {
+ test(event + ' finishes while a member is refreshing, without serializing reconnect timers', async () => {
+  const h = harness();
+  await h.handlers.create_lobby({roomType:'casual'});
+  const pin = h.events[0].data.pin;
+  const member = h.connect('refreshing-member');
+  await member.handlers.join_lobby({pin,playerName:'Member'});
+  const joined = member.events[0].data;
+  h.handlers.start_game(pin);
+  member.handlers.disconnect('refresh');
+  await h.handlers[event](pin);
+  assert.equal(h.saved()[pin].gameState, 'FINISHED');
+  assert.ok(h.broadcasts.some(e=>e.event==='game_ended'));
+  const board = h.broadcasts.filter(e=>e.event==='live_leaderboard_update').at(-1).data;
+  assert.equal(board.length,2);
+  assert.ok(board.every(p=>!('disconnectTimeout' in p)));
+  const refreshed = h.connect('refreshed-member');
+  refreshed.handlers.reconnect_lobby({pin,playerId:joined.playerId,resumeToken:joined.resumeToken});
+  assert.equal(refreshed.events[0].data.gameState,'FINISHED');
+ });
+}

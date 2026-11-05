@@ -169,7 +169,7 @@ const ProfilePage = () => {
                             <strong style={{ color: 'var(--accent-gold)' }}>{(currentUser?.weeklyScore || 0).toLocaleString()} XP</strong>
                         </div>
                         <div className="stat-row-item">
-                            <span>🎮 Màn solo đã chơi:</span>
+                            <span>🎮 Số màn đã chơi:</span>
                             <strong>{playHistory?.length || 0} trận</strong>
                         </div>
                         <div className="stat-row-item">
@@ -329,11 +329,11 @@ const ProfilePage = () => {
                                 </div>
                                 <div>
                                     <h3>Lịch Sử Màn Chơi Cá Nhân</h3>
-                                    <span className="section-sub-desc">Ghi nhận các màn chơi đơn (Solo) và Thử thách Tuần đã hoàn thành</span>
+                                    <span className="section-sub-desc">Ghi nhận các màn chơi đơn, thử thách tuần, chơi tự do và lớp học đã lưu</span>
                                 </div>
                             </div>
                             <div className="history-count-badge">
-                                <span>{playHistory?.length || 0} trận solo</span>
+                                <span>{playHistory?.length || 0} trận</span>
                             </div>
                         </div>
 
@@ -367,7 +367,7 @@ const ProfilePage = () => {
                                                         </span>
                                                     ) : (
                                                         <span className="badge-tag-solo">
-                                                            <Gamepad2 size={12} /> Chơi Đơn
+                                                            <Gamepad2 size={12} /> {item.mode === 'casual' ? 'Chơi Tự Do' : 'Chơi Đơn'}
                                                         </span>
                                                     )}
                                                 </td>
@@ -394,7 +394,7 @@ const ProfilePage = () => {
                         ) : (
                             <div className="profile-history-empty">
                                 <Gamepad2 size={38} className="empty-history-icon" />
-                                <h4>Chưa có lịch sử màn chơi solo nào</h4>
+                                <h4>Chưa có lịch sử màn chơi nào</h4>
                                 <p>Hãy chọn một bộ câu hỏi hoặc tham gia Thử Thách Tuần để ghi nhận thành tích cá nhân của bạn!</p>
                             </div>
                         )}
