@@ -328,7 +328,7 @@ io.on('connection', (socket) => {
                 console.log(`💡 Nguyên nhân: Phòng đã bị hủy bởi Host, hoặc Server vừa khởi động lại làm reset danh sách phòng.`);
                 console.log('============================================================\n');
                 logSocket(`⚠️ Học sinh [${data.playerName || data.username}] nhập PIN [${pin}] nhưng phòng không tồn tại. Danh sách PIN: [${Object.keys(lobbies).join(', ')}]`);
-                socket.emit('error', `Phòng [${pin}] không tồn tại hoặc đã kết thúc! Vui lòng kiểm tra lại mã PIN với Giáo viên.`);
+                socket.emit('error', 'Phòng không tồn tại hoặc đã kết thúc.');
                 return;
             }
 
@@ -388,7 +388,7 @@ io.on('connection', (socket) => {
                     console.log(`   🔍 Ứng viên kiểm tra: ${JSON.stringify(candidateNames)} => Kết quả: ${isAllowed ? '✅ ĐƯỢC PHÉP VÀO PHÒNG' : '⛔ BỊ CHẶN (Không thuộc lớp)'}`);
 
                     if (!isAllowed) {
-                        const blockMsg = `Tài khoản "${data.playerName}" không thuộc lớp "${classDoc.className}". Chỉ học sinh và giáo viên của lớp mới được tham gia!`;
+                        const blockMsg = 'Bạn không có quyền tham gia phòng lớp học này.';
                         console.log(`⛔ ${blockMsg}`);
                         console.log('============================================================\n');
                         logSocket(`⛔ Chặn [${data.playerName}] tham gia phòng lớp [${classDoc.className}]: Không thuộc danh sách học sinh.`);
