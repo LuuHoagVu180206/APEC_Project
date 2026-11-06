@@ -612,6 +612,7 @@ body {
 }
 
 /* Nút Dành Cho Giáo Viên (Hiệu ứng 3D Tactile nguyên bản) */
+/* Nút Dành Cho Giáo Viên (Viền trắng hoàn toàn, giữ hiệu ứng 3D Tactile Animation) */
 .btn-codedex-secondary {
     display: inline-flex !important;
     align-items: center !important;
@@ -619,44 +620,57 @@ body {
     gap: 10px !important;
     padding: 15px 30px !important;
     border-radius: 14px !important;
-    background-color: #ffffff !important;
-    border: 2px solid #cbd5e1 !important;
-    color: #0f172a !important;
+    background-color: rgba(255, 255, 255, 0.18) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 2px solid #ffffff !important;
+    color: #ffffff !important;
     font-size: 16px !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     cursor: pointer !important;
-    box-shadow: 0 4px 0 #cbd5e1, 0 8px 16px rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 4px 0 #ffffff !important;
     transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
     user-select: none !important;
     text-decoration: none !important;
     outline: none !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+.btn-codedex-secondary svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
 }
 
 .btn-codedex-secondary:hover {
-    background-color: #f1f5f9 !important;
-    border-color: #3b82f6 !important;
-    color: #3b82f6 !important;
-    transform: translateY(-3px) !important;
-    box-shadow: 0 7px 0 #3b82f6, 0 14px 24px rgba(59, 130, 246, 0.2) !important;
+    background-color: rgba(255, 255, 255, 0.28) !important;
+    border: 2px solid #ffffff !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 0 #ffffff !important;
 }
 
 .btn-codedex-secondary:active {
-    transform: translateY(3px) !important;
-    box-shadow: 0 1px 0 #3b82f6, 0 2px 4px rgba(59, 130, 246, 0.1) !important;
+    transform: translateY(2px) !important;
+    border: 2px solid #ffffff !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 1px 0 #ffffff !important;
 }
 
 [data-theme='dark'] .btn-codedex-secondary {
-    background-color: var(--bg-surface, #0e1424);
-    border-color: var(--border-strong, #334155);
-    color: var(--text-primary, #f8fafc);
-    box-shadow: var(--shadow-sm);
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border: 2px solid #ffffff !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 0 #ffffff !important;
 }
 
 [data-theme='dark'] .btn-codedex-secondary:hover {
-    background-color: var(--bg-surface-elevated, #161f36);
-    border-color: var(--accent-blue, #60a5fa);
-    color: var(--accent-blue, #60a5fa);
-    box-shadow: var(--shadow-md);
+    background-color: rgba(255, 255, 255, 0.24) !important;
+    border: 2px solid #ffffff !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 0 #ffffff !important;
 }
 
 .quest-title {
@@ -2349,48 +2363,93 @@ body {
    POSITIVUS TEMPLATE SPECIFIC STYLES (CYAN ACCENT)
    ========================================================================== */
 
-/* POSITIVUS HERO SECTION (2 COLUMNS) */
+/* ==========================================================================
+   POSITIVUS HERO SECTION - FULL-WIDTH LANDSCAPE BACKGROUND
+   ========================================================================== */
 .hero-section {
     position: relative;
-    padding: 20px 0 30px 0;
     width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
     background-color: var(--bg-page);
-    box-sizing: border-box;
-}
-
-.hero-grid-two-col {
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
+    background-image: url('../assets/landscape_color_preserved.svg');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+    aspect-ratio: 16 / 9;
+    min-height: 520px;
+    max-height: 820px;
+    display: flex;
     align-items: center;
-    gap: 48px;
-    padding: 30px 0 20px 0;
-    box-sizing: border-box;
+    justify-content: center;
+    padding: 30px 0;
 }
 
-.hero-left-col {
+[data-theme='dark'] .hero-section {
+    background-image: url('../assets/landscape_color_preserved.svg');
+}
+
+.hero-content-block {
+    max-width: 580px;
+    padding: 24px 28px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-content-block::before {
+    content: '';
+    position: absolute;
+    top: -24px;
+    left: -28px;
+    right: -28px;
+    bottom: -24px;
+    background: radial-gradient(ellipse 75% 70% at 35% 45%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.55) 50%, transparent 80%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    -webkit-mask-image: radial-gradient(ellipse 75% 70% at 35% 45%, black 30%, transparent 80%);
+    mask-image: radial-gradient(ellipse 75% 70% at 35% 45%, black 30%, transparent 80%);
+    pointer-events: none;
+    z-index: -1;
+    border: none !important;
+}
+
+[data-theme='dark'] .hero-content-block::before {
+    background: radial-gradient(ellipse 75% 70% at 35% 45%, rgba(10, 15, 25, 0.94) 0%, rgba(10, 15, 25, 0.6) 50%, transparent 80%);
 }
 
 .hero-title {
-    font-size: clamp(34px, 4.2vw, 54px);
+    font-size: clamp(32px, 3.8vw, 50px);
     font-weight: 900;
-    line-height: 1.16;
+    line-height: 1.18;
     letter-spacing: -1.2px;
-    color: var(--text-primary);
-    margin: 0 0 20px 0;
+    color: #191a23;
+    margin: 0 0 18px 0;
     text-transform: none;
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.7);
+}
+
+[data-theme='dark'] .hero-title {
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
 }
 
 .hero-subtitle {
-    font-size: 17px;
+    font-size: 16.5px;
     line-height: 1.6;
-    color: var(--text-secondary);
-    margin: 0 0 32px 0;
+    color: #191a23;
+    margin: 0 0 28px 0;
     max-width: 520px;
-    font-weight: 500;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+[data-theme='dark'] .hero-subtitle {
+    color: #f1f5f9;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
 .hero-actions {
@@ -2400,56 +2459,22 @@ body {
     flex-wrap: wrap;
 }
 
-.hero-right-col {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.hero-banner-artwork-card {
-    width: 100%;
-    max-width: 480px;
-    aspect-ratio: 16 / 11;
-    border-radius: 28px;
-    background-color: var(--positivus-gray);
-    border: 2px solid #191a23;
-    box-shadow: 0 5px 0 #191a23;
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.hero-banner-artwork-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 0 #191a23;
-}
-
-[data-theme='dark'] .hero-banner-artwork-card {
-    border-color: #2d3b55;
-    box-shadow: 0 5px 0 #050811;
-}
-
-.hero-artwork-inner {
-    width: 100%;
-    height: 100%;
-    background-image: url('../assets/landscape_color_preserved.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center center;
-}
-
 @media (max-width: 992px) {
-    .hero-grid-two-col {
-        grid-template-columns: 1fr;
-        gap: 36px;
-        text-align: center;
+    .hero-section {
+        aspect-ratio: auto;
+        min-height: 480px;
+        padding: 40px 0;
+        background-size: cover;
+        background-position: center center;
     }
-    .hero-left-col {
+    .hero-content-block {
+        max-width: 100%;
         align-items: center;
+        text-align: center;
+        padding: 20px 16px;
+    }
+    .hero-title {
+        font-size: 32px !important;
         text-align: center;
     }
     .hero-subtitle {
@@ -2506,6 +2531,7 @@ body {
     color: #000000 !important;
 }
 
+/* Nút Dành Cho Giáo Viên (Viền trắng hoàn toàn, giữ hiệu ứng 3D Tactile Animation) */
 .btn-codedex-secondary {
     display: inline-flex !important;
     align-items: center !important;
@@ -2513,33 +2539,58 @@ body {
     gap: 10px !important;
     padding: 15px 30px !important;
     border-radius: 14px !important;
-    background-color: transparent !important;
-    border: 2px solid #191a23 !important;
-    color: var(--text-primary) !important;
+    background-color: rgba(255, 255, 255, 0.18) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 2px solid #ffffff !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
     font-size: 16px !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     cursor: pointer !important;
-    box-shadow: none !important;
-    transition: all 0.15s ease !important;
+    box-shadow: 0 4px 0 #ffffff !important;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
     user-select: none !important;
+    text-decoration: none !important;
+    outline: none !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+.btn-codedex-secondary svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
 }
 
 .btn-codedex-secondary:hover {
-    background-color: #f3f3f3 !important;
+    background-color: rgba(255, 255, 255, 0.28) !important;
+    border: 2px solid #ffffff !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
     transform: translateY(-2px) !important;
-    box-shadow: 0 4px 0 #191a23 !important;
+    box-shadow: 0 6px 0 #ffffff !important;
+}
+
+.btn-codedex-secondary:active {
+    transform: translateY(2px) !important;
+    border: 2px solid #ffffff !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 1px 0 #ffffff !important;
 }
 
 [data-theme='dark'] .btn-codedex-secondary {
-    border-color: #2d3b55 !important;
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border: 2px solid #ffffff !important;
+    border-color: #ffffff !important;
     color: #ffffff !important;
+    box-shadow: 0 4px 0 #ffffff !important;
 }
 
 [data-theme='dark'] .btn-codedex-secondary:hover {
-    background-color: #151d30 !important;
-    border-color: #38bdf8 !important;
-    color: #38bdf8 !important;
-    box-shadow: 0 4px 0 #050811 !important;
+    background-color: rgba(255, 255, 255, 0.24) !important;
+    border: 2px solid #ffffff !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 0 #ffffff !important;
 }
 
 /* POSITIVUS TICKER BAR */

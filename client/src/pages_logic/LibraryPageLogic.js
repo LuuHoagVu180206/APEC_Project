@@ -53,6 +53,68 @@ export const LibraryPageLogic = () => {
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
     const [authorInputFocus, setAuthorInputFocus] = useState(false);
 
+    // Quản lý modal Báo cáo vi phạm (Report System)
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [reportTarget, setReportTarget] = useState(null);
+    const [reportReason, setReportReason] = useState('Nội dung sai lệch kiến thức / đáp án sai');
+    const [reportDescription, setReportDescription] = useState('');
+    const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+    const [reportFeedback, setReportFeedback] = useState(null);
+
+    const reportReasonsList = [
+        'Nội dung sai lệch kiến thức / đáp án sai',
+        'Ngôn từ thô tục, xúc phạm, đả kích',
+        'Spam, quảng cáo không phù hợp',
+        'Nội dung phản cảm, kích động bạo lực',
+        'Vi phạm bản quyền / lý do khác'
+    ];
+
+    const handleOpenReportModal = (qSet) => {
+        setReportTarget(qSet);
+        setReportReason('Nội dung sai lệch kiến thức / đáp án sai');
+        setReportDescription('');
+        setReportFeedback(null);
+        setIsReportModalOpen(true);
+    };
+
+    const handleCloseReportModal = () => {
+        setIsReportModalOpen(false);
+        setReportTarget(null);
+        setReportDescription('');
+        setReportFeedback(null);
+    };
+
+    const handleSubmitReport = async () => {
+        if (!reportTarget || !reportReason) return;
+        setIsSubmittingReport(true);
+        try {
+            const token = currentUser?.accessToken || localStorage.getItem('token') || '';
+            const config = token ? { headers: { token } } : {};
+            await axios.post('http://localhost:5000/api/reports', {
+                targetType: 'QuestionSet',
+                targetId: reportTarget._id,
+                reason: reportReason,
+                description: reportDescription
+            }, config);
+
+            setReportFeedback({
+                type: 'success',
+                message: 'Báo cáo vi phạm đã được gửi thành công đến Ban Quản Trị!'
+            });
+            setTimeout(() => {
+                handleCloseReportModal();
+            }, 1500);
+        } catch (err) {
+            console.error('Lỗi khi gửi báo cáo:', err);
+            setReportFeedback({
+                type: 'error',
+                message: err.response?.data || 'Không thể gửi báo cáo vi phạm, vui lòng thử lại sau.'
+            });
+        } finally {
+            setIsSubmittingReport(false);
+        }
+    };
+
     const [savedSets, setSavedSets] = useState(currentUser?.savedSets || []);
     const [schoolMemberships, setSchoolMemberships] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -452,6 +514,19 @@ export const LibraryPageLogic = () => {
         handleCopySet,
         handlePlaySet,
         handleExport,
-        handleLogout
+        handleLogout,
+        // Report state & actions
+        isReportModalOpen,
+        reportTarget,
+        reportReason,
+        setReportReason,
+        reportDescription,
+        setReportDescription,
+        isSubmittingReport,
+        reportFeedback,
+        reportReasonsList,
+        handleOpenReportModal,
+        handleCloseReportModal,
+        handleSubmitReport
     };
 };

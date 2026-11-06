@@ -17,7 +17,9 @@ const QuestionSetSchema = new mongoose.Schema({
     weekNumber: { type: Number, default: 0 },             // Tuần số mấy (1, 2, 3...)
     badge: { type: String, default: '' },                 // Huy hiệu hiển thị (VD: "APEC Official", "Tuần 1")
     authorName: { type: String, default: '' },
-    isAnonymous: { type: Boolean, default: false }        // Đăng ẩn danh (chỉ có hiệu lực khi isPublic: true)
+    isAnonymous: { type: Boolean, default: false },       // Đăng ẩn danh (chỉ có hiệu lực khi isPublic: true)
+    reportsCount: { type: Number, default: 0 },           // Số lượt bị báo cáo vi phạm
+    isReported: { type: Boolean, default: false }         // Đánh dấu có báo cáo vi phạm cần duyệt
 }, { timestamps: true });
 
 module.exports = mongoose.model('QuestionSet', QuestionSetSchema);

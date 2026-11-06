@@ -6,7 +6,9 @@ const QuestionSchema = new mongoose.Schema({
     options: [{ type: String, required: true }],  
     correctAnswer: { type: String, required: true },
     difficulty: { type: String, default: 'easy' },
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
-});
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    reportsCount: { type: Number, default: 0 },
+    isReported: { type: Boolean, default: false }
+}, { timestamps: true });
 
 module.exports = mongoose.model('Question', QuestionSchema);

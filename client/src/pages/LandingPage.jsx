@@ -229,33 +229,25 @@ const LandingPage = () => {
             {/* 1. NAVBAR - UNIFIED NAVBAR */}
             <Navbar activePage="home" />
 
-            {/* 2. HERO SECTION - POSITIVUS 2-COLUMN HERO WITH CYAN ACCENT */}
+            {/* 2. HERO SECTION - FULL-WIDTH LANDSCAPE BACKGROUND */}
             <section className="hero-section">
                 <div className="section-container">
-                    <div className="hero-grid-two-col">
-                        <div className="hero-left-col">
-                            <h1 className="hero-title">
-                                Khởi đầu chuyến phiêu lưu chinh phục tri thức
-                            </h1>
-                            <p className="hero-subtitle">
-                                Nền tảng học tập kết hợp trò chơi hóa - Chinh phục tri thức qua từng màn chơi. Vừa chơi game, vừa rèn luyện tư duy, mở khóa huy hiệu và đồng hành cùng bạn bè trong lớp học!
-                            </p>
-                            <div className="hero-actions">
-                                <button className="btn-codedex-primary" onClick={() => navigate(user ? '/game' : '/login?mode=register')}>
-                                    <Gamepad2 size={20} />
-                                    <span>Bắt đầu chơi ngay</span>
-                                </button>
-                                <button className="btn-codedex-secondary" onClick={() => navigate('/register/teacher')}>
-                                    <GraduationCap size={20} />
-                                    <span>Dành cho Giáo viên</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="hero-right-col">
-                            <div className="hero-banner-artwork-card">
-                                <div className="hero-artwork-inner"></div>
-                            </div>
+                    <div className="hero-content-block">
+                        <h1 className="hero-title">
+                            Khởi đầu chuyến phiêu lưu chinh phục tri thức
+                        </h1>
+                        <p className="hero-subtitle">
+                            Nền tảng học tập kết hợp trò chơi hóa - Chinh phục tri thức qua từng màn chơi. Vừa chơi game, vừa rèn luyện tư duy, mở khóa huy hiệu và đồng hành cùng bạn bè trong lớp học!
+                        </p>
+                        <div className="hero-actions">
+                            <button className="btn-codedex-primary" onClick={() => navigate(user ? '/game' : '/login?mode=register')}>
+                                <Gamepad2 size={20} />
+                                <span>Bắt đầu chơi ngay</span>
+                            </button>
+                            <button className="btn-codedex-secondary" onClick={() => navigate('/register/teacher')}>
+                                <GraduationCap size={20} />
+                                <span>Dành cho Giáo viên</span>
+                            </button>
                         </div>
                     </div>
                 </div>

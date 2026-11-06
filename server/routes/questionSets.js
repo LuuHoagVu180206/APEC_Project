@@ -6,7 +6,7 @@ const TeacherClass = require('../models/TeacherClass');
 const SchoolMember = require('../models/SchoolMember');
 const jwt = require('jsonwebtoken');
 const excelJS = require('exceljs');
-const { verifyToken } = require('../verifyToken');
+const { verifyToken, verifyAdmin } = require('../verifyToken');
 
 const canViewClassQuestionSet = async (req, res, questionSetId) => {
     const isUsedInClass = await TeacherClass.exists({ questionSets: questionSetId });
@@ -103,6 +103,19 @@ router.get('/defaults', async (req, res) => {
     }
 });
 
+// LẤY TẤT CẢ BỘ CÂU HỎI TRONG HỆ THỐNG (Dành cho Admin)
+router.get('/admin/all', verifyAdmin, async (req, res) => {
+    try {
+        const allSets = await QuestionSet.find()
+            .populate('owner', 'username fullName displayName avatar role')
+            .sort({ createdAt: -1 });
+        res.status(200).json(allSets);
+    } catch (err) {
+        console.error("Lỗi lấy toàn bộ QuestionSets cho Admin:", err);
+        res.status(500).json(err);
+    }
+});
+
 // 3. LẤY BỘ CÂU HỎI CỦA RIÊNG TÔI (Dùng cho trang Studio)
 router.get('/my-sets', verifyToken, async (req, res) => {
     try {
@@ -126,6 +139,16 @@ router.delete('/:id', verifyToken, async (req, res) => {
 
         if (!isOwner && !isAdmin) {
             return res.status(403).json("Bạn không có quyền xóa bộ câu hỏi này!");
+        }
+
+        if (isAdmin && !isOwner) {
+            const reason = req.body?.reason || "Vi phạm tiêu chuẩn cộng đồng";
+            console.log(`[HỆ THỐNG KIỂM DUYỆT] Admin đã xóa bộ câu hỏi: "${qSet.title}". Lý do: ${reason}`);
+            const Report = require('../models/Report');
+            await Report.updateMany(
+                { targetId: req.params.id, status: 'pending' },
+                { $set: { status: 'resolved', resolvedAction: 'deleted_content', resolvedReason: reason, resolvedBy: req.user.id, resolvedAt: new Date() } }
+            );
         }
 
         await QuestionSet.findByIdAndDelete(req.params.id);

@@ -89,6 +89,11 @@ router.delete('/:id', verifyToken, async (req, res) => {
         if (isAdmin && !isOwner) {
             const reason = req.body.reason || "Vi phạm tiêu chuẩn cộng đồng";
             console.log(`[HỆ THỐNG KIỂM DUYỆT] Admin đã xóa câu hỏi: "${question.questionText}". Lý do: ${reason}`);
+            const Report = require('../models/Report');
+            await Report.updateMany(
+                { targetId: req.params.id, status: 'pending' },
+                { $set: { status: 'resolved', resolvedAction: 'deleted_content', resolvedReason: reason, resolvedBy: req.user.id, resolvedAt: new Date() } }
+            );
         }
 
         await Question.findByIdAndDelete(req.params.id);

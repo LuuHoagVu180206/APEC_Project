@@ -168,7 +168,7 @@ const TeacherDashboardPage = () => {
 
                         {classes.length > 0 && (
                             <div className="teacher-dash-search-box">
-                                <Search size={16} color="var(--td-text-subtle)" />
+                                <Search size={16} color="var(--text-secondary)" />
                                 <input 
                                     type="text" 
                                     placeholder="Tìm kiếm lớp học..." 
@@ -201,16 +201,7 @@ const TeacherDashboardPage = () => {
                             <h3>Chưa có lớp nào được tạo</h3>
                             <p>Hãy khởi tạo lớp học đầu tiên của bạn để chia sẻ mã lớp và quản lý bộ đề câu hỏi cho học sinh.</p>
                             <button 
-                                className="teacher-dash-back-btn" 
-                                style={{
-                                    background: 'var(--td-gold)', 
-                                    color: 'var(--td-gold-text)', 
-                                    borderColor: 'var(--td-gold-shadow)', 
-                                    boxShadow: '0 4px 0 0 var(--td-gold-shadow)',
-                                    padding: '12px 24px',
-                                    fontSize: '14px',
-                                    fontWeight: 800
-                                }}
+                                className="teacher-dash-empty-btn" 
                                 onClick={() => navigate('/teacher/classes/new')}
                             >
                                 <Plus size={18} /> Tạo lớp đầu tiên
@@ -219,7 +210,7 @@ const TeacherDashboardPage = () => {
                     ) : filteredClasses.length === 0 ? (
                         /* EMPTY FILTER STATE */
                         <div className="teacher-dash-empty" style={{ padding: '36px 20px' }}>
-                            <Search size={32} color="var(--td-text-subtle)" />
+                            <Search size={32} color="var(--text-secondary)" />
                             <p>Không tìm thấy lớp học nào khớp với "{searchQuery}"</p>
                         </div>
                     ) : (
@@ -288,7 +279,7 @@ const TeacherDashboardPage = () => {
                                                     )}
                                                 </div>
                                             ) : (
-                                                <span style={{ fontSize: '12px', color: 'var(--td-text-subtle)' }}>
+                                                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                                                     {classItem.questionSets?.length || 0} bộ đề
                                                 </span>
                                             )}

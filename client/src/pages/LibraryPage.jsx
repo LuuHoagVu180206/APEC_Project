@@ -27,6 +27,8 @@ import {
     Check,
     RotateCcw,
     Gamepad2,
+    Flag,
+    AlertTriangle,
     Users
 } from 'lucide-react';
 
@@ -79,7 +81,19 @@ const LibraryPage = () => {
         handleDelete,
         handleCopySet,
         handlePlaySet,
-        handleExport
+        handleExport,
+        isReportModalOpen,
+        reportTarget,
+        reportReason,
+        setReportReason,
+        reportDescription,
+        setReportDescription,
+        isSubmittingReport,
+        reportFeedback,
+        reportReasonsList,
+        handleOpenReportModal,
+        handleCloseReportModal,
+        handleSubmitReport
     } = LibraryPageLogic();
 
     const categories = [
@@ -630,19 +644,32 @@ const LibraryPage = () => {
                                                     )}
                                                 </div>
 
-                                                {canDelete(qSet.owner?._id || qSet.owner) && (
+                                                <div className="card-top-actions">
                                                     <button 
                                                         type="button"
-                                                        className="btn-delete-card"
+                                                        className="btn-card-report"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            handleDelete(qSet._id);
+                                                            handleOpenReportModal(qSet);
                                                         }}
-                                                        title="Xóa bộ câu hỏi khỏi hệ thống"
+                                                        title="Báo cáo bộ câu hỏi vi phạm"
                                                     >
-                                                        <Trash2 size={16} />
+                                                        <Flag size={14} />
                                                     </button>
-                                                )}
+                                                    {canDelete(qSet.owner?._id || qSet.owner) && (
+                                                        <button 
+                                                            type="button"
+                                                            className="btn-delete-card"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDelete(qSet._id);
+                                                            }}
+                                                            title="Xóa bộ câu hỏi khỏi hệ thống"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             {/* Tiêu đề bộ đề (Bấm để xem chi tiết) */}
@@ -748,6 +775,17 @@ const LibraryPage = () => {
                                                     <FileText size={15} />
                                                     <span>Xuất PDF</span>
                                                 </button>
+
+                                                {/* Nút Báo Cáo Vi Phạm */}
+                                                <button 
+                                                    type="button" 
+                                                    className="btn-library-action btn-action-report"
+                                                    onClick={() => handleOpenReportModal(qSet)}
+                                                    title="Báo cáo vi phạm bộ câu hỏi này"
+                                                >
+                                                    <Flag size={14} />
+                                                    <span>Báo cáo</span>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -756,6 +794,112 @@ const LibraryPage = () => {
                         </div>
                     )}
                 </div>
+
+            {/* MODAL BÁO CÁO VI PHẠM (REPORT MODAL) */}
+            {isReportModalOpen && reportTarget && (
+                <div className="report-modal-backdrop" onClick={handleCloseReportModal}>
+                    <div className="report-modal-card" onClick={(e) => e.stopPropagation()}>
+                        <div className="report-modal-header">
+                            <div className="report-modal-title-group">
+                                <div className="report-modal-icon-badge">
+                                    <Flag size={20} />
+                                </div>
+                                <div>
+                                    <h3>Báo Cáo Vi Phạm</h3>
+                                    <p>Gửi khiếu nại hoặc báo cáo nội dung đến Ban Quản Trị</p>
+                                </div>
+                            </div>
+                            <button 
+                                type="button" 
+                                className="btn-close-report-modal"
+                                onClick={handleCloseReportModal}
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="report-modal-body">
+                            {/* THÔNG TIN BỘ ĐỀ ĐƯỢC CHỌN */}
+                            <div className="report-target-preview">
+                                <span className="report-target-meta">Bộ câu hỏi bị báo cáo:</span>
+                                <span className="report-target-title">"{reportTarget.title}"</span>
+                                <span className="report-target-meta">
+                                    Tác giả: <strong>{reportTarget.authorName || reportTarget.owner?.displayName || reportTarget.owner?.username || 'APEC Group'}</strong> • Chủ đề: <strong>{reportTarget.topic || 'Khác'}</strong>
+                                </span>
+                            </div>
+
+                            {/* CHỌN LÝ DO BÁO CÁO */}
+                            <div className="report-form-group">
+                                <label className="report-form-label">
+                                    <AlertTriangle size={15} color="#ef4444" />
+                                    <span>Lý do báo cáo vi phạm</span>
+                                </label>
+                                <div className="report-reasons-grid">
+                                    {reportReasonsList.map((reason) => (
+                                        <button
+                                            key={reason}
+                                            type="button"
+                                            className={`report-reason-pill ${reportReason === reason ? 'active' : ''}`}
+                                            onClick={() => setReportReason(reason)}
+                                        >
+                                            <span>{reason}</span>
+                                            {reportReason === reason && <Check size={14} />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* MÔ TẢ CHI TIẾT */}
+                            <div className="report-form-group">
+                                <label className="report-form-label">
+                                    <span>Mô tả chi tiết / Bằng chứng (Tùy chọn)</span>
+                                </label>
+                                <textarea
+                                    className="report-textarea"
+                                    placeholder="Vui lòng cung cấp thêm thông tin chi tiết (ví dụ: câu hỏi số mấy bị sai đáp án, từ ngữ xúc phạm...)"
+                                    value={reportDescription}
+                                    onChange={(e) => setReportDescription(e.target.value)}
+                                />
+                            </div>
+
+                            {/* THÔNG BÁO PHẢN HỒI NẾU CÓ */}
+                            {reportFeedback && (
+                                <div className={`report-feedback-box ${reportFeedback.type}`}>
+                                    {reportFeedback.type === 'success' ? <Check size={16} /> : <AlertTriangle size={16} />}
+                                    <span>{reportFeedback.message}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="report-modal-footer">
+                            <button 
+                                type="button" 
+                                className="btn-report-cancel"
+                                onClick={handleCloseReportModal}
+                                disabled={isSubmittingReport}
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button 
+                                type="button" 
+                                className="btn-report-submit"
+                                onClick={handleSubmitReport}
+                                disabled={isSubmittingReport}
+                            >
+                                {isSubmittingReport ? (
+                                    <span>Đang gửi...</span>
+                                ) : (
+                                    <>
+                                        <Flag size={15} />
+                                        <span>Gửi báo cáo</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             </main>
         </div>
     );

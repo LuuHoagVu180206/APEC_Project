@@ -40,6 +40,7 @@ const classRoute = require('./routes/classes');
 const schoolRequestRoute = require('./routes/schoolRequests');
 const schoolRoute = require('./routes/schools');
 const adminRoute = require('./routes/admin');
+const reportRoute = require('./routes/reports');
 
 app.use('/api/sets', setRoute);
 app.use('/api/auth', authRoute);
@@ -51,6 +52,7 @@ app.use('/api/classes', classRoute);
 app.use('/api/school-requests', schoolRequestRoute);
 app.use('/api/schools', schoolRoute);
 app.use('/api/admin', adminRoute);
+app.use('/api/reports', reportRoute);
 
 // 4. Kết nối Database MongoDB
 mongoose.connect(process.env.MONGO_URI)
