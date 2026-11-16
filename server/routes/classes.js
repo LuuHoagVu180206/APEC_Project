@@ -431,48 +431,29 @@ router.post('/:id/question-sets', requireClassTeacher, async (req, res) => {
 // API LƯU ĐIỂM LỚP HỌC (Dành cho Học sinh / Phòng lớp học)
 router.post('/:id/scores', async (req, res) => {
     try {
-        const { studentName, score, timePlayed, questionsAnswered, setId, setTitle, roomPin, role } = req.body;
-        const classIdentifier = req.params.id;
+        const { score, timePlayed, questionsAnswered, setId, setTitle, roomPin } = req.body;
+        const { id } = req.params;
+        const classDoc = await TeacherClass.findOne(mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { classCode: id.toLowerCase().trim() });
+        if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
 
-        let query = {};
-        if (mongoose.Types.ObjectId.isValid(classIdentifier)) {
-            query = { _id: classIdentifier };
-        } else {
-            query = { classCode: classIdentifier.toLowerCase().trim() };
+        const isClassTeacher = [classDoc.teacher, ...classDoc.teachers].some(member => String(member) === req.user.id);
+        const isClassStudent = classDoc.students.some(member => String(member) === req.user.id);
+        if (!isClassTeacher && !isClassStudent) return res.status(403).json('Bạn không phải là thành viên của lớp học này!');
+
+        const userDoc = await require('../models/User').findById(req.user.id);
+        if (!userDoc) return res.status(401).json('Phiên đăng nhập không hợp lệ!');
+
+        const cleanName = userDoc.username;
+        const [scoreVal, timeVal, qVal] = [score, timePlayed, questionsAnswered].map(value => Number(value ?? 0));
+        if (![scoreVal, timeVal, qVal].every(value => Number.isFinite(value) && value >= 0)) {
+            return res.status(400).json('Điểm và thống kê phải là các số không âm!');
         }
-
-        const classDoc = await TeacherClass.findOne(query);
-        if (!classDoc) {
-            return res.status(404).json('Không tìm thấy lớp học!');
-        }
-
-        const cleanName = (studentName || 'Người chơi').trim();
-        const scoreVal = Number(score) || 0;
-        const timeVal = Number(timePlayed) || 0;
-        const qVal = Number(questionsAnswered) || 0;
-
-        // Tự động xác thực vai trò (role) chính xác từ dữ liệu User và TeacherClass
-        const User = require('../models/User');
-        let userDoc = null;
-        if (req.user?.id) {
-            userDoc = await User.findById(req.user.id);
-        }
-        if (!userDoc && cleanName) {
-            userDoc = await User.findOne({ username: cleanName });
-        }
-
-        let userRole = role || 'student';
-        const isTeacherOfThisClass = (classDoc.teacher && userDoc && classDoc.teacher.toString() === userDoc._id.toString()) ||
-            (classDoc.teacherName && cleanName.toLowerCase() === classDoc.teacherName.toLowerCase()) ||
-            (userDoc && userDoc.role === 'teacher');
-
-        if (isTeacherOfThisClass) {
-            userRole = 'teacher';
-        }
+        const userRole = isClassTeacher ? 'teacher' : 'student';
 
         // 1. Lưu vào gameScores
         if (!classDoc.gameScores) classDoc.gameScores = [];
         const newScoreRecord = {
+            student: userDoc._id,
             studentName: cleanName,
             score: scoreVal,
             timePlayed: timeVal,
@@ -577,9 +558,14 @@ router.get('/:id/scores', async (req, res) => {
             query = { classCode: classIdentifier.toLowerCase().trim() };
         }
 
-        const classDoc = await TeacherClass.findOne(query).select('className classCode gameScores');
+        const classDoc = await TeacherClass.findOne(query).select('className classCode gameScores teacher teachers');
         if (!classDoc) {
             return res.status(404).json('Không tìm thấy lớp học!');
+        }
+
+        const managesClass = [classDoc.teacher, ...classDoc.teachers].some(member => String(member) === req.user.id);
+        if (!managesClass && req.user.role !== 'admin') {
+            return res.status(403).json('Bạn không có quyền xem điểm của lớp học này!');
         }
 
         const sortedScores = [...(classDoc.gameScores || [])].sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -675,13 +661,7 @@ router.get('/:id/game-sessions', verifyToken, async (req, res) => {
 // API GHI NHẬN PHIÊN CHƠI MỚI CHO LỚP HỌC
 router.post('/:id/game-sessions', async (req, res) => {
     try {
-        const classIdentifier = req.params.id;
-        let query = mongoose.Types.ObjectId.isValid(classIdentifier) 
-            ? { _id: classIdentifier } 
-            : { classCode: classIdentifier.toLowerCase().trim() };
-
-        const classDoc = await TeacherClass.findOne(query);
-        if (!classDoc) return res.status(404).json('Không tìm thấy lớp học!');
+        const { classDoc } = await authorizeClassroom(req.accessToken, req.params.id);
 
         const { roomPin, setTitle, setId, teacherParticipated, players } = req.body;
 
@@ -737,6 +717,7 @@ router.post('/:id/game-sessions', async (req, res) => {
             session: newSession
         });
     } catch (err) {
+        if (err.status) return res.status(err.status).json(err.message);
         console.error('Lỗi tạo phiên chơi lớp học:', err);
         res.status(500).json('Lỗi server khi lưu phiên chơi!');
     }

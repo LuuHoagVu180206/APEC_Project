@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Sun, Moon, LogOut, ShieldCheck, Gamepad2, GraduationCap } from 'lucide-react';
 import { useDarkMode } from '../pages_logic/useDarkMode';
@@ -19,14 +18,7 @@ const Navbar = ({ activePage, children }) => {
         }
     });
 
-    useEffect(() => {
-        if (user && user.username && user.role !== 'guest') {
-            axios.post('http://localhost:5000/api/auth/web-session', { user }).catch(() => {});
-        }
-    }, [user]);
-
     const handleLogout = () => {
-        axios.delete('http://localhost:5000/api/auth/web-session').catch(() => {});
         localStorage.removeItem('user');
         setUser(null);
         navigate('/');

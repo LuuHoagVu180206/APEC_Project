@@ -638,19 +638,22 @@ async function seedDefaultAndWeeklySets() {
         let apecUser = await User.findOne({ username: 'APEC Group' });
         if (!apecUser) {
             const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash('ApecGroup@2026', salt);
+            const hashedPassword = await bcrypt.hash(require('node:crypto').randomBytes(32).toString('hex'), salt);
             apecUser = await User.create({
                 username: 'APEC Group',
                 displayName: 'APEC Group (Ban Tổ Chức)',
                 password: hashedPassword,
-                role: 'admin',
-                highScore: 9999,
-                weeklyScore: 9999,
-                email: 'contact@apecgroup.edu.vn',
-                phone: '19008888',
+                role: 'user',
                 avatar: ''
             });
             console.log('✅ Đã tạo tài khoản chính thức: APEC Group');
+        }
+
+        // The official author is a catalog identity, including in older databases.
+        if (apecUser.role !== 'user' || apecUser.email || apecUser.highScore || apecUser.weeklyScore) {
+            await User.updateOne({ _id: apecUser._id }, {
+                role: 'user', email: '', highScore: 0, weeklyScore: 0
+            });
         }
 
         // 2. Khởi tạo 7 bộ câu hỏi Default
@@ -732,28 +735,6 @@ async function seedDefaultAndWeeklySets() {
             }
         }
 
-        // 4. Khởi tạo một số người chơi mẫu cho Leaderboard thêm sinh động nếu chưa có
-        const sampleCompetitors = [
-            { username: 'DragonMaster', displayName: 'Vũ Long ⚡', weeklyScore: 1950, highScore: 2600, role: 'user' },
-            { username: 'MinhAnh_GenZ', displayName: 'Minh Anh 🌸', weeklyScore: 1820, highScore: 2350, role: 'user' },
-            { username: 'QuizMaster_HUST', displayName: 'Đức Thịnh 🎓', weeklyScore: 1710, highScore: 2180, role: 'user' },
-            { username: 'CyberStar', displayName: 'Hoàng Yến ✨', weeklyScore: 1540, highScore: 1980, role: 'user' },
-            { username: 'HaoNam_K12', displayName: 'Hào Nam 🚀', weeklyScore: 1420, highScore: 1750, role: 'user' }
-        ];
-
-        const salt = await bcrypt.genSalt(10);
-        const defaultPwd = await bcrypt.hash('Player@123', salt);
-        for (const p of sampleCompetitors) {
-            const exists = await User.findOne({ username: p.username });
-            if (!exists) {
-                await User.create({
-                    ...p,
-                    password: defaultPwd,
-                    email: `${p.username.toLowerCase()}@gmail.com`
-                });
-            }
-        }
-
         console.log('🎉 Hoàn tất kiểm tra dữ liệu bộ câu hỏi APEC Group & Weekly!');
 
         // 5. Khởi tạo 5 bộ câu hỏi tiểu học thân thiện nếu chưa có
@@ -799,7 +780,7 @@ async function seedDefaultAndWeeklySets() {
             console.warn('Lưu ý khi nạp bộ đề tiểu học:', kErr.message);
         }
     } catch (err) {
-        console.error('❌ Lỗi khi khởi tạo seedData:', err);
+        throw err;
     }
 }
 

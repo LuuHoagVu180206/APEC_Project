@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const readCurrentUser = () => {
@@ -27,7 +27,7 @@ export const SchoolDashboardLogic = () => {
 
     const requestConfig = { headers: { token: currentUser?.accessToken } };
     const loadDashboard = useCallback(async () => {
-        const response = await axios.get(`http://localhost:5000/api/schools/${schoolId}/dashboard`, {
+        const response = await api.get(`/api/schools/${schoolId}/dashboard`, {
             headers: { token: currentUser.accessToken }
         });
         setDashboard(response.data);
@@ -39,19 +39,19 @@ export const SchoolDashboardLogic = () => {
             return;
         }
         let isActive = true;
-        axios.get(`http://localhost:5000/api/schools/${schoolId}/dashboard`, {
+        api.get(`/api/schools/${schoolId}/dashboard`, {
             headers: { token: currentUser.accessToken }
         }).then(async (dashboardResponse) => {
             if (!isActive) return;
             setDashboard(dashboardResponse.data);
             if (dashboardResponse.data.membership.communityRole === 'community_manager') {
-                const setsResponse = await axios.get('http://localhost:5000/api/sets/my-sets', {
+                const setsResponse = await api.get('/api/sets/my-sets', {
                     headers: { token: currentUser.accessToken }
                 });
                 if (isActive) setMySets(setsResponse.data);
             }
             if (currentUser.role === 'teacher') {
-                const classesResponse = await axios.get('http://localhost:5000/api/classes/mine', {
+                const classesResponse = await api.get('/api/classes/mine', {
                     headers: { token: currentUser.accessToken }
                 });
                 if (isActive) setMyClasses(classesResponse.data.filter((classItem) => !classItem.school));
@@ -85,19 +85,19 @@ export const SchoolDashboardLogic = () => {
         const content = announcementText.trim();
         if (!content) return;
         await runAction(async () => {
-            await axios.post(`http://localhost:5000/api/schools/${schoolId}/announcements`, { content }, requestConfig);
+            await api.post(`/api/schools/${schoolId}/announcements`, { content }, requestConfig);
             setAnnouncementText('');
         });
     };
 
     const deleteAnnouncement = (postId) => runAction(() =>
-        axios.delete(`http://localhost:5000/api/schools/${schoolId}/announcements/${postId}`, requestConfig)
+        api.delete(`/api/schools/${schoolId}/announcements/${postId}`, requestConfig)
     );
 
     const removeMember = (memberId) => {
         if (window.confirm('Gỡ thành viên này khỏi trường?')) {
-            return runAction(() => axios.delete(
-                `http://localhost:5000/api/schools/${schoolId}/members/${memberId}`,
+            return runAction(() => api.delete(
+                `/api/schools/${schoolId}/members/${memberId}`,
                 requestConfig
             ));
         }
@@ -106,7 +106,7 @@ export const SchoolDashboardLogic = () => {
     const shareQuestionSet = async () => {
         if (!selectedSetId) return;
         await runAction(async () => {
-            await axios.post(`http://localhost:5000/api/schools/${schoolId}/shared-question-sets`, {
+            await api.post(`/api/schools/${schoolId}/shared-question-sets`, {
                 questionSetId: selectedSetId
             }, requestConfig);
             setSelectedSetId('');
@@ -114,13 +114,13 @@ export const SchoolDashboardLogic = () => {
     };
 
     const unshareQuestionSet = (questionSetId) => runAction(() =>
-        axios.delete(`http://localhost:5000/api/schools/${schoolId}/shared-question-sets/${questionSetId}`, requestConfig)
+        api.delete(`/api/schools/${schoolId}/shared-question-sets/${questionSetId}`, requestConfig)
     );
 
     const createClass = async (event) => {
         event.preventDefault();
         await runAction(async () => {
-            await axios.post(`http://localhost:5000/api/schools/${schoolId}/classes`, classForm, requestConfig);
+            await api.post(`/api/schools/${schoolId}/classes`, classForm, requestConfig);
             setClassForm({ className: '', semester: '', description: '' });
         });
     };
@@ -128,8 +128,8 @@ export const SchoolDashboardLogic = () => {
     const addExistingClass = async () => {
         if (!selectedClassId) return;
         await runAction(async () => {
-            await axios.post(
-                `http://localhost:5000/api/schools/${schoolId}/classes/${selectedClassId}/import`,
+            await api.post(
+                `/api/schools/${schoolId}/classes/${selectedClassId}/import`,
                 {},
                 requestConfig
             );
@@ -139,14 +139,14 @@ export const SchoolDashboardLogic = () => {
     };
 
     const deleteClass = (classId) => runAction(() =>
-        axios.delete(`http://localhost:5000/api/schools/${schoolId}/classes/${classId}`, requestConfig)
+        api.delete(`/api/schools/${schoolId}/classes/${classId}`, requestConfig)
     );
 
     const openClass = async (classId) => {
         setError('');
         try {
-            const response = await axios.get(
-                `http://localhost:5000/api/schools/${schoolId}/classes/${classId}`,
+            const response = await api.get(
+                `/api/schools/${schoolId}/classes/${classId}`,
                 requestConfig
             );
             setSelectedClass(response.data);
@@ -160,13 +160,13 @@ export const SchoolDashboardLogic = () => {
     const joinClass = async () => {
         if (!selectedClass) return;
         await runAction(async () => {
-            await axios.post(
-                `http://localhost:5000/api/schools/${schoolId}/classes/${selectedClass._id}/join`,
+            await api.post(
+                `/api/schools/${schoolId}/classes/${selectedClass._id}/join`,
                 {},
                 requestConfig
             );
-            const response = await axios.get(
-                `http://localhost:5000/api/schools/${schoolId}/classes/${selectedClass._id}`,
+            const response = await api.get(
+                `/api/schools/${schoolId}/classes/${selectedClass._id}`,
                 requestConfig
             );
             setSelectedClass(response.data);

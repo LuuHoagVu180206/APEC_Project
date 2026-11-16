@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 export const LeaderboardPageLogic = () => {
@@ -23,7 +23,7 @@ export const LeaderboardPageLogic = () => {
     useEffect(() => {
         if (!user?.accessToken) return;
         let isActive = true;
-        axios.get('http://localhost:5000/api/schools/mine', {
+        api.get('/api/schools/mine', {
             headers: { token: user.accessToken }
         }).then((res) => {
             if (isActive) setSchoolMemberships(res.data);
@@ -37,7 +37,7 @@ export const LeaderboardPageLogic = () => {
         const fetchLeaderboard = async () => {
             setIsLoading(true);
             try {
-                const res = await axios.get(`http://localhost:5000/api/scores/leaderboard?type=${activeTab}`);
+                const res = await api.get(`/api/scores/leaderboard?type=${activeTab}`);
                 if (isActive) {
                     setLeaders(res.data || []);
                 }

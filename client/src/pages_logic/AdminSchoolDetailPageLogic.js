@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const readCurrentUser = () => {
@@ -25,7 +25,7 @@ export const AdminSchoolDetailPageLogic = () => {
         }
 
         const controller = new AbortController();
-        axios.get(`http://localhost:5000/api/admin/schools/${schoolId}`, {
+        api.get(`/api/admin/schools/${schoolId}`, {
             headers: { token: currentUser.accessToken },
             signal: controller.signal
         }).then((response) => {

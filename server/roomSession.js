@@ -7,7 +7,7 @@ const QuestionSet = require('./models/QuestionSet');
 async function roomUser(token) {
     if (!token) return null;
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'mat_khau_bi_mat_cua_server');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (mongoose.Types.ObjectId.isValid(decoded.id)) return await User.findById(decoded.id);
     } catch (_) {}
     throw new Error('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại!');

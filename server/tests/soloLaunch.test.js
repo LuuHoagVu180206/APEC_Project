@@ -5,8 +5,13 @@ const vm = require('node:vm');
 const path = require('node:path');
 
 // Exercise the exact JavaScript run by Godot's JavaScriptBridge.
-const godotRoot = process.env.GODOT_PROJECT_PATH || path.resolve(__dirname, '../../../DEMO_MAZE_FOLDER/DEMOMAZE');
-const source = fs.readFileSync(path.join(godotRoot, 'LobbyScene/lobby_control.gd'), 'utf8');
+const godotRoot = process.env.GODOT_PROJECT_PATH || path.resolve(__dirname, '../../../demo_maze');
+const scriptPath = path.join(godotRoot, 'LobbyScene/lobby_control.gd');
+if (!process.env.GODOT_PROJECT_PATH && !fs.existsSync(scriptPath)) {
+    test('Godot bridge launch', { skip: 'Set GODOT_PROJECT_PATH to run the Godot source tests.' }, () => {});
+    return;
+}
+const source = fs.readFileSync(scriptPath, 'utf8');
 const script = source.match(/var js_check = """([\s\S]*?)"""/)[1];
 function context(url) {
     const target = { location: { href: url, get search() { return new URL(this.href).search; } } };

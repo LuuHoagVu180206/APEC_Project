@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '../utils/toast';
 
@@ -78,7 +78,7 @@ export const StudioPageLogic = () => {
     useEffect(() => {
         if (!currentUser?.accessToken) return;
         let isActive = true;
-        axios.get('http://localhost:5000/api/schools/mine', {
+        api.get('/api/schools/mine', {
             headers: { token: currentUser.accessToken }
         }).then((res) => {
             if (isActive) setSchoolMemberships(res.data);
@@ -88,7 +88,7 @@ export const StudioPageLogic = () => {
 
     const fetchQuestions = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/questions/mine', {
+            const res = await api.get('/api/questions/mine', {
                 headers: { token: currentUser.accessToken }
             });
             setQuestions(res.data || []);
@@ -96,7 +96,7 @@ export const StudioPageLogic = () => {
             console.error("Lỗi lấy danh sách câu hỏi:", err);
             // Fallback lấy toàn bộ nếu /mine có trục trặc
             try {
-                const fallbackRes = await axios.get('http://localhost:5000/api/questions');
+                const fallbackRes = await api.get('/api/questions');
                 const myQs = (fallbackRes.data || []).filter(q => {
                     const qOwner = q.owner?._id || q.owner?.id || (typeof q.owner === 'string' ? q.owner : null);
                     return qOwner && (qOwner === currentUser._id || qOwner === currentUser.id);
@@ -110,7 +110,7 @@ export const StudioPageLogic = () => {
 
     const fetchMySets = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/sets/my-sets', {
+            const res = await api.get('/api/sets/my-sets', {
                 headers: { token: currentUser.accessToken }
             });
             setMySets(res.data || []);
@@ -121,7 +121,7 @@ export const StudioPageLogic = () => {
 
     const fetchTeacherClasses = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/classes/mine', {
+            const res = await api.get('/api/classes/mine', {
                 headers: { token: currentUser.accessToken }
             });
             setTeacherClasses(res.data || []);
@@ -132,7 +132,7 @@ export const StudioPageLogic = () => {
 
     const fetchSavedSets = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/sets/library');
+            const res = await api.get('/api/sets/library');
             const latestUser = JSON.parse(localStorage.getItem('user'));
             const mySaved = res.data.filter(set => latestUser?.savedSets?.includes(set._id));
             setSavedSetsData(mySaved);
@@ -167,13 +167,13 @@ export const StudioPageLogic = () => {
                 ...setData,
                 isAnonymous: setData.isPublic ? Boolean(setData.isAnonymous) : false
             };
-            const res = await axios.post('http://localhost:5000/api/sets', payload, {
+            const res = await api.post('/api/sets', payload, {
                 headers: { token: currentUser.accessToken }
             });
 
             if (currentUser.role === 'teacher' && classId) {
                 try {
-                    await axios.post(`http://localhost:5000/api/classes/${classId}/question-sets`, {
+                    await api.post(`/api/classes/${classId}/question-sets`, {
                         questionSetId: res.data._id
                     }, { headers: { token: currentUser.accessToken } });
                 } catch (linkError) {
@@ -237,12 +237,12 @@ export const StudioPageLogic = () => {
                 owner: currentUser._id
             };
 
-            const res = await axios.post('http://localhost:5000/api/questions', newQuestion, { 
+            const res = await api.post('/api/questions', newQuestion, {
                 headers: { token: currentUser.accessToken }
             });
           
             if (formData.setId && formData.setId !== '') {
-                await axios.put(`http://localhost:5000/api/sets/${formData.setId}/add-question`, { 
+                await api.put(`/api/sets/${formData.setId}/add-question`, {
                     questionId: res.data._id 
                 }, { 
                     headers: { token: currentUser.accessToken }
@@ -316,7 +316,7 @@ export const StudioPageLogic = () => {
                 topic: editingQuestionData.topic || 'Khác'
             };
 
-            const res = await axios.put(`http://localhost:5000/api/questions/${editingQuestionData._id}`, payload, {
+            const res = await api.put(`/api/questions/${editingQuestionData._id}`, payload, {
                 headers: { token: currentUser.accessToken }
             });
 
@@ -345,7 +345,7 @@ export const StudioPageLogic = () => {
     const handleSelectSetForQuestion = async (setId) => {
         if (!targetQuestionForSet || !setId) return;
         try {
-            await axios.put(`http://localhost:5000/api/sets/${setId}/add-question`, { 
+            await api.put(`/api/sets/${setId}/add-question`, {
                 questionId: targetQuestionForSet._id 
             }, { 
                 headers: { token: currentUser.accessToken }
@@ -363,7 +363,7 @@ export const StudioPageLogic = () => {
     const handleToggleAnonymous = async (setId, currentAnonymous) => {
         try {
             const nextAnonymous = !currentAnonymous;
-            await axios.put(`http://localhost:5000/api/sets/${setId}`, {
+            await api.put(`/api/sets/${setId}`, {
                 isAnonymous: nextAnonymous
             }, {
                 headers: { token: currentUser.accessToken }
@@ -379,7 +379,7 @@ export const StudioPageLogic = () => {
     const handleTogglePrivacy = async (setId, currentPublic) => {
         try {
             const nextPublic = !currentPublic;
-            await axios.put(`http://localhost:5000/api/sets/${setId}`, {
+            await api.put(`/api/sets/${setId}`, {
                 isPublic: nextPublic,
                 isAnonymous: nextPublic ? undefined : false
             }, {
@@ -396,7 +396,7 @@ export const StudioPageLogic = () => {
     const handleDeleteSet = async (id) => {
         if (window.confirm("Bạn chắc chắn muốn xóa BỘ câu hỏi này?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/sets/${id}`, { 
+                await api.delete(`/api/sets/${id}`, {
                     headers: { token: currentUser.accessToken } 
                 });
                 fetchMySets();
@@ -410,7 +410,7 @@ export const StudioPageLogic = () => {
     const handleDeleteQuestion = async (id) => {
         if (window.confirm("Bạn chắc chắn muốn xóa CÂU HỎI này khỏi ngân hàng?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/questions/${id}`, { 
+                await api.delete(`/api/questions/${id}`, {
                     headers: { token: currentUser.accessToken } 
                 });
                 fetchQuestions();
@@ -423,7 +423,7 @@ export const StudioPageLogic = () => {
 
     const handleRemoveSavedSet = async (setId) => {
         try {
-            await axios.put('http://localhost:5000/api/users/toggle-save-set', { setId }, { 
+            await api.put('/api/users/toggle-save-set', { setId }, {
                 headers: { token: currentUser.accessToken }
             });
             
@@ -440,7 +440,7 @@ export const StudioPageLogic = () => {
 
     const handleExport = async (setId, type) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/sets/${setId}/export?type=${type}`, {
+            const res = await api.get(`/api/sets/${setId}/export?type=${type}`, {
                 responseType: 'blob',
                 headers: { token: currentUser.accessToken }
             });

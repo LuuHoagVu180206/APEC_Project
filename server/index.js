@@ -11,12 +11,30 @@ const { roomUser, roomQuestionSet, newResumeToken, matchesResumeToken, roomSnaps
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 require('dotenv').config();
 
+const production = process.env.NODE_ENV === 'production';
+const frontendOrigins = (process.env.FRONTEND_ORIGINS || (production ? '' : 'http://localhost:3000,http://127.0.0.1:3000'))
+    .split(',').map(origin => origin.trim()).filter(Boolean);
+
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret?.trim() || !process.env.MONGO_URI) {
+    throw new Error('Set JWT_SECRET and MONGO_URI before starting the server.');
+}
+if (production && (jwtSecret.length < 32 || jwtSecret === 'replace_with_a_long_random_secret' || frontendOrigins.length === 0)) {
+    throw new Error('Production requires FRONTEND_ORIGINS and a distinct random JWT_SECRET of at least 32 characters.');
+}
+
+const isAllowedOrigin = origin => !origin || frontendOrigins.includes(origin);
+const corsOptions = {
+    origin: (origin, callback) => callback(null, isAllowedOrigin(origin))
+};
+
 // Lưu file debug log vào thư mục tạm hệ điều hành để tránh nodemon tự động restart
 const debugLogPath = path.join(os.tmpdir(), 'apec_socket_debug.log');
 function logSocket(...args) {
     const time = new Date().toISOString().replace('T', ' ').substring(0, 19);
     const line = `[${time}] ${args.map(a => (typeof a === 'object' ? JSON.stringify(a) : a)).join(' ')}\n`;
     console.log(...args);
+    if (production) return;
     try {
         fs.appendFileSync(debugLogPath, line);
     } catch (_) {}
@@ -25,7 +43,7 @@ function logSocket(...args) {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
@@ -54,6 +72,8 @@ app.use('/api/schools', schoolRoute);
 app.use('/api/admin', adminRoute);
 app.use('/api/reports', reportRoute);
 
+let initialized = false;
+
 // 4. Kết nối Database MongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(async () => {
@@ -63,11 +83,21 @@ mongoose.connect(process.env.MONGO_URI)
         try {
             const { seedDefaultAndWeeklySets } = require('./seedData');
             await seedDefaultAndWeeklySets();
+            initialized = true;
         } catch (seedErr) {
-            console.error('Lỗi khởi tạo seedData:', seedErr);
+            console.error('Lỗi khởi tạo seedData:', seedErr.message);
+            process.exit(1);
         }
     })
-    .catch((err) => console.error('❌ Lỗi kết nối MongoDB:', err));
+    .catch(err => {
+        console.error('Lỗi kết nối MongoDB:', err.message);
+        process.exit(1);
+    });
+
+app.get('/healthz', (_req, res) => {
+    const ready = initialized && mongoose.connection.readyState === 1;
+    res.status(ready ? 200 : 503).json({ status: ready ? 'ok' : 'unavailable' });
+});
 
 app.get('/', (req, res) => {
     res.send('Server EduGame đang chạy ngon lành!');
@@ -77,14 +107,12 @@ const server = http.createServer(app);
 
 // 3. KHỞI TẠO SOCKET.IO GẮN VÀO SERVER HTTP
 const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
+    cors: corsOptions,
+    allowRequest: (req, callback) => callback(null, isAllowedOrigin(req.headers.origin))
 });
 
 
-const lobbies = {};
+const lobbies = Object.create(null);
 
 // Room members can load the selected questions, including a private classroom set.
 // The reconnect key proves membership without exposing another teacher's set.
@@ -109,6 +137,7 @@ app.get('/api/rooms/:pin/questions', async (req, res) => {
 const lobbiesPersistPath = path.join(os.tmpdir(), 'apec_edugame_lobbies.json');
 
 function saveLobbiesToDisk() {
+    if (production) return;
     try {
         const dataToSave = {};
         for (const [pin, lobby] of Object.entries(lobbies)) {
@@ -126,6 +155,7 @@ function saveLobbiesToDisk() {
 }
 
 function loadLobbiesFromDisk() {
+    if (production) return;
     try {
         if (fs.existsSync(lobbiesPersistPath)) {
             const raw = fs.readFileSync(lobbiesPersistPath, 'utf8');
@@ -341,68 +371,21 @@ io.on('connection', (socket) => {
             }
             console.log(`✅ Tìm thấy phòng [${pin}]. Loại: ${lobby.roomType} | Tên: "${lobby.roomName}" | Host: "${lobby.hostName}"`);
 
-            // NẾU LÀ PHÒNG LỚP HỌC (CLASSROOM): RESTRICTION CHẶN ACCOUNT NGOÀI LỚP
-            if (lobby.roomType === 'classroom' && lobby.classId) {
+            let authenticatedPlayer;
+            if (lobby.roomType === 'classroom') {
                 try {
-                    console.log(`🏫 Đang xác minh quyền vào phòng lớp học [Class ID: ${lobby.classId}]...`);
-                    const TeacherClass = require('./models/TeacherClass');
-                    const classDoc = await TeacherClass.findById(lobby.classId)
-                        .populate('teacher', 'username displayName email')
-                        .populate('teachers', 'username displayName email')
-                        .populate('students', 'username displayName email');
-
-                    if (!classDoc) {
-                        console.log(`❌ Không tìm thấy dữ liệu lớp học trong Database tương ứng với classId: ${lobby.classId}`);
-                        console.log('============================================================\n');
-                        logSocket(`❌ [join_lobby] Không tìm thấy lớp học [${lobby.classId}]`);
-                        socket.emit('error', "Không tìm thấy dữ liệu lớp học tương ứng với phòng này!");
-                        return;
-                    }
-
-                    // Tập hợp các username / displayName / email được phép tham gia (viết thường)
-                    const allowedIdentifiers = new Set();
-                    const addMember = (m) => {
-                        if (!m) return;
-                        if (m.username) allowedIdentifiers.add(String(m.username).trim().toLowerCase());
-                        if (m.displayName) allowedIdentifiers.add(String(m.displayName).trim().toLowerCase());
-                        if (m.email) allowedIdentifiers.add(String(m.email).trim().toLowerCase());
-                    };
-
-                    addMember(classDoc.teacher);
-                    (classDoc.teachers || []).forEach(addMember);
-                    (classDoc.students || []).forEach(addMember);
-
-                    // Thu thập các candidate gửi lên từ client (bỏ qua 'khách', 'guest', 'player')
-                    const candidateNames = [data.username, data.playerName]
-                        .filter(u => u && typeof u === 'string')
-                        .map(u => u.trim().toLowerCase())
-                        .filter(u => u !== '' && u !== 'khách' && u !== 'guest' && u !== 'player');
-
-                    let isAllowed = false;
-                    if (candidateNames.length > 0) {
-                        isAllowed = candidateNames.some(u => allowedIdentifiers.has(u));
-                    } else {
-                        const rawUser = (data.username || data.playerName || '').trim().toLowerCase();
-                        isAllowed = allowedIdentifiers.has(rawUser);
-                    }
-
-                    console.log(`   👥 Thành viên lớp "${classDoc.className}" (${allowedIdentifiers.size} định danh): [${Array.from(allowedIdentifiers).slice(0, 8).join(', ')}...]`);
-                    console.log(`   🔍 Ứng viên kiểm tra: ${JSON.stringify(candidateNames)} => Kết quả: ${isAllowed ? '✅ ĐƯỢC PHÉP VÀO PHÒNG' : '⛔ BỊ CHẶN (Không thuộc lớp)'}`);
-
-                    if (!isAllowed) {
-                        const blockMsg = 'Bạn không có quyền tham gia phòng lớp học này.';
-                        console.log(`⛔ ${blockMsg}`);
-                        console.log('============================================================\n');
-                        logSocket(`⛔ Chặn [${data.playerName}] tham gia phòng lớp [${classDoc.className}]: Không thuộc danh sách học sinh.`);
-                        socket.emit('error', blockMsg);
-                        return;
+                    authenticatedPlayer = await roomUser(data.token);
+                    const classDoc = await require('./models/TeacherClass').findById(lobby.classId);
+                    const classMembers = classDoc
+                        ? [classDoc.teacher, ...classDoc.teachers, ...classDoc.students]
+                        : [];
+                    const belongsToClass = authenticatedPlayer &&
+                        classMembers.some(member => String(member) === String(authenticatedPlayer._id));
+                    if (!belongsToClass) {
+                        return socket.emit('error', 'Bạn không có quyền tham gia phòng lớp học này.');
                     }
                 } catch (err) {
-                    console.log("❌ Lỗi ngoại lệ khi kiểm tra quyền tham gia phòng lớp học:", err);
-                    console.log('============================================================\n');
-                    logSocket("❌ Lỗi kiểm tra quyền tham gia phòng lớp học:", err);
-                    socket.emit('error', "Lỗi hệ thống khi kiểm tra quyền vào lớp!");
-                    return;
+                    return socket.emit('error', 'Không thể xác thực tài khoản để vào phòng lớp học.');
                 }
             }
 
@@ -424,15 +407,16 @@ io.on('connection', (socket) => {
                 }
                 lobby.players[existingIndex].socketId = socket.id;
                 lobby.players[existingIndex].connected = true;
-                lobby.players[existingIndex].name = data.playerName || lobby.players[existingIndex].name;
+                lobby.players[existingIndex].name = authenticatedPlayer?.displayName || authenticatedPlayer?.username || data.playerName || lobby.players[existingIndex].name;
                 console.log(`🔄 Cập nhật socket cho người chơi cũ [${data.playerName}] trong phòng [${pin}] (Socket mới: ${socket.id})`);
                 logSocket(`🔄 Người chơi [${data.playerName}] kết nối lại phòng [${pin}] (socket mới: ${socket.id})`);
             } else {
                 lobby.players.push({
                     socketId: socket.id,
                     playerId: require('crypto').randomUUID(),
-                    name: data.playerName,
-                    username: data.username || data.playerName,
+                    name: authenticatedPlayer?.displayName || authenticatedPlayer?.username || data.playerName,
+                    username: authenticatedPlayer?.username || data.username || data.playerName,
+                    userId: authenticatedPlayer?._id?.toString(),
                     isHost: false,
                     connected: true,
                     role: 'student',
@@ -552,9 +536,6 @@ io.on('connection', (socket) => {
                 setId: lobbies[pin].setId,
                 setTitle: lobbies[pin].setTitle
             });
-        } else {
-            console.log(`🚀 [START_GAME] Bắt đầu trận đấu cho pin: ${pin}`);
-            io.to(pin).emit('game_started', "GO!");
         }
     });
 
@@ -660,7 +641,7 @@ io.on('connection', (socket) => {
         console.log(`\n🛑 ================== [REQUEST_END_GAME] ==================`);
         console.log(`📡 Socket: [${socket.id}] yêu cầu KẾT THÚC TRẬN ĐẤU phòng PIN: "${pin}"`);
 
-        if (lobbies[pin]) {
+        if (lobbies[pin]?.hostId === socket.id) {
             lobbies[pin].gameState = 'FINISHED';
             // Những người chơi chưa hoàn thành (chưa tìm đủ 4 thú) thì điểm là 0
             lobbies[pin].players.forEach(p => {
@@ -739,11 +720,6 @@ io.on('connection', (socket) => {
                     console.error("Lỗi cập nhật phiên chơi khi dừng game:", e);
                 }
             }
-        } else {
-            console.log(`⚠️ Phòng [${pin}] không có trong bộ nhớ, phát broadcast game_ended vào room [${pin}]`);
-            io.to(pin).emit('end_game_requested', "Host đã dừng game!");
-            io.to(pin).emit('game_ended', "Hết giờ!");
-            console.log(`============================================================\n`);
         }
     });
 
@@ -752,7 +728,7 @@ io.on('connection', (socket) => {
         console.log(`\n🛑 ================== [TRIGGER_END_GAME] ==================`);
         console.log(`📡 Socket: [${socket.id}] yêu cầu TRIGGER END GAME phòng PIN: "${pin}"`);
 
-        if (lobbies[pin]) {
+        if (lobbies[pin]?.hostId === socket.id) {
             lobbies[pin].gameState = 'FINISHED';
             lobbies[pin].players.forEach(p => {
                 if (!p.completed) {
@@ -774,8 +750,6 @@ io.on('connection', (socket) => {
             const socketsInRoom = await io.in(pin).allSockets();
             console.log(`📢 Đã phát game_ended tới ${socketsInRoom.size} thiết bị trong phòng [${pin}]:`, Array.from(socketsInRoom));
             console.log(`============================================================\n`);
-        } else {
-            io.to(pin).emit('game_ended', "Hết giờ!");
         }
     });
 
@@ -863,7 +837,7 @@ io.on('connection', (socket) => {
 });
 
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server & Socket.io đang chạy tại http://localhost:${PORT}`);
 });
 

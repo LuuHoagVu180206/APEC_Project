@@ -2,14 +2,13 @@ const jwt = require('jsonwebtoken');
 
 const verifyToken = (req, res, next) => {
     // Lấy vé từ trong header gửi lên
-    const authHeader = req.headers.token || req.headers.authorization || req.headers['x-access-token'] || req.body?.token || req.query?.token;
+    const authHeader = req.headers.authorization || req.headers.token || req.headers['x-access-token'] || req.body?.token || req.query?.token;
     if (authHeader) {
-        const token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
-            ? authHeader.slice(7).trim()
-            : authHeader; 
+        const token = typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : '';
 
-        jwt.verify(token, process.env.JWT_SECRET || "mat_khau_bi_mat_cua_server", (err, user) => {
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
             if (err) return res.status(403).json("Token không hợp lệ!");
+            req.accessToken = token;
             req.user = user; // Gắn thông tin người dùng vào request
             next(); // Cho phép đi tiếp vào trong
         });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { LandingPageLogic } from '../pages_logic/LandingPageLogic';
@@ -104,7 +104,7 @@ const LandingPage = () => {
     };
 
     useEffect(() => {
-        axios.get('http://localhost:5000/api/sets/weekly')
+        api.get('/api/sets/weekly')
             .then(res => setWeeklySets(res.data || []))
             .catch(() => {});
     }, []);
@@ -195,13 +195,13 @@ const LandingPage = () => {
 
     // Lấy bộ đề chuẩn từ Database (defaults hoặc library), loại trừ hoàn toàn các bộ đề weekly
     useEffect(() => {
-        axios.get('http://localhost:5000/api/sets/defaults')
+        api.get('/api/sets/defaults')
             .then(res => {
                 if (res.data && res.data.length > 0) {
                     const cleanSets = res.data.filter(s => !s.isWeekly && !s.title?.toLowerCase().includes('thử thách tuần'));
                     setPublicQuestionSets(cleanSets.length > 0 ? cleanSets : defaultApecQuestionSets);
                 } else {
-                    axios.get('http://localhost:5000/api/sets/library')
+                    api.get('/api/sets/library')
                         .then(resLib => {
                             if (resLib.data && resLib.data.length > 0) {
                                 const cleanLib = resLib.data.filter(s => !s.isWeekly && !s.title?.toLowerCase().includes('thử thách tuần'));
@@ -212,7 +212,7 @@ const LandingPage = () => {
                 }
             })
             .catch(() => {
-                axios.get('http://localhost:5000/api/sets/library')
+                api.get('/api/sets/library')
                     .then(resLib => {
                         if (resLib.data && resLib.data.length > 0) {
                             const cleanLib = resLib.data.filter(s => !s.isWeekly && !s.title?.toLowerCase().includes('thử thách tuần'));

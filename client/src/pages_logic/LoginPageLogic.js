@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '../utils/toast';
 
@@ -11,13 +11,12 @@ export const LoginPageLogic = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', {
+            const res = await api.post('/api/auth/login', {
                 username,
                 password
             });
             toast.success('Đăng nhập thành công! Chào mừng bạn trở lại.');
             localStorage.setItem('user', JSON.stringify(res.data));
-            axios.post('http://localhost:5000/api/auth/web-session', { user: res.data }).catch(() => {});
             setTimeout(() => {
                 navigate('/game');
             }, 400);

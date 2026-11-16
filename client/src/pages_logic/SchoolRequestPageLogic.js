@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const initialForm = {
@@ -38,7 +38,7 @@ export const SchoolRequestPageLogic = () => {
         setError('');
         setIsSubmitting(true);
         try {
-            await axios.post('http://localhost:5000/api/school-requests', formData, {
+            await api.post('/api/school-requests', formData, {
                 headers: { token: currentUser.accessToken }
             });
             alert('Đã gửi yêu cầu tạo School Community để admin xét duyệt.');

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const getErrorMessage = (error, fallback) => {
     const response = error.response?.data;
@@ -25,7 +25,7 @@ export const ForgotPasswordPageLogic = () => {
         setNotice('');
         setIsSubmitting(true);
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+            const response = await api.post('/api/auth/forgot-password', { email });
             setNotice(response.data.message);
             setStep(2);
         } catch (requestError) {
@@ -41,7 +41,7 @@ export const ForgotPasswordPageLogic = () => {
         setNotice('');
         setIsSubmitting(true);
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/verify-reset-otp', { email, otp });
+            const response = await api.post('/api/auth/verify-reset-otp', { email, otp });
             setResetToken(response.data.resetToken);
             setStep(3);
         } catch (requestError) {
@@ -56,7 +56,7 @@ export const ForgotPasswordPageLogic = () => {
         setNotice('');
         setIsSubmitting(true);
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+            const response = await api.post('/api/auth/forgot-password', { email });
             setOtp('');
             setNotice(response.data.message);
         } catch (requestError) {
@@ -80,7 +80,7 @@ export const ForgotPasswordPageLogic = () => {
 
         setIsSubmitting(true);
         try {
-            await axios.post('http://localhost:5000/api/auth/reset-password', {
+            await api.post('/api/auth/reset-password', {
                 email,
                 resetToken,
                 password,

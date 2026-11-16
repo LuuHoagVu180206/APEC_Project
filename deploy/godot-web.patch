@@ -1,0 +1,358 @@
+diff --git a/project.godot b/project.godot
+index 9cec6e9..3f956ac 100644
+--- a/project.godot
++++ b/project.godot
+@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+ 
+ config/name="DEMO_MAZE"
+ run/main_scene="uid://bao6c6wwadg38"
+-config/features=PackedStringArray("4.7", "Forward Plus")
++config/features=PackedStringArray("4.7", "GL Compatibility")
+ config/icon="res://icon.svg"
+ 
+ [audio]
+@@ -31,8 +31,6 @@ SettingsDataContainer="*uid://c015vimkquk2a"
+ SaveManager="*uid://o8f3vm38ufls"
+ GlobalAudio="*uid://w6652ojm0570"
+ Network="*uid://bqxse15ho1oiu"
+-GodotMcpRuntime="*res://addons/godot_mcp/runtime/runtime_agent.gd"
+-_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
+ 
+ [display]
+ 
+@@ -43,7 +41,7 @@ window/layer_1=""
+ 
+ [editor_plugins]
+ 
+-enabled=PackedStringArray("res://addons/godot-socketio/plugin.cfg", "res://addons/godot_ai/plugin.cfg", "res://addons/godot_mcp/plugin.cfg")
++enabled=PackedStringArray("res://addons/godot-socketio/plugin.cfg")
+ 
+ [gui]
+ 
+@@ -53,3 +51,8 @@ theme/custom="res://GeneralArt/Themes/cozy_scrollbars.tres"
+ 
+ 2d_physics/layer_1="BlockTile"
+ 2d_physics/layer_2="Player"
++
++[rendering]
++
++renderer/rendering_method="gl_compatibility"
++renderer/rendering_method.mobile="gl_compatibility"
+diff --git a/export_presets.cfg b/export_presets.cfg
+index 823195c..94c9d36 100644
+--- a/export_presets.cfg
++++ b/export_presets.cfg
+@@ -11,7 +11,7 @@ dedicated_server=false
+ custom_features=""
+ export_filter="all_resources"
+ include_filter=""
+-exclude_filter=""
++exclude_filter="addons/godot_ai/*,addons/godot_mcp/*,example/*,openai_key.txt"
+ export_path="../GodotToHTMLArchive/index.html"
+ patches=PackedStringArray()
+ patch_delta_encoding=false
+diff --git a/network.gd b/network.gd
+index 6e4505a..0b40eea 100644
+--- a/network.gd
++++ b/network.gd
+@@ -9,15 +9,9 @@ var _connect_started_at: int = 0
+ 
+ func _init():
+ 	autoconnect = false
+-	_resolve_base_url()
+ 
+ func _resolve_base_url() -> void:
+-	var host: String = "localhost"
+-	if OS.has_feature("web"):
+-		var js_host = JavaScriptBridge.eval("window.location.hostname")
+-		if js_host and typeof(js_host) == TYPE_STRING and js_host != "":
+-			host = js_host
+-	base_url = "http://" + host + ":5000"
++	base_url = GlobalScript.api_origin()
+ 	socket_path = "/socket.io"
+ 
+ func _ready():
+diff --git a/GameLevel/global_script.gd b/GameLevel/global_script.gd
+index 34098d6..db8c5f7 100644
+--- a/GameLevel/global_script.gd
++++ b/GameLevel/global_script.gd
+@@ -85,9 +85,22 @@ func _ready() -> void:
+ 			net.try_resume_room()
+ 	)
+ 
++func api_origin() -> String:
++	if OS.has_feature("web"):
++		var origin = JavaScriptBridge.eval("""
++			(function () {
++				try { return window.parent.apecGameApiOrigin || ''; }
++				catch (_) { return ''; }
++			})()
++		""")
++		if origin is String and not origin.is_empty():
++			return origin.trim_suffix("/")
++	var configured_origin := OS.get_environment("APEC_API_ORIGIN").strip_edges()
++	return configured_origin.trim_suffix("/") if not configured_origin.is_empty() else "http://localhost:5000"
++
+ ## Gọi API kiểm tra xem hiện tại trên web có đang đăng nhập không
+ func check_web_login_status(on_completed_callback: Callable = Callable()) -> void:
+-	var session_token: String = ""
++	var session_token: String = current_user_token
+ 	# 1. Nếu chạy trên nền Web (HTML5), kiểm tra trực tiếp qua localStorage trình duyệt hoặc window.parent
+ 	if OS.has_feature("web"):
+ 		var js_code = """
+@@ -153,15 +166,10 @@ func check_web_login_status(on_completed_callback: Callable = Callable()) -> voi
+ 		if on_completed_callback.is_valid():
+ 			on_completed_callback.call()
+ 	)
+-	var host = "localhost"
+-	if OS.has_feature("web"):
+-		var js_host = JavaScriptBridge.eval("window.location.hostname")
+-		if js_host and typeof(js_host) == TYPE_STRING and js_host != "":
+-			host = js_host
+ 	var session_headers: PackedStringArray = []
+ 	if not session_token.is_empty():
+ 		session_headers.append("token: " + session_token)
+-	var request_error = http_request.request("http://%s:5000/api/auth/current-session" % host, session_headers)
++	var request_error = http_request.request(api_origin() + "/api/auth/current-session", session_headers)
+ 	if request_error != OK:
+ 		http_request.queue_free()
+ 		clear_user_session()
+diff --git a/GamePlayedStatisticUI/game_play_stats_ui.gd b/GamePlayedStatisticUI/game_play_stats_ui.gd
+index 98742f6..739bd84 100644
+--- a/GamePlayedStatisticUI/game_play_stats_ui.gd
++++ b/GamePlayedStatisticUI/game_play_stats_ui.gd
+@@ -312,11 +312,6 @@ func _on_save_button_pressed() -> void:
+ 		"token: " + token
+ 	]
+ 
+-	var host = "localhost"
+-	if OS.has_feature("web"):
+-		var js_host = JavaScriptBridge.eval("window.location.hostname")
+-		if js_host and typeof(js_host) == TYPE_STRING and js_host != "":
+-			host = js_host
+ 
+ 	# TRƯỜNG HỢP 1: Chơi trong lớp học -> Lưu vào database điểm lớp học
+ 	if r_type == "classroom" and class_id != "":
+@@ -335,7 +330,7 @@ func _on_save_button_pressed() -> void:
+ 			"roomPin": gs.current_room_pin if gs else "",
+ 			"role": player_role
+ 		}
+-		var url = "http://%s:5000/api/classes/%s/scores" % [host, class_id]
++		var url = (GlobalScript.api_origin() + "/api/classes/%s/scores") % class_id
+ 		http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(class_payload))
+ 
+ 	# TRƯỜNG HỢP 2: Chơi 1 mình (Weekly hoặc Bộ đề thường)
+@@ -350,7 +345,7 @@ func _on_save_button_pressed() -> void:
+ 			"setTitle": set_title,
+ 			"isWeekly": is_w
+ 		}
+-		var url = "http://%s:5000/api/scores/score" % host
++		var url = GlobalScript.api_origin() + "/api/scores/score"
+ 		http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(score_payload))
+ 
+ 	# Đồng bộ postMessage tới Web cha nếu chạy qua Iframe
+@@ -363,7 +358,7 @@ func _on_save_button_pressed() -> void:
+ 				isWeekly: %s,
+ 				roomType: '%s',
+ 				classId: '%s'
+-			}, '*');
++			}, window.location.origin);
+ 		""" % [
+ 			score_val,
+ 			time_val,
+diff --git a/CreateRoomScene/LiveResultWatchingScene/live_result_watching_scene.gd b/CreateRoomScene/LiveResultWatchingScene/live_result_watching_scene.gd
+index 2ca9d1b..c3b82b6 100644
+--- a/CreateRoomScene/LiveResultWatchingScene/live_result_watching_scene.gd
++++ b/CreateRoomScene/LiveResultWatchingScene/live_result_watching_scene.gd
+@@ -717,11 +717,6 @@ func _save_classroom_session_api(players_data: Array) -> void:
+ 	if not gs or gs.room_type != "classroom" or gs.class_id == "":
+ 		return
+ 
+-	var host = "localhost"
+-	if OS.has_feature("web"):
+-		var js_host = JavaScriptBridge.eval("window.location.hostname")
+-		if js_host and typeof(js_host) == TYPE_STRING and js_host != "":
+-			host = js_host
+ 
+ 	var ranked_players = []
+ 	for p in players_data:
+@@ -751,7 +746,7 @@ func _save_classroom_session_api(players_data: Array) -> void:
+ 
+ 	var http = HTTPRequest.new()
+ 	add_child(http)
+-	var url = "http://%s:5000/api/classes/%s/game-sessions" % [host, gs.class_id]
++	var url = (GlobalScript.api_origin() + "/api/classes/%s/game-sessions") % gs.class_id
+ 	var headers = ["Content-Type: application/json"]
+ 	if gs.current_user_token != "":
+ 		headers.append("token: " + gs.current_user_token)
+@@ -813,24 +808,24 @@ func _fetch_modal_sets(tab_name: String) -> void:
+ 		modal_loading_label.show()
+ 
+ 	var gs = _get_global_script()
+-	var url = "http://localhost:5000/api/sets/defaults"
++	var url = GlobalScript.api_origin() + "/api/sets/defaults"
+ 	var headers: PackedStringArray = []
+ 
+ 	match tab_name:
+ 		"class":
+ 			var class_target = gs.class_id if (gs and gs.class_id != "") else "urssleif"
+-			url = "http://localhost:5000/api/classes/%s/sets" % class_target
++			url = (GlobalScript.api_origin() + "/api/classes/%s/sets") % class_target
+ 		"studio":
+ 			if not (gs and gs.is_logged_in):
+ 				if modal_loading_label:
+ 					modal_loading_label.text = " Vui lòng đăng nhập trên web để xem Bộ đề cá nhân (Studio)!"
+ 				return
+-			url = "http://localhost:5000/api/sets/my-sets"
++			url = GlobalScript.api_origin() + "/api/sets/my-sets"
+ 			headers.append("token: " + gs.current_user_token)
+ 		"library":
+-			url = "http://localhost:5000/api/sets/library"
++			url = GlobalScript.api_origin() + "/api/sets/library"
+ 		"defaults":
+-			url = "http://localhost:5000/api/sets/defaults"
++			url = GlobalScript.api_origin() + "/api/sets/defaults"
+ 
+ 	var http = HTTPRequest.new()
+ 	add_child(http)
+@@ -970,7 +965,7 @@ func _select_and_apply_set(set_item: Dictionary) -> void:
+ 						gs.loaded_questions = parsed["questions"]
+ 						print("Đã nạp sẵn %d câu hỏi vào GlobalScript!" % gs.loaded_questions.size())
+ 		)
+-		http.request("http://localhost:5000/api/sets/" + set_id)
++		http.request(GlobalScript.api_origin() + "/api/sets/" + set_id)
+ 
+ 	# Đồng bộ cho tất cả học sinh đang có mặt trong phòng qua Socket
+ 	var net = _get_network()
+diff --git a/LobbyScene/lobby_control.gd b/LobbyScene/lobby_control.gd
+index 947605f..b31a166 100644
+--- a/LobbyScene/lobby_control.gd
++++ b/LobbyScene/lobby_control.gd
+@@ -554,11 +554,6 @@ func _execute_auto_solo_launch(auto_data: Dictionary) -> void:
+ 	loading_panel.add_child(vbox)
+ 	add_child(loading_panel)
+ 
+-	var host = "localhost"
+-	if OS.has_feature("web"):
+-		var js_host = JavaScriptBridge.eval("window.location.hostname")
+-		if js_host and typeof(js_host) == TYPE_STRING and js_host != "":
+-			host = js_host
+ 
+ 	# Tải bộ câu hỏi nếu có setId
+ 	if set_id != "" and not set_id.begins_with("w"):
+@@ -581,7 +576,7 @@ func _execute_auto_solo_launch(auto_data: Dictionary) -> void:
+ 								gs.is_weekly = bool(s_info.get("isWeekly"))
+ 			_start_game_now()
+ 		)
+-		http.request("http://%s:5000/api/sets/%s" % [host, set_id])
++		http.request((GlobalScript.api_origin() + "/api/sets/%s") % set_id)
+ 	elif set_id != "" and set_id.begins_with("w"):
+ 		var http = HTTPRequest.new()
+ 		add_child(http)
+@@ -606,7 +601,7 @@ func _execute_auto_solo_launch(auto_data: Dictionary) -> void:
+ 							gs.loaded_questions = found_set["questions"]
+ 			_start_game_now()
+ 		)
+-		http.request("http://%s:5000/api/sets/weekly" % host)
++		http.request(GlobalScript.api_origin() + "/api/sets/weekly")
+ 	else:
+ 		_start_game_now()
+ 
+diff --git a/QuestionSet/question_set.gd b/QuestionSet/question_set.gd
+index 94b7398..fdd2fe7 100644
+--- a/QuestionSet/question_set.gd
++++ b/QuestionSet/question_set.gd
+@@ -39,21 +39,15 @@ func req_question_from_web():
+ 	add_child(http_request)
+ 	http_request.request_completed.connect(_on_http_request_completed)
+ 
+-	var host = "localhost"
+-	if OS.has_feature("web"):
+-		var js_host = JavaScriptBridge.eval("window.location.hostname")
+-		if js_host and typeof(js_host) == TYPE_STRING and js_host != "":
+-			host = js_host
+ 
+-	var url = "http://%s:5000/api/questions" % host
++	var url = GlobalScript.api_origin() + "/api/questions"
+ 	if gs and gs.current_set_id != "":
+-		url = "http://%s:5000/api/sets/%s" % [host, gs.current_set_id]
++		url = (GlobalScript.api_origin() + "/api/sets/%s") % gs.current_set_id
+ 	var headers: PackedStringArray = []
+ 	if gs and not gs.current_user_token.is_empty():
+ 		headers.append("token: " + gs.current_user_token)
+ 	if gs and not gs.current_room_pin.is_empty() and not gs.room_resume_token.is_empty():
+-		var room_host = str(JavaScriptBridge.eval("window.location.hostname")) if OS.has_feature("web") else "localhost"
+-		url = "http://%s:5000/api/rooms/%s/questions" % [room_host, gs.current_room_pin]
++		url = (GlobalScript.api_origin() + "/api/rooms/%s/questions") % gs.current_room_pin
+ 		headers.append("x-room-token: " + gs.room_resume_token)
+ 	http_request.request(url, headers)
+ 
+diff --git a/QuestionSet/QuizQuestion/quiz_question_ux.gd b/QuestionSet/QuizQuestion/quiz_question_ux.gd
+index f4cad9d..baaf918 100644
+--- a/QuestionSet/QuizQuestion/quiz_question_ux.gd
++++ b/QuestionSet/QuizQuestion/quiz_question_ux.gd
+@@ -125,15 +125,14 @@ func req_question_from_web() -> void:
+ 	var http_request = HTTPRequest.new()
+ 	add_child(http_request)
+ 	http_request.request_completed.connect(_on_http_request_completed)
+-	var url = "http://%s:5000/api/questions" % _api_host()
++	var url = GlobalScript.api_origin() + "/api/questions"
+ 	if gs and gs.current_set_id != "":
+-		url = "http://%s:5000/api/sets/%s" % [_api_host(), gs.current_set_id]
++		url = (GlobalScript.api_origin() + "/api/sets/%s") % gs.current_set_id
+ 	var headers: PackedStringArray = []
+ 	if gs and not gs.current_user_token.is_empty():
+ 		headers.append("token: " + gs.current_user_token)
+ 	if gs and not gs.current_room_pin.is_empty() and not gs.room_resume_token.is_empty():
+-		var room_host = str(JavaScriptBridge.eval("window.location.hostname")) if OS.has_feature("web") else "localhost"
+-		url = "http://%s:5000/api/rooms/%s/questions" % [room_host, gs.current_room_pin]
++		url = (GlobalScript.api_origin() + "/api/rooms/%s/questions") % gs.current_room_pin
+ 		headers.append("x-room-token: " + gs.room_resume_token)
+ 	http_request.request(url, headers)
+ 
+@@ -400,5 +399,3 @@ func reset_scene() -> void:
+ 	if return_button:
+ 		return_button.hide()
+ 
+-func _api_host() -> String:
+-	return str(JavaScriptBridge.eval("window.location.hostname")) if OS.has_feature("web") else "localhost"
+diff --git a/QuestionSetPicker/question_set_picker.gd b/QuestionSetPicker/question_set_picker.gd
+index b1c5244..65be024 100644
+--- a/QuestionSetPicker/question_set_picker.gd
++++ b/QuestionSetPicker/question_set_picker.gd
+@@ -414,7 +414,4 @@ func _on_back_pressed() -> void:
+ 	get_tree().change_scene_to_file(lobby_scene)
+ 
+ func _api_base() -> String:
+-	var host = "localhost"
+-	if OS.has_feature("web"):
+-		host = str(JavaScriptBridge.eval("window.location.hostname"))
+-	return "http://%s:5000" % host
++	return GlobalScript.api_origin()
+diff --git a/JoinRoomScene/join_room_scene.gd b/JoinRoomScene/join_room_scene.gd
+index e36f7ed..de5b5b1 100644
+--- a/JoinRoomScene/join_room_scene.gd
++++ b/JoinRoomScene/join_room_scene.gd
+@@ -126,7 +126,8 @@ func _on_join_room_button_pressed() -> void:
+ 		"pin": room_code,
+ 		"playerId": playerId,
+ 		"playerName": player_name,
+-		"username": username
++		"username": username,
++		"token": gs.current_user_token if gs else ""
+ 	}
+ 	
+ 	if gs:
+diff --git a/Sound/save_manager.gd b/Sound/save_manager.gd
+index 8fc20ec..6a42036 100644
+--- a/Sound/save_manager.gd
++++ b/Sound/save_manager.gd
+@@ -2,7 +2,7 @@ extends Node
+ 
+ 
+ func save_settings() -> void:
+-    var data := SettingsDataContainer.create_storage_dictionary()
++    var data: Dictionary = SettingsDataContainer.create_storage_dictionary()
+ 
+     var file := FileAccess.open("user://settings.save", FileAccess.WRITE)
+     if file == null:

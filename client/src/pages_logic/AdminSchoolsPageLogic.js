@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const readCurrentUser = () => {
@@ -31,7 +31,7 @@ export const AdminSchoolsPageLogic = () => {
         setError('');
         const debounceTimer = setTimeout(async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/admin/schools', {
+                const response = await api.get('/api/admin/schools', {
                     params: { search: search.trim(), page, limit: 20 },
                     headers: { token: currentUser.accessToken },
                     signal: controller.signal

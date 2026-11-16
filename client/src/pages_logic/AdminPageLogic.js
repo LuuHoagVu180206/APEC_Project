@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 export const AdminPageLogic = () => {
@@ -65,7 +65,7 @@ export const AdminPageLogic = () => {
     // 1. Tải danh sách nội dung bị báo cáo
     const fetchReportedItems = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/reports/reported-items', getAuthHeader());
+            const res = await api.get('/api/reports/reported-items', getAuthHeader());
             setReportedSets(res.data.reportedSets || []);
             setReportedQuestions(res.data.reportedQuestions || []);
             setPendingReportsCount(res.data.pendingCount || 0);
@@ -77,7 +77,7 @@ export const AdminPageLogic = () => {
     // 2. Tải toàn bộ bộ câu hỏi (cho tab riêng)
     const fetchAllQuestionSets = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/sets/admin/all', getAuthHeader());
+            const res = await api.get('/api/sets/admin/all', getAuthHeader());
             setAllQuestionSets(res.data || []);
         } catch (err) {
             console.error('Lỗi lấy toàn bộ QuestionSets:', err);
@@ -87,7 +87,7 @@ export const AdminPageLogic = () => {
     // 3. Tải toàn bộ câu hỏi (cho tab riêng)
     const fetchAllQuestions = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/questions', getAuthHeader());
+            const res = await api.get('/api/questions', getAuthHeader());
             setAllQuestions(res.data || []);
         } catch (err) {
             console.error('Lỗi lấy toàn bộ Questions:', err);
@@ -97,7 +97,7 @@ export const AdminPageLogic = () => {
     // 4. Tải phiên bản game
     const fetchVersion = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/settings/version');
+            const res = await api.get('/api/settings/version');
             setCurrentVersion(res.data.version || 'v1.0');
         } catch (err) {
             console.error('Lỗi lấy version game:', err);
@@ -111,7 +111,7 @@ export const AdminPageLogic = () => {
             return;
         }
         try {
-            await axios.post('http://localhost:5000/api/settings/version', {
+            await api.post('/api/settings/version', {
                 version: newVersion.trim()
             }, getAuthHeader());
             alert(`Đã cập nhật game sang phiên bản: ${newVersion.trim()}`);
@@ -119,7 +119,7 @@ export const AdminPageLogic = () => {
             setNewVersion('');
         } catch (err) {
             console.error('Lỗi cập nhật version:', err);
-            alert('Lỗi cập nhật version!');
+            alert(err.response?.data?.message || 'Lỗi cập nhật version!');
         }
     };
 
@@ -145,20 +145,20 @@ export const AdminPageLogic = () => {
         try {
             if (deleteTarget.reportId) {
                 // Xử lý thông qua Report API
-                await axios.put(
-                    `http://localhost:5000/api/reports/${deleteTarget.reportId}/resolve`,
+                await api.put(
+                    `/api/reports/${deleteTarget.reportId}/resolve`,
                     { action: 'delete', reason: deleteReason.trim() },
                     getAuthHeader()
                 );
             } else if (deleteTarget.type === 'QuestionSet') {
                 // Xóa QuestionSet trực tiếp
-                await axios.delete(`http://localhost:5000/api/sets/${deleteTarget.item._id}`, {
+                await api.delete(`/api/sets/${deleteTarget.item._id}`, {
                     headers: getAuthHeader().headers,
                     data: { reason: deleteReason.trim() }
                 });
             } else if (deleteTarget.type === 'Question') {
                 // Xóa Question trực tiếp
-                await axios.delete(`http://localhost:5000/api/questions/${deleteTarget.item._id}`, {
+                await api.delete(`/api/questions/${deleteTarget.item._id}`, {
                     headers: getAuthHeader().headers,
                     data: { reason: deleteReason.trim() }
                 });
@@ -195,8 +195,8 @@ export const AdminPageLogic = () => {
 
         setIsDismissing(true);
         try {
-            await axios.put(
-                `http://localhost:5000/api/reports/${dismissTarget._id}/resolve`,
+            await api.put(
+                `/api/reports/${dismissTarget._id}/resolve`,
                 { action: 'dismiss', reason: dismissReason.trim() },
                 getAuthHeader()
             );

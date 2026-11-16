@@ -14,7 +14,7 @@ const getOptionalUser = (req) => {
             ? authHeader.slice(7).trim()
             : authHeader;
         try {
-            return jwt.verify(token, process.env.JWT_SECRET || 'mat_khau_bi_mat_cua_server');
+            return jwt.verify(token, process.env.JWT_SECRET);
         } catch (_) {
             return null;
         }

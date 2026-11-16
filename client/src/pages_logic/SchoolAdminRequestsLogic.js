@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const readCurrentUser = () => {
@@ -17,7 +17,7 @@ export const SchoolAdminRequestsLogic = () => {
     const [error, setError] = useState('');
 
     const loadRequests = useCallback(async () => {
-        const response = await axios.get('http://localhost:5000/api/school-requests/admin/pending', {
+        const response = await api.get('/api/school-requests/admin/pending', {
             headers: { token: currentUser.accessToken }
         });
         setRequests(response.data);
@@ -34,7 +34,7 @@ export const SchoolAdminRequestsLogic = () => {
     const reviewRequest = async (requestId, decision) => {
         setError('');
         try {
-            await axios.patch(`http://localhost:5000/api/school-requests/${requestId}/review`, {
+            await api.patch(`/api/school-requests/${requestId}/review`, {
                 decision
             }, { headers: { token: currentUser.accessToken } });
             await loadRequests();

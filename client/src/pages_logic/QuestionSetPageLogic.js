@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { toast } from '../utils/toast';
 
 export const QuestionSetPageLogic = () => {
@@ -60,7 +60,7 @@ export const QuestionSetPageLogic = () => {
     const fetchSetDetails = async () => {
         setIsLoading(true);
         try {
-            const res = await axios.get(`http://localhost:5000/api/sets/${id}`, {
+            const res = await api.get(`/api/sets/${id}`, {
                 headers: currentUser?.accessToken ? { token: currentUser.accessToken } : {}
             });
             setSetData(res.data.set);
@@ -92,7 +92,7 @@ export const QuestionSetPageLogic = () => {
     useEffect(() => {
         if (!currentUser?.accessToken) return;
         let isActive = true;
-        axios.get('http://localhost:5000/api/schools/mine', {
+        api.get('/api/schools/mine', {
             headers: { token: currentUser.accessToken }
         }).then((res) => {
             if (isActive) setSchoolMemberships(res.data);
@@ -110,7 +110,7 @@ export const QuestionSetPageLogic = () => {
         if (!currentUser?.accessToken) return;
         setIsFetchingExistingQuestions(true);
         try {
-            const res = await axios.get('http://localhost:5000/api/questions/mine', {
+            const res = await api.get('/api/questions/mine', {
                 headers: { token: currentUser.accessToken }
             });
             setMyExistingQuestions(res.data || []);
@@ -118,7 +118,7 @@ export const QuestionSetPageLogic = () => {
             console.error("Lỗi lấy danh sách câu hỏi của tôi:", err);
             // Fallback lấy toàn bộ nếu /mine có trục trặc
             try {
-                const fallbackRes = await axios.get('http://localhost:5000/api/questions');
+                const fallbackRes = await api.get('/api/questions');
                 const myQs = (fallbackRes.data || []).filter(q => {
                     const qOwner = q.owner?._id || q.owner?.id || (typeof q.owner === 'string' ? q.owner : null);
                     return qOwner && String(qOwner) === String(currentUserId);
@@ -164,7 +164,7 @@ export const QuestionSetPageLogic = () => {
                 isAnonymous: editFormData.isPublic ? editFormData.isAnonymous : false
             };
 
-            const res = await axios.put(`http://localhost:5000/api/sets/${id}`, payload, {
+            const res = await api.put(`/api/sets/${id}`, payload, {
                 headers: { token: currentUser.accessToken }
             });
             setSetData(res.data);
@@ -229,7 +229,7 @@ export const QuestionSetPageLogic = () => {
                 topic: newQuestionData.topic || setData.topic || 'Khác'
             };
 
-            const res = await axios.post(`http://localhost:5000/api/sets/${id}/questions`, payload, {
+            const res = await api.post(`/api/sets/${id}/questions`, payload, {
                 headers: { token: currentUser.accessToken }
             });
 
@@ -265,7 +265,7 @@ export const QuestionSetPageLogic = () => {
 
         setIsAddingQuestion(true);
         try {
-            const res = await axios.put(`http://localhost:5000/api/sets/${id}/add-questions`, {
+            const res = await api.put(`/api/sets/${id}/add-questions`, {
                 questionIds: selectedExistingIds
             }, {
                 headers: { token: currentUser.accessToken }
@@ -294,7 +294,7 @@ export const QuestionSetPageLogic = () => {
         if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này khỏi bộ đề?")) return;
 
         try {
-            await axios.put(`http://localhost:5000/api/sets/${id}/remove-question`, {
+            await api.put(`/api/sets/${id}/remove-question`, {
                 questionId
             }, {
                 headers: { token: currentUser.accessToken }
@@ -321,7 +321,7 @@ export const QuestionSetPageLogic = () => {
 
         setIsCopying(true);
         try {
-            const res = await axios.post(`http://localhost:5000/api/sets/${id}/copy`, {}, {
+            const res = await api.post(`/api/sets/${id}/copy`, {}, {
                 headers: { token: currentUser.accessToken }
             });
             toast.success(`Đã sao chép bộ đề thành công! Bộ đề mới đã được lưu vào Studio của bạn với tên: ${res.data.set?.title}`);
@@ -349,7 +349,7 @@ export const QuestionSetPageLogic = () => {
         }
 
         try {
-            const res = await axios.put('http://localhost:5000/api/users/toggle-save-set', {
+            const res = await api.put('/api/users/toggle-save-set', {
                 setId: id
             }, {
                 headers: { token: currentUser.accessToken }
@@ -377,7 +377,7 @@ export const QuestionSetPageLogic = () => {
     const handleExport = async (type) => {
         if (!setData?._id) return;
         try {
-            const res = await axios.get(`http://localhost:5000/api/sets/${setData._id}/export?type=${type}`, {
+            const res = await api.get(`/api/sets/${setData._id}/export?type=${type}`, {
                 responseType: 'blob'
             });
             const url = window.URL.createObjectURL(new Blob([res.data]));

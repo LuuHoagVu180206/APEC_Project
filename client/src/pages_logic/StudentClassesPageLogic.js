@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const readCurrentUser = () => {
@@ -23,7 +23,7 @@ export const StudentClassesPageLogic = () => {
     const [isJoining, setIsJoining] = useState(false);
 
     const loadClasses = useCallback(async () => {
-        const response = await axios.get('http://localhost:5000/api/classes/student/mine', {
+        const response = await api.get('/api/classes/student/mine', {
             headers: { token: currentUser.accessToken }
         });
         setClasses(response.data);
@@ -41,7 +41,7 @@ export const StudentClassesPageLogic = () => {
     const openClass = async (classId) => {
         setError('');
         try {
-            const response = await axios.get(`http://localhost:5000/api/classes/student/${classId}`, {
+            const response = await api.get(`/api/classes/student/${classId}`, {
                 headers: { token: currentUser.accessToken }
             });
             setSelectedClass(response.data);
@@ -60,7 +60,7 @@ export const StudentClassesPageLogic = () => {
         setNotice('');
         setIsJoining(true);
         try {
-            const response = await axios.post('http://localhost:5000/api/classes/join-by-code', {
+            const response = await api.post('/api/classes/join-by-code', {
                 classCode: classCode.trim().toLowerCase(),
                 joinAsTeacher: currentUser.role === 'teacher' && joinAsTeacher
             }, { headers: { token: currentUser.accessToken } });

@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const weeklySetId = '444444444444444444444444';
 
 function fixture() {
     const routes = {};
@@ -13,7 +14,10 @@ function fixture() {
             if (name === 'express') return { Router: () => ({ post: (url, ...handlers) => { routes[url] = handlers.at(-1); }, get() {} }) };
             if (name === 'mongoose') return require('mongoose');
             if (name === '../models/User') return { findById: async id => { savedId = id; return user; }, countDocuments: async () => 0 };
-            if (name === '../models/QuestionSet') return { findByIdAndUpdate: async () => {} };
+            if (name === '../models/QuestionSet') return {
+                exists: async query => query._id === weeklySetId,
+                findByIdAndUpdate: async () => {}
+            };
             if (name === '../verifyToken') return { verifyToken() {} };
             throw Error(name);
         }
@@ -42,11 +46,19 @@ test('casual save records score/history for authenticated account, not host disp
 
 test('solo and weekly scoring still persist; unsupported mode cannot report success', async () => {
     const h = fixture();
-    await h.save({ roomType: 'solo', isWeekly: true });
+    await h.save({ roomType: 'solo', setId: weeklySetId });
     assert.equal(h.user.playHistory.length, 1);
     assert.equal(h.user.weeklyHistory.length, 1);
     assert.equal(h.user.weeklyScore, 1234);
     const result = await h.save({ roomType: 'unknown' });
     assert.equal(result.status, 400);
     assert.equal(h.user.playHistory.length, 1);
+});
+
+test('only a published weekly set contributes to weekly ranking', async () => {
+    const h = fixture();
+    await h.save({ roomType: 'solo', isWeekly: true, setId: '555555555555555555555555' });
+    assert.equal(h.user.playHistory.length, 1);
+    assert.equal(h.user.weeklyHistory.length, 0);
+    assert.equal(h.user.weeklyScore, 0);
 });

@@ -16,7 +16,7 @@ async function authorizeClassroom(token, classIdentifier) {
     }
     let decoded;
     try {
-        decoded = jwt.verify(token.replace(/^Bearer /, '').trim(), process.env.JWT_SECRET || 'mat_khau_bi_mat_cua_server');
+        decoded = jwt.verify(token.replace(/^Bearer /, '').trim(), process.env.JWT_SECRET);
     } catch (_) {
         deny(401, 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại!');
     }

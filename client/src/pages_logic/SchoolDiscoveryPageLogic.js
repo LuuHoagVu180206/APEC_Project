@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const readCurrentUser = () => {
@@ -23,7 +23,7 @@ export const SchoolDiscoveryPageLogic = () => {
     const [isJoining, setIsJoining] = useState(false);
 
     const loadSchools = async (search = searchTerm) => {
-        const response = await axios.get('http://localhost:5000/api/schools/search', {
+        const response = await api.get('/api/schools/search', {
             params: { q: search }
         });
         setSchools(response.data);
@@ -31,7 +31,7 @@ export const SchoolDiscoveryPageLogic = () => {
 
     const loadMemberships = async () => {
         if (!currentUser) return;
-        const response = await axios.get('http://localhost:5000/api/schools/mine', {
+        const response = await api.get('/api/schools/mine', {
             headers: { token: currentUser.accessToken }
         });
         setMemberships(response.data);
@@ -44,8 +44,8 @@ export const SchoolDiscoveryPageLogic = () => {
         }
         let isActive = true;
         Promise.all([
-            axios.get('http://localhost:5000/api/schools/search'),
-            axios.get('http://localhost:5000/api/schools/mine', {
+            api.get('/api/schools/search'),
+            api.get('/api/schools/mine', {
                 headers: { token: currentUser.accessToken }
             })
         ]).then(([schoolResponse, membershipResponse]) => {
@@ -85,8 +85,8 @@ export const SchoolDiscoveryPageLogic = () => {
         setError('');
         setIsJoining(true);
         try {
-            const response = await axios.post(
-                `http://localhost:5000/api/schools/${selectedSchool._id}/join`,
+            const response = await api.post(
+                `/api/schools/${selectedSchool._id}/join`,
                 joinData,
                 { headers: { token: currentUser.accessToken } }
             );

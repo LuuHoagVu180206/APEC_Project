@@ -7,16 +7,19 @@ const { verifyToken } = require('../verifyToken');
 // API LƯU ĐIỂM (Cả chế độ thường & Thử thách tuần)
 router.post('/score', verifyToken, async (req, res) => {
     try {
-        const { score, setId, setTitle, isWeekly, timePlayed, questionsAnswered, roomType } = req.body;
+        const { score, setId, setTitle, timePlayed, questionsAnswered, roomType } = req.body;
         const cleanSetId = (setId && setId !== 'null' && setId !== 'undefined') ? String(setId).trim() : '';
         const user = await User.findById(req.user.id);
         
         if (user) {
-            const numericScore = Number(score) || 0;
-            const numericTime = Number(timePlayed) || 0;
-            const numericQuestions = Number(questionsAnswered) || 0;
+            const [numericScore, numericTime, numericQuestions] = [score, timePlayed, questionsAnswered].map(value => Number(value ?? 0));
+            if (![numericScore, numericTime, numericQuestions].every(value => Number.isFinite(value) && value >= 0)) {
+                return res.status(400).json('Điểm và thống kê phải là các số không âm!');
+            }
             const mode = roomType || 'solo';
             if (!['solo', 'casual', 'classroom'].includes(mode)) return res.status(400).json('Chế độ chơi không hợp lệ!');
+            const isWeekly = mode === 'solo' && mongoose.Types.ObjectId.isValid(cleanSetId) &&
+                Boolean(await QuestionSet.exists({ _id: cleanSetId, isWeekly: true, isPublic: true }));
 
             // 1. MÀN CHƠI SOLO: Lưu vào lịch sử cá nhân và cập nhật kỷ lục cá nhân
             if (mode === 'solo' || mode === 'casual') {

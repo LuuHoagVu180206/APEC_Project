@@ -10,16 +10,16 @@ const teacherId = '111111111111111111111111';
 const otherId = '222222222222222222222222';
 const classId = '333333333333333333333333';
 const setId = '444444444444444444444444';
-const secret = process.env.JWT_SECRET || 'mat_khau_bi_mat_cua_server';
+const secret = process.env.JWT_SECRET ||= 'classroom-test-secret';
 const token = jwt.sign({ id: teacherId, role: 'teacher' }, secret);
 
 function harness({ role = 'teacher', owner = teacherId, assistants = [], exists = true, setExists = true, setPublic = true, emptySet = false, initialLobbies = null } = {}) {
-    const classDoc = { _id: classId, teacher: owner, teachers: assistants, classCode: 'abcdefgh', className: 'Test', questionSets: [setId] };
+    const classDoc = { _id: classId, teacher: owner, teachers: assistants, students: [otherId], classCode: 'abcdefgh', className: 'Test', questionSets: [setId] };
     const user = { _id: teacherId, role };
     const module = { exports: {} };
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classroomAccess.js'), 'utf8'), {
         module, process, require(name) {
-            if (name === './models/User') return { findById: async id => ({ ...user, _id: id }) };
+            if (name === './models/User') return { findById: async id => ({ ...user, _id: id, username: 'account-' + id }) };
             if (name === './models/TeacherClass') return { findOne: async query => exists && (query._id === classId || query.classCode === 'abcdefgh') ? classDoc : null };
             return require(name);
         }
@@ -28,7 +28,7 @@ function harness({ role = 'teacher', owner = teacherId, assistants = [], exists 
     const roomModule = { exports: {} };
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../roomSession.js'), 'utf8'), {
         module: roomModule, process, Buffer, require(name) {
-            if (name === './models/User') return { findById: async id => ({ ...user, _id: id }) };
+            if (name === './models/User') return { findById: async id => ({ ...user, _id: id, username: 'account-' + id }) };
             if (name === './models/QuestionSet') return { findById: async id => id === setId && setExists ? { _id: setId, owner: otherId, title: 'Cozy quiz', isPublic: setPublic, questions: emptySet ? [] : ['question'] } : null };
             return require(name);
         }
@@ -45,10 +45,11 @@ function harness({ role = 'teacher', owner = teacherId, assistants = [], exists 
     express.json = express.urlencoded = () => () => {};
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../index.js'), 'utf8'), {
         __dirname: path.join(__dirname, '..'), console: { log() {}, error() {} },
-        process: { env: {}, on() {} }, setTimeout: fakeTimeout, clearTimeout: fakeClear,
+        process: { env: { JWT_SECRET: secret, MONGO_URI: 'mongodb://test' }, on() {} }, setTimeout: fakeTimeout, clearTimeout: fakeClear,
         require(name) {
             if (name === './classroomAccess') return access;
             if (name === './roomSession') return roomModule.exports;
+            if (name === './models/TeacherClass') return { findById: async id => id === classId ? classDoc : null };
             if (name === './models/QuestionSet') return { findById: async () => ({ _id: setId, questions: ['q1'] }) };
             if (name === './models/Question') return { find: async () => [{ _id: 'q1', questionText: 'Room question' }] };
             if (name === 'express') return express;
@@ -83,6 +84,23 @@ function harness({ role = 'teacher', owner = teacherId, assistants = [], exists 
     });
     return { ...access, handlers, events, routes, apiRoutes, timers, broadcasts, connect, saved: () => saved };
 }
+
+test('a classroom player must authenticate as a member and uses the account identity', async () => {
+    const h = harness();
+    await h.handlers.create_lobby({ roomType: 'classroom', classId, token });
+    const { pin } = h.events.find(event => event.event === 'lobby_created').data;
+    const guest = h.connect('guest-socket');
+    await guest.handlers.join_lobby({ pin, playerName: 'Member display name' });
+    assert.equal(guest.events.at(-1).event, 'error');
+
+    const student = h.connect('student-socket');
+    const studentToken = jwt.sign({ id: otherId }, secret);
+    await student.handlers.join_lobby({ pin, playerName: 'Someone else', token: studentToken });
+    const joined = student.events.find(event => event.event === 'join_success').data;
+    const player = joined.players.find(item => item.playerId === joined.playerId);
+    assert.equal(player.username, 'account-' + otherId);
+    assert.equal(player.userId, otherId);
+});
 
 for (const role of ['user', 'guest', 'admin']) {
     test(`reject ${role}, even with a teacher role in JWT/payload`, async () => {
@@ -332,6 +350,8 @@ for (const event of ['request_end_game', 'trigger_end_game']) {
   await member.handlers.join_lobby({pin,playerName:'Member'});
   const joined = member.events[0].data;
   h.handlers.start_game(pin);
+  await member.handlers[event](pin);
+  assert.equal(h.saved()[pin].gameState, 'PLAYING');
   member.handlers.disconnect('refresh');
   await h.handlers[event](pin);
   assert.equal(h.saved()[pin].gameState, 'FINISHED');

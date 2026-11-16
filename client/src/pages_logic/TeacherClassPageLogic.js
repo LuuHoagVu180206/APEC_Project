@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const readCurrentUser = () => {
@@ -33,7 +33,7 @@ export const TeacherClassPageLogic = () => {
         if (!currentUser?.accessToken) return;
         setIsLoadingSessions(true);
         try {
-            const res = await axios.get(`http://localhost:5000/api/classes/${id}/game-sessions`, {
+            const res = await api.get(`/api/classes/${id}/game-sessions`, {
                 headers: { token: currentUser.accessToken }
             });
             setGameSessions(res.data.sessions || []);
@@ -46,14 +46,14 @@ export const TeacherClassPageLogic = () => {
     }, [currentUser, id]);
 
     const loadClass = useCallback(async () => {
-        const response = await axios.get(`http://localhost:5000/api/classes/${id}`, {
+        const response = await api.get(`/api/classes/${id}`, {
             headers: { token: currentUser.accessToken }
         });
         setClassInfo(response.data);
     }, [currentUser, id]);
 
     const loadMembers = useCallback(async (role, page = 1, search = '') => {
-        const response = await axios.get(`http://localhost:5000/api/classes/${id}/members`, {
+        const response = await api.get(`/api/classes/${id}/members`, {
             headers: { token: currentUser.accessToken },
             params: { role, page, limit: 20, search }
         });
@@ -69,10 +69,10 @@ export const TeacherClassPageLogic = () => {
 
         let isActive = true;
         const loadPage = async () => {
-            const classResponse = await axios.get(`http://localhost:5000/api/classes/${id}`, {
+            const classResponse = await api.get(`/api/classes/${id}`, {
                 headers: { token: currentUser.accessToken }
             });
-            const setsResponse = await axios.get('http://localhost:5000/api/sets/my-sets', {
+            const setsResponse = await api.get('/api/sets/my-sets', {
                 headers: { token: currentUser.accessToken }
             });
             if (!isActive) return;
@@ -107,7 +107,7 @@ export const TeacherClassPageLogic = () => {
         if (!selectedSetId) return;
         setError('');
         try {
-            await axios.post(`http://localhost:5000/api/classes/${id}/question-sets`, {
+            await api.post(`/api/classes/${id}/question-sets`, {
                 questionSetId: selectedSetId
             }, { headers: { token: currentUser.accessToken } });
             await loadClass();
@@ -122,7 +122,7 @@ export const TeacherClassPageLogic = () => {
     const handlePromoteAssistant = async (userId) => {
         setError('');
         try {
-            await axios.post(`http://localhost:5000/api/classes/${id}/assistants/${userId}`, {}, {
+            await api.post(`/api/classes/${id}/assistants/${userId}`, {}, {
                 headers: { token: currentUser.accessToken }
             });
             await Promise.all([
@@ -140,7 +140,7 @@ export const TeacherClassPageLogic = () => {
     const handleDemoteAssistant = async (userId) => {
         setError('');
         try {
-            await axios.delete(`http://localhost:5000/api/classes/${id}/assistants/${userId}`, {
+            await api.delete(`/api/classes/${id}/assistants/${userId}`, {
                 headers: { token: currentUser.accessToken }
             });
             await Promise.all([

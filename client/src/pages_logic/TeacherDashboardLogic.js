@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const readCurrentUser = () => {
@@ -30,7 +30,7 @@ export const TeacherDashboardLogic = () => {
         }
 
         let isActive = true;
-        axios.get('http://localhost:5000/api/classes/mine', {
+        api.get('/api/classes/mine', {
             headers: { token: currentUser.accessToken }
         }).then((response) => {
             if (isActive) setClasses(response.data);

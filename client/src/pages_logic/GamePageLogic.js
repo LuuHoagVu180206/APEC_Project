@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 
 export const GamePageLogic = () => {
     const navigate = useNavigate();
@@ -58,7 +58,7 @@ export const GamePageLogic = () => {
 
         const fetchGameConfig = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/settings/version');
+                const res = await api.get('/api/settings/version');
                 if (res.data?.version) {
                     setGameVersion(res.data.version);
                 } else {
@@ -80,8 +80,8 @@ export const GamePageLogic = () => {
         const loadOfficialSets = async () => {
             try {
                 const [defaultsRes, weeklyRes] = await Promise.all([
-                    axios.get('http://localhost:5000/api/sets/defaults'),
-                    axios.get('http://localhost:5000/api/sets/weekly')
+                    api.get('/api/sets/defaults'),
+                    api.get('/api/sets/weekly')
                 ]);
                 setDefaultSets(defaultsRes.data || []);
                 setWeeklySets(weeklyRes.data || []);
@@ -100,7 +100,7 @@ export const GamePageLogic = () => {
         const loadQuestionsForGame = async () => {
             if (setId) {
                 try {
-                    const res = await axios.get(`http://localhost:5000/api/sets/${setId}`);
+                    const res = await api.get(`/api/sets/${setId}`);
                     if (res.data?.questions && res.data.questions.length > 0) {
                         setQuestions(res.data.questions);
                         const sData = res.data.set || {};
@@ -117,10 +117,10 @@ export const GamePageLogic = () => {
 
             // Nếu không có setId hoặc tải lỗi, thử lấy bộ mặc định đầu tiên hoặc /api/questions
             try {
-                const defaultsRes = await axios.get('http://localhost:5000/api/sets/defaults');
+                const defaultsRes = await api.get('/api/sets/defaults');
                 if (defaultsRes.data && defaultsRes.data.length > 0) {
                     const firstSet = defaultsRes.data[0];
-                    const setDetailRes = await axios.get(`http://localhost:5000/api/sets/${firstSet._id}`);
+                    const setDetailRes = await api.get(`/api/sets/${firstSet._id}`);
                     if (setDetailRes.data?.questions?.length > 0) {
                         setQuestions(setDetailRes.data.questions);
                         setActiveSet(setDetailRes.data.set);
@@ -129,7 +129,7 @@ export const GamePageLogic = () => {
                 }
 
                 // Fallback nếu không có bộ đề nào
-                const res = await axios.get('http://localhost:5000/api/questions');
+                const res = await api.get('/api/questions');
                 setQuestions(res.data);
                 setActiveSet({
                     title: 'Bộ Đề Khởi Động Chuẩn',
@@ -147,7 +147,7 @@ export const GamePageLogic = () => {
     // 4. Chọn một bộ câu hỏi khác
     const handleSelectSet = async (selectedSet) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/sets/${selectedSet._id}`);
+            const res = await api.get(`/api/sets/${selectedSet._id}`);
             if (res.data?.questions && res.data.questions.length > 0) {
                 setQuestions(res.data.questions);
                 setActiveSet(res.data.set);
@@ -161,7 +161,7 @@ export const GamePageLogic = () => {
                     iframeRef.current.contentWindow.postMessage({
                         type: 'LOAD_QUESTIONS',
                         data: res.data.questions
-                    }, '*');
+                    }, window.location.origin);
                 }
             } else {
                 alert("Bộ câu hỏi này hiện chưa có câu hỏi nào!");
@@ -176,7 +176,7 @@ export const GamePageLogic = () => {
     useEffect(() => {
         if (!user?.accessToken) return;
         let isActive = true;
-        axios.get('http://localhost:5000/api/schools/mine', {
+        api.get('/api/schools/mine', {
             headers: { token: user.accessToken }
         }).then((res) => {
             if (isActive) setSchoolMemberships(res.data);
@@ -186,7 +186,8 @@ export const GamePageLogic = () => {
 
     // 6. Xử lý postMessage giữa Web và Iframe Game
     useEffect(() => {
-        const handleGameMessage = async (event) => {
+        const handleGameMessage = (event) => {
+            if (event.origin !== window.location.origin || event.source !== iframeRef.current?.contentWindow) return;
             const data = event.data;
             if (!data) return;
 
@@ -195,11 +196,11 @@ export const GamePageLogic = () => {
                     iframeRef.current.contentWindow.postMessage({
                         type: 'LOAD_QUESTIONS',
                         data: questions
-                    }, '*');
+                    }, window.location.origin);
                 }
             }
 
-                        if (data.type === 'GAME_OVER') {
+            if (data.type === 'GAME_OVER') {
                 // Game Godot đã tự thực hiện lưu điểm trực tiếp qua API (đầy đủ timePlayed và questionsAnswered)
                 // Web chỉ cần đồng bộ lại user state (highScore, weeklyScore) để cập nhật tức thì trên navbar
                 const score = Number(data.score) || 0;
@@ -210,7 +211,7 @@ export const GamePageLogic = () => {
                     currentUser = null;
                 }
 
-                if (!currentUser || currentUser.role === 'guest') {
+                if (!currentUser || currentUser.role === 'guest' || data.roomType === 'classroom') {
                     return;
                 }
 

@@ -20,7 +20,7 @@ const canViewClassQuestionSet = async (req, res, questionSetId) => {
 
     let tokenUser;
     try {
-        tokenUser = jwt.verify(token, process.env.JWT_SECRET || 'mat_khau_bi_mat_cua_server');
+        tokenUser = jwt.verify(token, process.env.JWT_SECRET);
     } catch (err) {
         res.status(401).json('Token không hợp lệ!');
         return false;

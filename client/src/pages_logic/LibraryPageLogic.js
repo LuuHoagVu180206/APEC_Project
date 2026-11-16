@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getAuthorInfo } from '../utils/authorUtils';
 
@@ -90,7 +90,7 @@ export const LibraryPageLogic = () => {
         try {
             const token = currentUser?.accessToken || localStorage.getItem('token') || '';
             const config = token ? { headers: { token } } : {};
-            await axios.post('http://localhost:5000/api/reports', {
+            await api.post('/api/reports', {
                 targetType: 'QuestionSet',
                 targetId: reportTarget._id,
                 reason: reportReason,
@@ -165,7 +165,7 @@ export const LibraryPageLogic = () => {
     useEffect(() => {
         if (!currentUser?.accessToken) return;
         let isActive = true;
-        axios.get('http://localhost:5000/api/schools/mine', {
+        api.get('/api/schools/mine', {
             headers: { token: currentUser.accessToken }
         }).then((res) => {
             if (isActive) setSchoolMemberships(res.data);
@@ -176,7 +176,7 @@ export const LibraryPageLogic = () => {
     const fetchLibrary = async () => {
         setIsLoading(true);
         try {
-            const res = await axios.get('http://localhost:5000/api/sets/library');
+            const res = await api.get('/api/sets/library');
             setQuestionSets(res.data || []);
         } catch (err) {
             console.error("Lỗi lấy dữ liệu thư viện:", err);
@@ -187,7 +187,7 @@ export const LibraryPageLogic = () => {
 
     const fetchWeeklySets = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/sets/weekly');
+            const res = await api.get('/api/sets/weekly');
             setWeeklySets(res.data || []);
         } catch (err) {
             console.warn("Lỗi lấy danh sách đề Weekly:", err);
@@ -263,7 +263,7 @@ export const LibraryPageLogic = () => {
             return;
         }
         try {
-            await axios.put(`http://localhost:5000/api/sets/${setId}/like`, {}, {
+            await api.put(`/api/sets/${setId}/like`, {}, {
                 headers: { token: currentUser.accessToken }
             });
             fetchLibrary(); 
@@ -280,7 +280,7 @@ export const LibraryPageLogic = () => {
         }
 
         try {
-            const res = await axios.put('http://localhost:5000/api/users/toggle-save-set', {
+            const res = await api.put('/api/users/toggle-save-set', {
                 setId: setId
             }, {
                 headers: { token: currentUser.accessToken }
@@ -307,7 +307,7 @@ export const LibraryPageLogic = () => {
     const handleDelete = async (setId) => {
         if (window.confirm("Bạn chắc chắn muốn xóa bộ câu hỏi này khỏi hệ thống?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/sets/${setId}`, {
+                await api.delete(`/api/sets/${setId}`, {
                     headers: { token: currentUser.accessToken }
                 });
                 fetchLibrary();
@@ -325,7 +325,7 @@ export const LibraryPageLogic = () => {
         }
 
         try {
-            const res = await axios.post(`http://localhost:5000/api/sets/${setId}/copy`, {}, {
+            const res = await api.post(`/api/sets/${setId}/copy`, {}, {
                 headers: { token: currentUser.accessToken }
             });
             alert(`✅ ${res.data.message || 'Đã sao chép bộ câu hỏi thành công!'}\nBộ đề mới đã được lưu vào Studio của bạn dưới dạng Riêng tư.`);
@@ -343,14 +343,14 @@ export const LibraryPageLogic = () => {
 
     const handlePlaySet = async (setId) => {
         if (setId && !String(setId).startsWith('w')) {
-            axios.post(`http://localhost:5000/api/sets/${setId}/play`, { mode: 'solo' }).catch(() => {});
+            api.post(`/api/sets/${setId}/play`, { mode: 'solo' }).catch(() => {});
         }
         navigate(setId ? `/game?setId=${setId}` : '/game');
     };
 
     const handleExport = async (setId, type) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/sets/${setId}/export?type=${type}`, {
+            const res = await api.get(`/api/sets/${setId}/export?type=${type}`, {
                 responseType: 'blob' 
             });
 

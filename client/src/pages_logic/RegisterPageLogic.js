@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '../utils/toast';
 
@@ -32,7 +32,7 @@ export const RegisterPageLogic = (role = 'user') => {
         }
 
         try {
-            await axios.post('http://localhost:5000/api/auth/register', { username, password, role });
+            await api.post('/api/auth/register', { username, password, role });
             toast.success("Đăng ký thành công! Đăng nhập ngay thôi nào.");
             setTimeout(() => {
                 navigate('/login'); 

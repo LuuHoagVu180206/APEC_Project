@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 export const ProfilePageLogic = () => {
@@ -44,7 +44,7 @@ export const ProfilePageLogic = () => {
 
         const fetchLatestProfile = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/users/me', {
+                const res = await api.get('/api/users/me', {
                     headers: { token: currentUser.accessToken }
                 });
                 const userData = res.data;
@@ -94,7 +94,7 @@ export const ProfilePageLogic = () => {
     useEffect(() => {
         if (!currentUser?.accessToken) return;
         let isActive = true;
-        axios.get('http://localhost:5000/api/schools/mine', {
+        api.get('/api/schools/mine', {
             headers: { token: currentUser.accessToken }
         }).then((res) => {
             if (isActive) setSchoolMemberships(res.data);
@@ -154,7 +154,7 @@ export const ProfilePageLogic = () => {
         setFormData(prev => ({ ...prev, displayName: resolvedDisplayName }));
 
         try {
-            const res = await axios.put('http://localhost:5000/api/users/update-profile', submissionData, {
+            const res = await api.put('/api/users/update-profile', submissionData, {
                 headers: { token: currentUser.accessToken }
             });
 
@@ -196,7 +196,7 @@ export const ProfilePageLogic = () => {
         }
 
         try {
-            const res = await axios.put('http://localhost:5000/api/users/change-password', passwordData, {
+            const res = await api.put('/api/users/change-password', passwordData, {
                 headers: { token: currentUser.accessToken }
             });
 

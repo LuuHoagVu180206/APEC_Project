@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const readCurrentUser = () => {
@@ -41,7 +41,7 @@ export const CreateClassPageLogic = () => {
 
         setIsSaving(true);
         try {
-            await axios.post('http://localhost:5000/api/classes', formData, {
+            await api.post('/api/classes', formData, {
                 headers: { token: currentUser.accessToken }
             });
             navigate('/teacher/dashboard');
