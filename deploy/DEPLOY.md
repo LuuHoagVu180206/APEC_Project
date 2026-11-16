@@ -1,5 +1,7 @@
 # Triển khai APEC EduGame
 
+Nếu dùng backend miễn phí ở Singapore, xem [Hướng dẫn Render Free](RENDER.md).
+
 Frontend React và game Godot chạy trên Vercel. API Express và Socket.IO chạy trên Railway Pro, vùng Singapore. MongoDB Atlas lưu dữ liệu ứng dụng. Bắt đầu với một replica vì phòng đang chơi nằm trong RAM.
 
 ## 1. Đưa bản phát hành lên GitHub
